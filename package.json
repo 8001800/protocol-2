@@ -4,5 +4,15 @@
   "description": "Abacus Protocol Contracts",
   "repository": "git@github.com:pradyuman/abacus-protocol.git",
   "author": "Pradyuman Vig <pradyumanvig@outlook.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "transmute-framework": "^0.1.60",
+    "zeppelin-solidity": "^1.7.0"
+  },
+  "devDependencies": {
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "web3": "^1.0.0-beta.30"
+  }
 }
