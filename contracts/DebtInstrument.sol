@@ -18,7 +18,7 @@ interface DebtInstrument {
   function requestAppraisal(uint256 id)
     external returns (uint256 signalId);
 
-  function requestAppraisal(uint256 id, uint256 appraisalServiceId)
+  function requestAppraisal(uint256 id, address appraisalService)
     external returns (uint256 signalId);
 
   /**
