@@ -11,5 +11,5 @@ contract ComplianceStandard {
     _;
   }
 
-  function check(address instrumentAddr, uint256 instrumentId, uint8 action) view external returns (uint8);
+  function check(address instrumentAddr, uint256 instrumentId, uint8 action) external returns (uint8);
 }

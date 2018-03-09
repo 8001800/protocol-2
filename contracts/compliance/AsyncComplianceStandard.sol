@@ -55,13 +55,19 @@ contract AsyncComplianceStandard is ComplianceStandard {
         );
     }
 
-    function check(address instrumentAddr, uint256 instrumentId, uint8 action) external view returns (uint8) {
+    function softCheck(address instrumentAddr, uint256 instrumentId, uint8 action) view public returns (uint8) {
         ComplianceCheckStatus storage status = statuses[instrumentAddr][instrumentId][action];
         // Check that the status check has been performed.
         require(status.blockToExpire != 0);
         // Check that the status check has not expired. 
         require(status.blockToExpire > block.number);
         return status.checkResult;
+    }
+
+    function check(address instrumentAddr, uint256 instrumentId, uint8 action) external returns (uint8) {
+        uint8 result = softCheck(instrumentAddr, instrumentId, action);
+        delete statuses[instrumentAddr][instrumentId][action];
+        return result;
     }
 
     /**
