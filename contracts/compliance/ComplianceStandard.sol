@@ -12,4 +12,6 @@ contract ComplianceStandard {
   }
 
   function check(address instrumentAddr, uint256 instrumentId, uint8 action) external returns (uint8);
+
+  function invalidate(address instrumentAddr, uint256 instrumentId, uint8 action) external;
 }

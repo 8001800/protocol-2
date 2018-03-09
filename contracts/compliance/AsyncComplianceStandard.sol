@@ -55,7 +55,7 @@ contract AsyncComplianceStandard is ComplianceStandard {
         );
     }
 
-    function softCheck(address instrumentAddr, uint256 instrumentId, uint8 action) view public returns (uint8) {
+    function check(address instrumentAddr, uint256 instrumentId, uint8 action) external returns (uint8) {
         ComplianceCheckStatus storage status = statuses[instrumentAddr][instrumentId][action];
         // Check that the status check has been performed.
         require(status.blockToExpire != 0);
@@ -64,10 +64,9 @@ contract AsyncComplianceStandard is ComplianceStandard {
         return status.checkResult;
     }
 
-    function check(address instrumentAddr, uint256 instrumentId, uint8 action) external returns (uint8) {
-        uint8 result = softCheck(instrumentAddr, instrumentId, action);
+    function invalidate(address instrumentAddr, uint256 instrumentId, uint8 action) external {
+        require(msg.sender == instrumentAddr);
         delete statuses[instrumentAddr][instrumentId][action];
-        return result;
     }
 
     /**
