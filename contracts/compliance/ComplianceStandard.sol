@@ -7,7 +7,6 @@ interface ComplianceStandard {
    */
   function check(
     address instrumentAddr,
-    uint256 instrumentId,
     uint256 actionId
   ) view external returns (uint8, uint256);
 }

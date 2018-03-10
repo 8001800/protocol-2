@@ -22,9 +22,9 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         uint256 id;
         string name;
         address owner;
-        uint256 cost;
+        string costLookup;
         bool isAsync;
-        mapping (address => mapping (uint256 => mapping(uint256 => ComplianceCheckStatus))) statuses;
+        mapping (address => mapping(uint256 => ComplianceCheckStatus)) statuses;
     }
     mapping (uint256 => ComplianceServiceInfo) complianceServices;
 
@@ -32,7 +32,6 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         uint256 serviceId,
         address standard,
         address instrumentAddr,
-        uint256 instrumentId,
         uint256 actionId,
         uint8 checkResult,
         uint256 nextServiceId
@@ -41,15 +40,13 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
     event ComplianceCheckRequested(
         uint256 serviceId,
         address instrumentAddr,
-        uint256 instrumentId,
-        uint256 action
+        uint256 actionId
     );
 
     event ComplianceCheckResultWritten(
         uint256 serviceId,
         address instrumentAddr,
-        uint256 instrumentId,
-        uint256 action,
+        uint256 actionId,
         uint256 blockToExpire,
         uint8 checkResult
     );
@@ -57,38 +54,39 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
     function requestCheck(
         uint256 serviceId,
         address instrumentAddr,
-        uint256 instrumentId,
-        uint256 action
-    ) fromKernel external returns (uint8)
+        uint256 actionId
+    ) fromKernel external
     {
-        ComplianceCheckRequested(serviceId, instrumentAddr, instrumentId, action);
+        ComplianceCheckRequested(serviceId, instrumentAddr, actionId);
     }
 
     function writeCheckResult(
         uint256 serviceId,
         address instrumentAddr,
-        uint256 instrumentId,
-        uint8 action,
+        uint256 actionId,
         uint256 blockToExpire,
         uint8 checkResult
-    ) external
+    ) external returns (uint8)
     {
         ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
 
         // Check service exists
-        require(serviceInfo.id != 0);
+        if (serviceInfo.id == 0) {
+            return 1;
+        }
         // Check service owner is correct
-        require(serviceInfo.owner == msg.sender);
+        if (serviceInfo.owner != msg.sender) {
+            return 2;
+        }
 
-        serviceInfo.statuses[instrumentAddr][instrumentId][action] = ComplianceCheckStatus({
+        serviceInfo.statuses[instrumentAddr][actionId] = ComplianceCheckStatus({
             blockToExpire: blockToExpire,
             checkResult: checkResult
         });
         ComplianceCheckResultWritten(
             serviceId,
             instrumentAddr,
-            instrumentId,
-            action,
+            actionId,
             blockToExpire,
             checkResult
         );
@@ -97,13 +95,12 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
     function invalidateCheckResult(
         uint256 serviceId,
         address instrumentAddr,
-        uint256 instrumentId,
         uint256 actionId
     ) external
     {
         ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
         require(serviceInfo.owner == msg.sender || instrumentAddr == msg.sender);
-        delete serviceInfo.statuses[instrumentAddr][instrumentId][actionId];
+        delete serviceInfo.statuses[instrumentAddr][actionId];
     }
 
     /**
@@ -113,11 +110,10 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
     function checkAsync(
         uint256 serviceId,
         address instrumentAddr,
-        uint256 instrumentId,
         uint256 actionId
     ) view private returns (uint8) {
         ComplianceCheckStatus storage status = complianceServices[serviceId]
-            .statuses[instrumentAddr][instrumentId][actionId];
+            .statuses[instrumentAddr][actionId];
 
         // Check that the status check has been performed.
         if (status.blockToExpire == 0) {
@@ -135,7 +131,6 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
     function softCheck(
         uint256 serviceId,
         address instrumentAddr,
-        uint256 instrumentId,
         uint256 actionId
     ) view public returns (uint8)
     {
@@ -146,7 +141,6 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
             return checkAsync(
                 serviceId,
                 instrumentAddr,
-                instrumentId,
                 actionId
             );
         }
@@ -156,11 +150,11 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
 
         uint8 checkResult;
         uint256 nextServiceId;
-        (checkResult, nextServiceId) = standard.check(instrumentAddr, instrumentId, actionId);
+        (checkResult, nextServiceId) = standard.check(instrumentAddr, actionId);
 
         if (nextServiceId != 0) {
             // recursively check next service
-            checkResult = softCheck(nextServiceId, instrumentAddr, instrumentId, actionId);
+            checkResult = softCheck(nextServiceId, instrumentAddr, actionId);
         }
         return checkResult;
     }
@@ -168,9 +162,8 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
     function check(
         uint256 serviceId,
         address instrumentAddr,
-        uint256 instrumentId,
         uint256 actionId
-    ) fromKernel public returns (uint8)
+    ) fromKernel public returns (uint8, uint256)
     {
         ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
 
@@ -181,19 +174,20 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
             checkResult = checkAsync(
                 serviceId,
                 instrumentAddr,
-                instrumentId,
                 actionId
             );
             ComplianceCheckPerformed(
                 serviceId,
                 address(0),
                 instrumentAddr,
-                instrumentId,
                 actionId,
                 checkResult,
                 0
             );
-            return checkResult;
+            if (checkResult != 0) {
+                return (checkResult, serviceId);
+            }
+            return (checkResult, 0);
         }
 
         // Sync checks
@@ -201,14 +195,13 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
 
         checkResult;
         uint256 nextServiceId;
-        (checkResult, nextServiceId) = standard.check(instrumentAddr, instrumentId, actionId);
+        (checkResult, nextServiceId) = standard.check(instrumentAddr, actionId);
 
         // For auditing
         ComplianceCheckPerformed(
             serviceId,
             standard,
             instrumentAddr,
-            instrumentId,
             actionId,
             checkResult,
             nextServiceId
@@ -216,16 +209,12 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
 
         if (nextServiceId != 0) {
             // recursively check next service
-            checkResult = check(nextServiceId, instrumentAddr, instrumentId, actionId);
+            (checkResult, nextServiceId) = check(nextServiceId, instrumentAddr, actionId);
         }
-        return checkResult;
+        return (checkResult, nextServiceId);
     }
 
-    /**
-     * Gets the cost of a compliance service.
-     */
-    function paymentDetails(uint256 serviceId) view external returns (uint256, address) {
-        ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
-        return (serviceInfo.cost, serviceInfo.owner);
+    function serviceOwner(uint256 serviceId) view external returns (address) {
+        return complianceServices[serviceId].owner;
     }
 }

@@ -26,31 +26,30 @@ contract AbacusKernel {
    * Initiates an async (off-chain) compliance check.
    *
    * @param serviceId Id of the compliance service to use.
-   * @param instrumentId Unique identifier for the instrument.
-   * @param action The identifier of the action checked.
+   * @param actionId The identifier of the action checked.
    */
   function requestComplianceCheck(
     address requester,
     uint256 serviceId,
-    uint256 instrumentId,
-    uint8 action
-  ) external
+    uint256 actionId,
+    uint256 cost
+  ) external returns (bool)
   {
-    uint256 cost;
-    address owner;
-    (cost, owner) = complianceRegistry.paymentDetails(serviceId);
-    require(token.transferFrom(requester, owner, cost));
-    complianceRegistry.requestCheck(serviceId, msg.sender, instrumentId, action);
+    address owner = complianceRegistry.serviceOwner(serviceId);
+    if (!token.transferFrom(requester, owner, cost)) {
+      return false;
+    }
+    complianceRegistry.requestCheck(serviceId, msg.sender, actionId);
+    return true;
   }
 
   function checkCompliance(
     uint256 serviceId,
     address instrumentAddr,
-    uint256 instrumentId,
-    uint256 action
-  ) external returns (uint8)
+    uint256 actionId
+  ) external returns (uint8, uint256)
   {
-    return complianceRegistry.check(serviceId, instrumentAddr, instrumentId, action);
+    return complianceRegistry.check(serviceId, instrumentAddr, actionId);
   }
 
   function initiateAppraisal(
