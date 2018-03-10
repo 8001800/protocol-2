@@ -1,9 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "../NeedsAbacus.sol";
-import "../AbacusKernel.sol";
-
-contract ComplianceStandard is NeedsAbacus {
+interface ComplianceStandard {
   /**
    * Checks for compliance.
    * @return result and next serviceId.
