@@ -224,7 +224,8 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
     /**
      * Gets the cost of a compliance service.
      */
-    function cost(uint256 serviceId) view external returns (uint256) {
-        return complianceServices[serviceId].cost;
+    function paymentDetails(uint256 serviceId) view external returns (uint256, address) {
+        ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
+        return (serviceInfo.cost, serviceInfo.owner);
     }
 }
