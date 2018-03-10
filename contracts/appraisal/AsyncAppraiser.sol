@@ -25,10 +25,10 @@ contract AsyncAppraiser is Appraiser {
     );
 
     function requestAppraisal(
-        address instrumentAddr, uint256 instrumentId, uint8 action
+        address instrumentAddr, uint256 instrumentId
     ) fromKernel external returns (uint8)
     {
-        AppraisalRequested(instrumentAddr, instrumentId, action);
+        AppraisalRequested(instrumentAddr, instrumentId);
     }
 
     function onAppraisalCompleted(

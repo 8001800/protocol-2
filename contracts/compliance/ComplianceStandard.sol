@@ -1,17 +1,16 @@
 pragma solidity ^0.4.19;
 
+import "../NeedsAbacus.sol";
 import "../AbacusKernel.sol";
 
-contract ComplianceStandard {
-  // TODO hardcode once deployed?
-  AbacusKernel constant ABACUS_KERNEL = AbacusKernel(0);
-
-  modifier fromKernel() {
-    require(msg.sender == address(ABACUS_KERNEL));
-    _;
-  }
-
-  function check(address instrumentAddr, uint256 instrumentId, uint8 action) external returns (uint8);
-
-  function invalidate(address instrumentAddr, uint256 instrumentId, uint8 action) external;
+contract ComplianceStandard is NeedsAbacus {
+  /**
+   * Checks for compliance.
+   * @return result and next serviceId.
+   */
+  function check(
+    address instrumentAddr,
+    uint256 instrumentId,
+    uint256 actionId
+  ) fromKernel view external returns (uint8, uint256);
 }

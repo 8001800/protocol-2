@@ -1,8 +1,17 @@
 pragma solidity ^0.4.19;
 
-import "./compliance/AsyncComplianceStandard.sol";
+import "./compliance/ComplianceRegistry.sol";
 
 contract AbacusKernel {
+  ComplianceRegistry complianceRegistry;
+
+  function Abacus(
+    address _complianceRegistry
+  ) public
+  {
+    complianceRegistry = ComplianceRegistry(_complianceRegistry);
+  }
+
   struct ComplianceSignal {
     address instrumentAddr;
     uint256 instrumentId;
@@ -12,17 +21,28 @@ contract AbacusKernel {
   /**
    * Initiates a compliance check.
    *
-   * @param complianceStandardAddr Address of the compliance standard to use.
+   * @param serviceId Id of the compliance service to use.
    * @param instrumentId Unique identifier for the instrument.
    * @param action The identifier of the action checked.
    */
   function requestComplianceCheck(
-    address complianceStandardAddr,
+    uint256 serviceId,
     uint256 instrumentId,
     uint8 action
   ) external
   {
-    AsyncComplianceStandard(complianceStandardAddr).requestCheck(msg.sender, instrumentId, action);
+    // uint256 cost = complianceRegistry.cost(serviceId);
+    complianceRegistry.requestCheck(serviceId, msg.sender, instrumentId, action);
+  }
+
+  function checkCompliance(
+    uint256 serviceId,
+    address instrumentAddr,
+    uint256 instrumentId,
+    uint256 action
+  ) external returns (uint8)
+  {
+    return complianceRegistry.check(serviceId, instrumentAddr, instrumentId, action);
   }
 
   function initiateAppraisal(
