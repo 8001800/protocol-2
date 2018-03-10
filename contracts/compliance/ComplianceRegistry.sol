@@ -170,7 +170,7 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         address instrumentAddr,
         uint256 instrumentId,
         uint256 actionId
-    ) public returns (uint8)
+    ) fromKernel public returns (uint8)
     {
         ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
 

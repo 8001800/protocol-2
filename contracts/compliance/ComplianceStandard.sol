@@ -12,5 +12,5 @@ contract ComplianceStandard is NeedsAbacus {
     address instrumentAddr,
     uint256 instrumentId,
     uint256 actionId
-  ) fromKernel view external returns (uint8, uint256);
+  ) view external returns (uint8, uint256);
 }
