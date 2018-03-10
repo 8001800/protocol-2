@@ -18,15 +18,27 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         uint8 checkResult;
     }
 
-    struct ComplianceServiceInfo {
+    struct ComplianceService {
         uint256 id;
         string name;
         address owner;
         string costLookup;
         bool isAsync;
+        uint256 version;
         mapping (address => mapping(uint256 => ComplianceCheckStatus)) statuses;
     }
-    mapping (uint256 => ComplianceServiceInfo) public complianceServices;
+
+    /**
+     * Version mapping -- always stores the latest version of a compliance service.
+     */
+    mapping (uint256 => uint256) public latestComplianceService;
+
+    /**
+     * Maps service id => version => compliance service.
+     */
+    mapping (uint256 => mapping (uint256 => ComplianceService)) public complianceServices;
+
+    uint256 serviceIdAutoInc;
 
     event ComplianceCheckPerformed(
         uint256 serviceId,
@@ -51,6 +63,15 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         uint8 checkResult
     );
 
+    event ComplianceServiceUpgrade(
+        uint256 id,
+        string name,
+        address owner,
+        string costLookup,
+        bool isAsync,
+        uint256 version
+    );
+
     function requestCheck(
         uint256 serviceId,
         address instrumentAddr,
@@ -68,7 +89,7 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         uint8 checkResult
     ) external returns (uint8)
     {
-        ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
+        ComplianceService storage serviceInfo = complianceServices[serviceId][latestComplianceService[serviceId]];
 
         // Check service exists
         if (serviceInfo.id == 0) {
@@ -98,7 +119,7 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         uint256 actionId
     ) external
     {
-        ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
+        ComplianceService storage serviceInfo = complianceServices[serviceId][latestComplianceService[serviceId]];
         require(serviceInfo.owner == msg.sender || instrumentAddr == msg.sender);
         delete serviceInfo.statuses[instrumentAddr][actionId];
     }
@@ -112,7 +133,7 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         address instrumentAddr,
         uint256 actionId
     ) view private returns (uint8) {
-        ComplianceCheckStatus storage status = complianceServices[serviceId]
+        ComplianceCheckStatus storage status = complianceServices[serviceId][latestComplianceService[serviceId]]
             .statuses[instrumentAddr][actionId];
 
         // Check that the status check has been performed.
@@ -134,7 +155,7 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         uint256 actionId
     ) view public returns (uint8)
     {
-        ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
+        ComplianceService storage serviceInfo = complianceServices[serviceId][latestComplianceService[serviceId]];
 
         // Async checks
         if (serviceInfo.isAsync) {
@@ -165,7 +186,7 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         uint256 actionId
     ) fromKernel public returns (uint8, uint256)
     {
-        ComplianceServiceInfo storage serviceInfo = complianceServices[serviceId];
+        ComplianceService storage serviceInfo = complianceServices[serviceId][latestComplianceService[serviceId]];
 
         uint8 checkResult;
 
@@ -215,6 +236,78 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
     }
 
     function serviceOwner(uint256 serviceId) view external returns (address) {
-        return complianceServices[serviceId].owner;
+        return complianceServices[serviceId][latestComplianceService[serviceId]].owner;
+    }
+
+    /**
+     * Registers a new service with the compliance registry.
+     */
+    function registerService(
+        string name,
+        address owner,
+        string costLookup,
+        bool isAsync
+    ) external returns (uint256) {
+        uint256 id = serviceIdAutoInc++;
+        complianceServices[id][1] = ComplianceService({
+            id: id,
+            name: name,
+            owner: owner,
+            costLookup: costLookup,
+            isAsync: isAsync,
+            version: 1
+        });
+
+        ComplianceServiceUpgrade({
+            id: id,
+            name: name,
+            owner: owner,
+            costLookup: costLookup,
+            isAsync: isAsync,
+            version: 1
+        });
+        return id;
+    }
+
+    /**
+     * Upgrades a compliance service, setting new properties and updating the
+     * latest version pointer.
+     */
+    function upgradeService(
+        uint256 id,
+        string name,
+        address owner,
+        string costLookup,
+        bool isAsync
+    ) external returns (bool)
+    { 
+        ComplianceService storage existingService = complianceServices[id][latestComplianceService[id]];
+        if (msg.sender != existingService.owner) {
+            return false;
+        }
+        uint256 nextVersion = existingService.version + 1;
+
+        // Create new compliance service data.
+        ComplianceService memory newService = ComplianceService({
+            id: id,
+            name: name,
+            owner: owner,
+            costLookup: costLookup,
+            isAsync: isAsync,
+            version: nextVersion
+        });
+
+        ComplianceServiceUpgrade({
+            id: id,
+            name: name,
+            owner: owner,
+            costLookup: costLookup,
+            isAsync: isAsync,
+            version: nextVersion
+        });
+
+        complianceServices[id][nextVersion] = newService;
+        latestComplianceService[id] = nextVersion;
+        return true;
     }
 }
