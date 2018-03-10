@@ -4,8 +4,8 @@ import "./AbacusToken.sol";
 import "./compliance/ComplianceRegistry.sol";
 
 contract AbacusKernel {
-  AbacusToken token;
-  ComplianceRegistry complianceRegistry;
+  AbacusToken public token;
+  ComplianceRegistry public complianceRegistry;
 
   function AbacusKernel(
     address _token,
@@ -51,11 +51,5 @@ contract AbacusKernel {
   {
     return complianceRegistry.check(serviceId, instrumentAddr, actionId);
   }
-
-  function initiateAppraisal(
-    address appraisalService,
-    address abacusInstrument,
-    uint256 instrumentId
-  ) external returns (uint256 signalId);
 
 }

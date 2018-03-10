@@ -26,7 +26,7 @@ contract ComplianceRegistry is NeedsAbacus, Ownable {
         bool isAsync;
         mapping (address => mapping(uint256 => ComplianceCheckStatus)) statuses;
     }
-    mapping (uint256 => ComplianceServiceInfo) complianceServices;
+    mapping (uint256 => ComplianceServiceInfo) public complianceServices;
 
     event ComplianceCheckPerformed(
         uint256 serviceId,
