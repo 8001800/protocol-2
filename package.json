@@ -1,8 +1,8 @@
 {
-  "name": "abacus-protocol",
+  "name": "protocol",
   "version": "0.1.0",
   "description": "Abacus Protocol Contracts",
-  "repository": "git@github.com:pradyuman/abacus-protocol.git",
+  "repository": "git@github.com:abacusprotocol/protocol.git",
   "author": "Pradyuman Vig <pradyumanvig@outlook.com>",
   "license": "MIT",
   "dependencies": {
