@@ -9,4 +9,12 @@ interface ComplianceStandard {
     address instrumentAddr,
     uint256 actionId
   ) view external returns (uint8, uint256);
+
+  /**
+   * Called when a hard check is performed.
+   */
+  function onHardCheck(
+    address instrumentAddr,
+    uint256 actionId
+  ) external;
 }

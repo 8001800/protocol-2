@@ -49,7 +49,7 @@ contract AbacusKernel {
     uint256 actionId
   ) external returns (uint8, uint256)
   {
-    return complianceRegistry.check(serviceId, instrumentAddr, actionId);
+    return complianceRegistry.hardCheck(serviceId, instrumentAddr, actionId);
   }
 
 }

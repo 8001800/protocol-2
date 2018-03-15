@@ -126,7 +126,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus, Ownable {
         return  status.checkResult;
     }
 
-    function softCheck(
+    function check(
         uint256 providerId,
         address instrumentAddr,
         uint256 actionId
@@ -157,7 +157,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus, Ownable {
         return checkResult;
     }
 
-    function check(
+    function hardCheck(
         uint256 providerId,
         address instrumentAddr,
         uint256 actionId
@@ -194,6 +194,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus, Ownable {
         checkResult;
         uint256 nextProviderId;
         (checkResult, nextProviderId) = standard.check(instrumentAddr, actionId);
+        standard.onHardCheck(instrumentAddr, actionId);
 
         // For auditing
         ComplianceCheckPerformed(
