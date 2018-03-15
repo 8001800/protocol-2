@@ -110,4 +110,8 @@ contract ProviderRegistry {
         trustMatrix[msg.sender][providerId] = 0;
     }
 
+    function providerOwner(uint256 providerId) view external returns (address) {
+        return providers[providerId].owner;
+    }
+
 }
