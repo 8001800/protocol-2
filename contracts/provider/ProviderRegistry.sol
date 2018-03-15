@@ -88,4 +88,26 @@ contract ProviderRegistry {
         return true;
     }
 
+    /**
+     * Adjacency matrix, where address is the constituent (one who trusts),
+     * uint256 is the trustee (provider id of one who is trusted), and the last
+     * uint256 is the version of the provider trusted.
+     * A zero version represents lack of trust.
+     */
+    mapping (address => mapping(uint256 => uint256)) public trustMatrix;
+
+    /**
+     * Writes that msg.sender trusts a provider.
+     */
+    function trustProvider(uint256 providerId) external {
+        trustMatrix[msg.sender][providerId] = providers[providerId].version;
+    }
+
+    /**
+     * Untrusts a provider.
+     */
+    function untrustProvider(uint256 providerId) external {
+        trustMatrix[msg.sender][providerId] = 0;
+    }
+
 }
