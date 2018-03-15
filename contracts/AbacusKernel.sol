@@ -2,18 +2,22 @@ pragma solidity ^0.4.19;
 
 import "./AbacusToken.sol";
 import "./compliance/ComplianceRegistry.sol";
+import "./identity/IdentityDatabase.sol";
 
 contract AbacusKernel {
   AbacusToken public token;
   ComplianceRegistry public complianceRegistry;
+  IdentityDatabase public identityDatabase;
 
   function AbacusKernel(
-    address _token,
-    address _complianceRegistry
+    AbacusToken _token,
+    ComplianceRegistry _complianceRegistry,
+    IdentityDatabase _identityDatabase
   ) public
   {
-    token = AbacusToken(_token);
-    complianceRegistry = ComplianceRegistry(_complianceRegistry);
+    token = _token;
+    complianceRegistry = _complianceRegistry;
+    identityDatabase = _identityDatabase;
   }
 
   struct ComplianceSignal {
@@ -39,7 +43,7 @@ contract AbacusKernel {
     if (!token.transferFrom(requester, owner, cost)) {
       return false;
     }
-    complianceRegistry.requestCheck(providerId, msg.sender, actionId);
+    complianceRegistry.requestCheck(providerId, msg.sender, actionId, cost);
     return true;
   }
 
@@ -50,6 +54,21 @@ contract AbacusKernel {
   ) external returns (uint8, uint256)
   {
     return complianceRegistry.hardCheck(providerId, instrumentAddr, actionId);
+  }
+
+  function requestIdentity(
+    uint256 providerId,
+    string args,
+    uint256 cost,
+    uint256 requestToken
+  ) external returns (bool)
+  {
+    address owner = identityDatabase.providerOwner(providerId);
+    if (!token.transferFrom(msg.sender, owner, cost)) {
+      return false;
+    }
+    identityDatabase.requestVerification(providerId, msg.sender, args, cost, requestToken);
+    return true;
   }
 
 }

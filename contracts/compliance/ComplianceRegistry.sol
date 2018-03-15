@@ -33,7 +33,8 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     event ComplianceCheckRequested(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId
+        uint256 actionId,
+        uint256 cost
     );
 
     event ComplianceCheckResultWritten(
@@ -47,10 +48,11 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     function requestCheck(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId
+        uint256 actionId,
+        uint256 cost
     ) fromKernel external
     {
-        ComplianceCheckRequested(providerId, instrumentAddr, actionId);
+        ComplianceCheckRequested(providerId, instrumentAddr, actionId, cost);
     }
 
     function writeCheckResult(

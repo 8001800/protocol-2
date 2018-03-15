@@ -7,16 +7,20 @@ contract IdentityDatabase is ProviderRegistry, NeedsAbacus {
     event IdentityVerificationRequested(
         uint256 providerId,
         address user,
-        string args
+        string args,
+        uint256 cost,
+        uint256 requestToken
     );
 
-    function requestIdentity(
+    function requestVerification(
         uint256 providerId,
         address user,
-        string args
+        string args,
+        uint256 cost,
+        uint256 requestToken
     ) fromKernel external
     {
-        IdentityVerificationRequested(providerId, user, args);
+        IdentityVerificationRequested(providerId, user, args, cost, requestToken);
     }
 
 }
