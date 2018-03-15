@@ -152,7 +152,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus, Ownable {
 
         if (nextProviderId != 0) {
             // recursively check next service
-            checkResult = softCheck(nextProviderId, instrumentAddr, actionId);
+            checkResult = check(nextProviderId, instrumentAddr, actionId);
         }
         return checkResult;
     }
@@ -208,7 +208,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus, Ownable {
 
         if (nextProviderId != 0) {
             // recursively check next service
-            (checkResult, nextProviderId) = check(nextProviderId, instrumentAddr, actionId);
+            (checkResult, nextProviderId) = hardCheck(nextProviderId, instrumentAddr, actionId);
         }
         return (checkResult, nextProviderId);
     }
