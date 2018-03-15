@@ -5,12 +5,7 @@ import "../NeedsAbacus.sol";
 import "./ComplianceStandard.sol";
 import "../provider/ProviderRegistry.sol";
 
-contract ComplianceRegistry is ProviderRegistry, NeedsAbacus, Ownable {
-    function setKernel(address _kernel) onlyOwner external {
-        require(kernel == address(0));
-        kernel = _kernel;
-    }
-
+contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     struct CheckStatus {
         // Block when this check status has expired.
         uint256 blockToExpire;

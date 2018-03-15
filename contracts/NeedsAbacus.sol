@@ -1,6 +1,8 @@
 pragma solidity ^0.4.19;
 
-contract NeedsAbacus {
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+
+contract NeedsAbacus is Ownable {
     /**
      * Address of the Abacus kernel.
      */
@@ -9,5 +11,10 @@ contract NeedsAbacus {
     modifier fromKernel() {
         require(msg.sender == address(kernel));
         _;
+    }
+
+    function setKernel(address _kernel) onlyOwner external {
+        require(kernel == address(0));
+        kernel = _kernel;
     }
 }
