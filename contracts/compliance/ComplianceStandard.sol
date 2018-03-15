@@ -1,6 +1,8 @@
 pragma solidity ^0.4.19;
 
-interface ComplianceStandard {
+import "../provider/Upgradeable.sol";
+
+contract ComplianceStandard is Upgradeable {
   /**
    * Checks for compliance.
    * @return result and next serviceId.
