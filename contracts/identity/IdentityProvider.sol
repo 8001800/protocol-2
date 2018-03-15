@@ -1,9 +1,9 @@
 pragma solidity ^0.4.19;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "../provider/Upgradeable.sol";
+import "../provider/Upgradable.sol";
 
-contract IdentityProvider is Upgradeable {
+contract IdentityProvider is Upgradable {
     function getBoolField(address user, string field) view external returns (bool);
 
     function getInt256Field(address user, string field) view external returns (int256);
