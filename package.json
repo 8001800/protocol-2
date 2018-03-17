@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Abacus Protocol Contracts",
   "repository": "git@github.com:abacusprotocol/protocol.git",
-  "author": "Pradyuman Vig <pradyumanvig@outlook.com>",
+  "author": "Abacus Team <team@abacus.market>",
   "license": "MIT",
   "scripts": {
     "lint": "solium -d contracts --fix"
