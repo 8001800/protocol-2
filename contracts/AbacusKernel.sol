@@ -20,22 +20,18 @@ contract AbacusKernel {
     identityDatabase = _identityDatabase;
   }
 
-  struct ComplianceSignal {
-    address instrumentAddr;
-    uint256 instrumentId;
-  }
-  mapping (address => mapping (uint256 => ComplianceSignal)) complianceSignals;
-
   /**
    * Initiates an async (off-chain) compliance check.
    *
    * @param providerId Id of the compliance provider to use.
-   * @param actionId The identifier of the action checked.
    */
   function requestComplianceCheck(
     address requester,
     uint256 providerId,
-    uint256 actionId,
+    uint256 instrumentIdOrAmt,
+    address from,
+    address to,
+    bytes32 data,
     uint256 cost
   ) external returns (bool)
   {
@@ -43,17 +39,35 @@ contract AbacusKernel {
     if (!token.transferFrom(requester, owner, cost)) {
       return false;
     }
-    complianceRegistry.requestCheck(providerId, msg.sender, actionId, cost);
+    complianceRegistry.requestCheck(
+      providerId,
+      msg.sender,
+      instrumentIdOrAmt,
+      from,
+      to,
+      data,
+      cost
+    );
     return true;
   }
 
   function checkCompliance(
     uint256 providerId,
     address instrumentAddr,
-    uint256 actionId
+    uint256 instrumentIdOrAmt,
+    address from,
+    address to,
+    bytes32 data
   ) external returns (uint8, uint256)
   {
-    return complianceRegistry.hardCheck(providerId, instrumentAddr, actionId);
+    return complianceRegistry.hardCheck(
+      providerId,
+      instrumentAddr,
+      instrumentIdOrAmt,
+      from,
+      to,
+      data
+    );
   }
 
   function requestIdentity(

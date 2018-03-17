@@ -6,6 +6,7 @@
   "author": "Abacus Team <team@abacus.market>",
   "license": "MIT",
   "scripts": {
+    "clean": "rm -fr build/",
     "compile": "truffle compile",
     "lint": "solium -d contracts --fix"
   },
