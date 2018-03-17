@@ -19,16 +19,41 @@ contract ProviderRegistry {
      * Represents a provider of some sort of service.
      */
     struct ProviderInfo {
+        /**
+         * The unique id of the provider.
+         */
         uint256 id;
+        /**
+         * The name of the provider. Immutable.
+         */
         string name;
+        /**
+         * Any metadata needed for the provider. Commonly an IPFS hash.
+         */
         string metadata;
+        /**
+         * The owner of the provider. Can be a smart contract.
+         */
         address owner;
+        /**
+         * The latest version of the provider.
+         */
         uint256 version;
     }
+
+    /**
+     * Stores a mapping of provider id to the latest provider info.
+     */
     mapping (uint256 => ProviderInfo) providers;
 
+    /**
+     * The id of next provider registered. This ensures that provider ids are unique.
+     */
     uint256 nextProviderId = 0;
 
+    /**
+     * Registers a new provider.
+     */
     function registerProvider(
         string name,
         string metadata,
@@ -52,6 +77,9 @@ contract ProviderRegistry {
         });
     }
 
+    /**
+     * Upgrades a provider.
+     */
     function upgradeProvider(
         string metadata,
         address owner
