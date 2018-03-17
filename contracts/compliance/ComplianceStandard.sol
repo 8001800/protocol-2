@@ -20,6 +20,9 @@ contract ComplianceStandard is Upgradable {
    */
   function onHardCheck(
     address instrumentAddr,
-    uint256 actionId
+    uint256 instrumentIdOrAmt,
+    address from,
+    address to,
+    bytes32 data
   ) external;
 }

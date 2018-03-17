@@ -28,7 +28,10 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         uint256 providerId,
         address standard,
         address instrumentAddr,
-        uint256 actionId,
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data,
         uint8 checkResult,
         uint256 nextProviderId
     );
@@ -36,14 +39,20 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     event ComplianceCheckRequested(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId,
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data,
         uint256 cost
     );
 
     event ComplianceCheckResultWritten(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId,
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data,
         uint256 blockToExpire,
         uint8 checkResult
     );
@@ -54,11 +63,22 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     function requestCheck(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId,
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data,
         uint256 cost
     ) fromKernel external
     {
-        ComplianceCheckRequested(providerId, instrumentAddr, actionId, cost);
+        ComplianceCheckRequested(
+            providerId,
+            instrumentAddr,
+            instrumentIdOrAmt,
+            from,
+            to,
+            data,
+            cost
+        );
     }
 
     /**
@@ -67,11 +87,22 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     function writeCheckResult(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId,
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data,
         uint256 blockToExpire,
         uint8 checkResult
     ) external returns (uint8)
     {
+        uint256 actionId = computeActionId(
+            providerId,
+            instrumentAddr,
+            instrumentIdOrAmt,
+            from,
+            to,
+            data
+        );
         ProviderInfo storage providerInfo = providers[providerId];
 
         // Check service exists
@@ -90,7 +121,10 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         ComplianceCheckResultWritten(
             providerId,
             instrumentAddr,
-            actionId,
+            instrumentIdOrAmt,
+            from,
+            to,
+            data,
             blockToExpire,
             checkResult
         );
@@ -99,9 +133,20 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     function invalidateCheckResult(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data
     ) external
     {
+        uint256 actionId = computeActionId(
+            providerId,
+            instrumentAddr,
+            instrumentIdOrAmt,
+            from,
+            to,
+            data
+        );
         ProviderInfo storage providerInfo = providers[providerId];
         require(providerInfo.owner == msg.sender || instrumentAddr == msg.sender);
         delete statuses[providerId][instrumentAddr][actionId];
@@ -117,7 +162,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         address from,
         address to,
         bytes32 data
-    ) view private returns (uint256)
+    ) pure private returns (uint256)
     {
         return uint256(
             keccak256(
@@ -226,7 +271,10 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     function hardCheck(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data
     ) fromKernel public returns (uint8, uint256)
     {
         ProviderInfo storage providerInfo = providers[providerId];
@@ -238,13 +286,19 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
             checkResult = checkAsync(
                 providerId,
                 instrumentAddr,
-                actionId
+                instrumentIdOrAmt,
+                from,
+                to,
+                data
             );
             ComplianceCheckPerformed(
                 providerId,
                 address(0),
                 instrumentAddr,
-                actionId,
+                instrumentIdOrAmt,
+                from,
+                to,
+                data,
                 checkResult,
                 0
             );
@@ -259,22 +313,44 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
 
         checkResult;
         uint256 nextProviderId;
-        (checkResult, nextProviderId) = standard.check(instrumentAddr, actionId);
-        standard.onHardCheck(instrumentAddr, actionId);
+        (checkResult, nextProviderId) = standard.check(
+            instrumentAddr,
+            instrumentIdOrAmt,
+            from,
+            to,
+            data
+        );
+        standard.onHardCheck(
+            instrumentAddr,
+            instrumentIdOrAmt,
+            from,
+            to,
+            data
+        );
 
         // For auditing
         ComplianceCheckPerformed(
             providerId,
             standard,
             instrumentAddr,
-            actionId,
+            instrumentIdOrAmt,
+            from,
+            to,
+            data,
             checkResult,
             nextProviderId
         );
 
         if (nextProviderId != 0) {
             // recursively check next service
-            (checkResult, nextProviderId) = hardCheck(nextProviderId, instrumentAddr, actionId);
+            (checkResult, nextProviderId) = hardCheck(
+                nextProviderId,
+                instrumentAddr,
+                instrumentIdOrAmt,
+                from,
+                to,
+                data
+            );
         }
         return (checkResult, nextProviderId);
     }
