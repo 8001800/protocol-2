@@ -5,6 +5,9 @@
   "repository": "git@github.com:abacusprotocol/protocol.git",
   "author": "Pradyuman Vig <pradyumanvig@outlook.com>",
   "license": "MIT",
+  "scripts": {
+    "lint": "solium -d contracts --fix"
+  },
   "dependencies": {
     "transmute-framework": "^0.1.60",
     "zeppelin-solidity": "^1.7.0"
