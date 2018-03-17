@@ -9,21 +9,29 @@ import "../provider/ProviderRegistry.sol";
  * Registry for compliance providers.
  */
 contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
+    /**
+     * @dev Stores the status of an asynchronous compliance check.
+     */
     struct CheckStatus {
-        // Block when this check status has expired.
+        /**
+         * @dev Block when this check status has expired.
+         */
         uint256 blockToExpire;
 
-        // 0 indicates success, non-zero is left to the caller.
+        /**
+         * @dev Result of the check. 0 indicates success, non-zero is left to the caller.
+         */
         uint8 checkResult;
     }
 
     /**
-     * Mapping of provider id => address => action id => check status.
+     * @dev Mapping of provider id => address => action id => check status.
      */
     mapping (uint256 => mapping (address => mapping (uint256 => CheckStatus))) public statuses;
 
-    uint256 providerIdAutoInc;
-
+    /**
+     * @dev Emitted when a compliance check is performed.
+     */
     event ComplianceCheckPerformed(
         uint256 providerId,
         address standard,
@@ -36,6 +44,9 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         uint256 nextProviderId
     );
 
+    /**
+     * @dev Emitted when an asynchronous compliance check is requested.
+     */
     event ComplianceCheckRequested(
         uint256 providerId,
         address instrumentAddr,
@@ -46,6 +57,9 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         uint256 cost
     );
 
+    /**
+     * @dev Emitted when the result of an asynchronous compliance check is written.
+     */
     event ComplianceCheckResultWritten(
         uint256 providerId,
         address instrumentAddr,
@@ -58,7 +72,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     );
 
     /**
-     * Requests a compliance check.
+     * @dev Requests a compliance check from a Compliance Provider.
      */
     function requestCheck(
         uint256 providerId,
@@ -82,7 +96,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     }
 
     /**
-     * Writes the result of an asynchronous compliance check to the blockchain.
+     * @dev Writes the result of an asynchronous compliance check to the blockchain.
      */
     function writeCheckResult(
         uint256 providerId,
@@ -130,6 +144,11 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         );
     }
 
+    /**
+     * @dev Invalidates a stored asynchronous compliance check result.
+     * This can only be called by the owner of the provider or by the instrument that
+     * requested the compliance check.
+     */
     function invalidateCheckResult(
         uint256 providerId,
         address instrumentAddr,
@@ -137,7 +156,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         address from,
         address to,
         bytes32 data
-    ) external
+    ) external returns (bool)
     {
         uint256 actionId = computeActionId(
             providerId,
@@ -148,12 +167,15 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
             data
         );
         ProviderInfo storage providerInfo = providers[providerId];
-        require(providerInfo.owner == msg.sender || instrumentAddr == msg.sender);
+        if (providerInfo.owner != msg.sender || instrumentAddr != msg.sender) {
+            return false;
+        }
         delete statuses[providerId][instrumentAddr][actionId];
+        return true;
     }
 
     /**
-     * Computes an id for an action using keccak256.
+     * @dev Computes an id for an action using keccak256.
      */
     function computeActionId(
         uint256 providerId,
@@ -177,7 +199,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     }
 
     /**
-     * Checks the result of an async service.
+     * @dev Checks the result of an async service.
      * Assumes the service is async. Check your preconditions before using.
      */
     function checkAsync(
@@ -213,7 +235,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     }
 
     /**
-     * Checks the result of a compliance check.
+     * @dev Checks the result of a compliance check.
      */
     function check(
         uint256 providerId,
@@ -266,7 +288,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     }
 
     /**
-     * Checks the result of a compliance check, ensuring any necessary state changes are made.
+     * @dev Checks the result of a compliance check and performs any necessary state changes.
      */
     function hardCheck(
         uint256 providerId,
