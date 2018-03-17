@@ -4,6 +4,7 @@ import "../provider/Upgradable.sol";
 
 /**
  * @title ComplianceStandard
+ * @dev An on-chain Compliance Provider.
  */
 contract ComplianceStandard is Upgradable {
   /**

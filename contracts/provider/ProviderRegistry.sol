@@ -1,11 +1,21 @@
 pragma solidity ^0.4.19;
 
 /**
- * Registry for providers.
+ * @title ProviderRegistry
+ * @dev Registry for providers of some service, e.g. identity or compliance.
+ * 
+ * The registry contains functions for self-amendment (i.e. version upgrades)
+ * and a mechanism to gauge trust of individual providers.
  */
 contract ProviderRegistry {
     /**
-     * Event thrown whenever a provider is added or changed.
+     * @dev Event emitted whenever a provider is added or changed.
+     *
+     * @param id See ProviderInfo docs.
+     * @param name See ProviderInfo docs.
+     * @param metadata See ProviderInfo docs.
+     * @param owner See ProviderInfo docs.
+     * @param version See ProviderInfo docs.
      */
     event ProviderInfoUpdate(
         uint256 id,
@@ -16,43 +26,47 @@ contract ProviderRegistry {
     );
 
     /**
-     * Represents a provider of some sort of service.
+     * @dev Represents a provider of some sort of service.
      */
     struct ProviderInfo {
         /**
-         * The unique id of the provider.
+         * @dev The unique id of the provider.
          */
         uint256 id;
         /**
-         * The name of the provider. Immutable.
+         * @dev The name of the provider. Immutable.
          */
         string name;
         /**
-         * Any metadata needed for the provider. Commonly an IPFS hash.
+         * @dev Any metadata needed for the provider. Commonly an IPFS hash.
          */
         string metadata;
         /**
-         * The owner of the provider. Can be a smart contract.
+         * @dev The owner of the provider. Can be a smart contract.
          */
         address owner;
         /**
-         * The latest version of the provider.
+         * @dev The latest version of the provider.
          */
         uint256 version;
     }
 
     /**
-     * Stores a mapping of provider id to the latest provider info.
+     * @dev Stores a mapping of provider id to the latest provider info.
      */
     mapping (uint256 => ProviderInfo) providers;
 
     /**
-     * The id of next provider registered. This ensures that provider ids are unique.
+     * @dev The id of next provider registered. This ensures that provider ids are unique.
      */
     uint256 nextProviderId = 0;
 
     /**
-     * Registers a new provider.
+     * @dev Registers a new provider.
+     *
+     * @param name See ProviderInfo docs.
+     * @param metadata See ProviderInfo docs.
+     * @param owner See ProviderInfo docs.
      */
     function registerProvider(
         string name,
@@ -78,7 +92,10 @@ contract ProviderRegistry {
     }
 
     /**
-     * Upgrades a provider.
+     * @dev Upgrades a provider, changing its metadata and owner.
+     *
+     * @param metadata See ProviderInfo docs.
+     * @param owner See ProviderInfo docs.
      */
     function upgradeProvider(
         string metadata,
@@ -117,7 +134,7 @@ contract ProviderRegistry {
     }
 
     /**
-     * Adjacency matrix, where address is the constituent (one who trusts),
+     * @dev Adjacency matrix, where address is the constituent (one who trusts),
      * uint256 is the trustee (provider id of one who is trusted), and the last
      * uint256 is the version of the provider trusted.
      * A zero version represents lack of trust.
@@ -125,19 +142,28 @@ contract ProviderRegistry {
     mapping (address => mapping(uint256 => uint256)) public trustMatrix;
 
     /**
-     * Writes that msg.sender trusts a provider.
+     * @dev Writes that msg.sender trusts a provider.
+     *
+     * @param providerId The id of the provider to trust.
      */
     function trustProvider(uint256 providerId) external {
         trustMatrix[msg.sender][providerId] = providers[providerId].version;
     }
 
     /**
-     * Untrusts a provider.
+     * @dev Untrusts a provider.
+     *
+     * @param providerId The id of the provider to untrust.
      */
     function untrustProvider(uint256 providerId) external {
         trustMatrix[msg.sender][providerId] = 0;
     }
 
+    /**
+     * @dev Returns the owner of a provider.
+     *
+     * @param providerId The id of the provider to look up.
+     */
     function providerOwner(uint256 providerId) view external returns (address) {
         return providers[providerId].owner;
     }
