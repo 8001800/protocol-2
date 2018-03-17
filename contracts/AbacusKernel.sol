@@ -4,6 +4,11 @@ import "./AbacusToken.sol";
 import "./compliance/ComplianceRegistry.sol";
 import "./identity/IdentityDatabase.sol";
 
+/**
+ * @title AbacusKernel
+ * @dev Manages payment with all registries. This exists to reduce friction in payment--
+ * one only needs to grant the kernel allowance rather than several registries.
+ */
 contract AbacusKernel {
   AbacusToken public token;
   ComplianceRegistry public complianceRegistry;
@@ -51,25 +56,11 @@ contract AbacusKernel {
     return true;
   }
 
-  function checkCompliance(
-    uint256 providerId,
-    address instrumentAddr,
-    uint256 instrumentIdOrAmt,
-    address from,
-    address to,
-    bytes32 data
-  ) external returns (uint8, uint256)
-  {
-    return complianceRegistry.hardCheck(
-      providerId,
-      instrumentAddr,
-      instrumentIdOrAmt,
-      from,
-      to,
-      data
-    );
-  }
-
+  /**
+   * Initiates an identity verification request.
+   *
+   * @param providerId Id of the identity provider to use.
+   */
   function requestIdentity(
     uint256 providerId,
     string args,
