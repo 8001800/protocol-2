@@ -5,6 +5,9 @@ import "../NeedsAbacus.sol";
 import "./ComplianceStandard.sol";
 import "../provider/ProviderRegistry.sol";
 
+/**
+ * Registry for compliance providers.
+ */
 contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     struct CheckStatus {
         // Block when this check status has expired.
@@ -45,6 +48,9 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         uint8 checkResult
     );
 
+    /**
+     * Requests a compliance check.
+     */
     function requestCheck(
         uint256 providerId,
         address instrumentAddr,
@@ -55,6 +61,9 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         ComplianceCheckRequested(providerId, instrumentAddr, actionId, cost);
     }
 
+    /**
+     * Writes the result of an asynchronous compliance check to the blockchain.
+     */
     function writeCheckResult(
         uint256 providerId,
         address instrumentAddr,
@@ -99,15 +108,50 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     }
 
     /**
+     * Computes an id for an action using keccak256.
+     */
+    function computeActionId(
+        uint256 providerId,
+        address instrumentAddr,
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data
+    ) view private returns (uint256)
+    {
+        return uint256(
+            keccak256(
+                providerId,
+                instrumentAddr,
+                instrumentIdOrAmt,
+                from,
+                to,
+                data
+            )
+        );
+    }
+
+    /**
      * Checks the result of an async service.
      * Assumes the service is async. Check your preconditions before using.
      */
     function checkAsync(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data
     ) view private returns (uint8)
     {
+        uint256 actionId = computeActionId(
+            providerId,
+            instrumentAddr,
+            instrumentIdOrAmt,
+            from,
+            to,
+            data
+        );
         CheckStatus storage status = statuses[providerId][instrumentAddr][actionId];
 
         // Check that the status check has been performed.
@@ -123,10 +167,16 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         return  status.checkResult;
     }
 
+    /**
+     * Checks the result of a compliance check.
+     */
     function check(
         uint256 providerId,
         address instrumentAddr,
-        uint256 actionId
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data
     ) view public returns (uint8)
     {
         ProviderInfo storage providerInfo = providers[providerId];
@@ -136,7 +186,10 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
             return checkAsync(
                 providerId,
                 instrumentAddr,
-                actionId
+                instrumentIdOrAmt,
+                from,
+                to,
+                data
             );
         }
 
@@ -145,15 +198,31 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
 
         uint8 checkResult;
         uint256 nextProviderId;
-        (checkResult, nextProviderId) = standard.check(instrumentAddr, actionId);
+        (checkResult, nextProviderId) = standard.check(
+            instrumentAddr,
+            instrumentIdOrAmt,
+            from,
+            to,
+            data
+        );
 
         if (nextProviderId != 0) {
             // recursively check next service
-            checkResult = check(nextProviderId, instrumentAddr, actionId);
+            checkResult = check(
+                nextProviderId,
+                instrumentAddr,
+                instrumentIdOrAmt,
+                from,
+                to,
+                data
+            );
         }
         return checkResult;
     }
 
+    /**
+     * Checks the result of a compliance check, ensuring any necessary state changes are made.
+     */
     function hardCheck(
         uint256 providerId,
         address instrumentAddr,

@@ -9,7 +9,10 @@ contract ComplianceStandard is Upgradable {
    */
   function check(
     address instrumentAddr,
-    uint256 actionId
+    uint256 instrumentIdOrAmt,
+    address from,
+    address to,
+    bytes32 data
   ) view external returns (uint8, uint256);
 
   /**
