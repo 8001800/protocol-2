@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import './AbacusInstrument.sol';
+import "./AbacusInstrument.sol";
 
 contract AppraisalInstrument is AbacusInstrument {
 
