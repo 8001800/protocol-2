@@ -25,16 +25,26 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     }
 
     /**
-     * @dev Mapping of provider id => address => action id => check status.
+     * @dev Mapping of action id => check status.
      */
-    mapping (uint256 => mapping (address => mapping (uint256 => CheckStatus))) public statuses;
+    mapping (uint256 => CheckStatus) public statuses;
 
     /**
      * @dev Emitted when a compliance check is performed.
+     *
+     * @param providerId The id of the provider.
+     * @param providerVersion The version of the provider.
+     * @param instrumentAddr The address of the instrument contract.
+     * @param instrumentIdOrAmt The instrument id (NFT) or amount (ERC20).
+     * @param from The from address of the token transfer.
+     * @param to The to address of the token transfer.
+     * @param data Any additional data related to the action.
+     * @param checkResult The result of the compliance check.
+     * @param nextProviderId The id of the compliance provider used after this provider.
      */
     event ComplianceCheckPerformed(
         uint256 providerId,
-        address standard,
+        uint256 providerVersion,
         address instrumentAddr,
         uint256 instrumentIdOrAmt,
         address from,
@@ -46,9 +56,23 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
 
     /**
      * @dev Emitted when an asynchronous compliance check is requested.
+     * This event is to be subscribed to and read by the provider off-chain.
+     * Once the off-chain provider sees this event and ensures the correct cost
+     * has been paid, they are to perform a compliance check then call `writeCheckResult`
+     * with the appropriate parameters.
+     *
+     * @param providerId The id of the provider.
+     * @param providerVersion The version of the provider.
+     * @param instrumentAddr The address of the instrument contract.
+     * @param instrumentIdOrAmt The instrument id (NFT) or amount (ERC20).
+     * @param from The from address of the token transfer.
+     * @param to The to address of the token transfer.
+     * @param data Any additional data related to the action.
+     * @param cost The amount the user paid to the compliance provider.
      */
     event ComplianceCheckRequested(
-        uint256 providerId,
+        uint256 indexed providerId,
+        uint256 providerVersion,
         address instrumentAddr,
         uint256 instrumentIdOrAmt,
         address from,
@@ -59,9 +83,20 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
 
     /**
      * @dev Emitted when the result of an asynchronous compliance check is written.
+     *
+     * @param providerId The id of the provider.
+     * @param providerVersion The version of the provider.
+     * @param instrumentAddr The address of the instrument contract.
+     * @param instrumentIdOrAmt The instrument id (NFT) or amount (ERC20).
+     * @param from The from address of the token transfer.
+     * @param to The to address of the token transfer.
+     * @param data Any additional data related to the action.
+     * @param blockToExpire The block in which the compliance check result expires.
+     * @param checkResult The result of the compliance check.
      */
     event ComplianceCheckResultWritten(
         uint256 providerId,
+        uint256 providerVersion,
         address instrumentAddr,
         uint256 instrumentIdOrAmt,
         address from,
@@ -73,6 +108,15 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
 
     /**
      * @dev Requests a compliance check from a Compliance Provider.
+     * Only the kernel may call this function. This ensures payments were made.
+     *
+     * @param providerId The id of the provider.
+     * @param instrumentAddr The address of the instrument contract.
+     * @param instrumentIdOrAmt The instrument id (NFT) or amount (ERC20).
+     * @param from The from address of the token transfer.
+     * @param to The to address of the token transfer.
+     * @param data Any additional data related to the action.
+     * @param cost The amount the user paid to the compliance provider.
      */
     function requestCheck(
         uint256 providerId,
@@ -86,6 +130,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     {
         ComplianceCheckRequested(
             providerId,
+            providers[providerId].version,
             instrumentAddr,
             instrumentIdOrAmt,
             from,
@@ -95,11 +140,26 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         );
     }
 
+    uint8 constant E_RESULT_SERVICE_NOT_FOUND = 1;
+    uint8 constant E_RESULT_UNAUTHORIZED = 2;
+    uint8 constant E_RESULT_VERSION_MISMATCH = 3;
+
     /**
      * @dev Writes the result of an asynchronous compliance check to the blockchain.
+     *
+     * @param providerId The id of the provider.
+     * @param providerVersion The version of the provider.
+     * @param instrumentAddr The address of the instrument contract.
+     * @param instrumentIdOrAmt The instrument id (NFT) or amount (ERC20).
+     * @param from The from address of the token transfer.
+     * @param to The to address of the token transfer.
+     * @param data Any additional data related to the action.
+     * @param blockToExpire The block in which the compliance check result expires.
+     * @param checkResult The result of the compliance check.
      */
     function writeCheckResult(
         uint256 providerId,
+        uint256 providerVersion,
         address instrumentAddr,
         uint256 instrumentIdOrAmt,
         address from,
@@ -109,31 +169,38 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         uint8 checkResult
     ) external returns (uint8)
     {
+        ProviderInfo storage providerInfo = providers[providerId];
+
+        // Check service exists
+        if (providerInfo.id == 0) {
+            return E_RESULT_SERVICE_NOT_FOUND;
+        }
+        // Check service owner is correct
+        if (providerInfo.owner != msg.sender) {
+            return E_RESULT_UNAUTHORIZED;
+        }
+        // Check provider version is correct
+        if (providerInfo.version != providerVersion) {
+            return E_RESULT_VERSION_MISMATCH;
+        }
+
         uint256 actionId = computeActionId(
             providerId,
+            providerVersion,
             instrumentAddr,
             instrumentIdOrAmt,
             from,
             to,
             data
         );
-        ProviderInfo storage providerInfo = providers[providerId];
 
-        // Check service exists
-        if (providerInfo.id == 0) {
-            return 1;
-        }
-        // Check service owner is correct
-        if (providerInfo.owner != msg.sender) {
-            return 2;
-        }
-
-        statuses[providerId][instrumentAddr][actionId] = CheckStatus({
+        statuses[actionId] = CheckStatus({
             blockToExpire: blockToExpire,
             checkResult: checkResult
         });
         ComplianceCheckResultWritten(
             providerId,
+            providerVersion,
             instrumentAddr,
             instrumentIdOrAmt,
             from,
@@ -158,19 +225,20 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         bytes32 data
     ) external returns (bool)
     {
+        ProviderInfo storage providerInfo = providers[providerId];
         uint256 actionId = computeActionId(
             providerId,
+            providerInfo.version,
             instrumentAddr,
             instrumentIdOrAmt,
             from,
             to,
             data
         );
-        ProviderInfo storage providerInfo = providers[providerId];
         if (providerInfo.owner != msg.sender || instrumentAddr != msg.sender) {
             return false;
         }
-        delete statuses[providerId][instrumentAddr][actionId];
+        delete statuses[actionId];
         return true;
     }
 
@@ -179,6 +247,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
      */
     function computeActionId(
         uint256 providerId,
+        uint256 providerVersion,
         address instrumentAddr,
         uint256 instrumentIdOrAmt,
         address from,
@@ -189,6 +258,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         return uint256(
             keccak256(
                 providerId,
+                providerVersion,
                 instrumentAddr,
                 instrumentIdOrAmt,
                 from,
@@ -197,6 +267,9 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
             )
         );
     }
+
+    uint8 constant E_CASYNC_CHECK_NOT_PERFORMED = 100;
+    uint8 constant E_CASYNC_CHECK_NOT_EXPIRED = 101;
 
     /**
      * @dev Checks the result of an async service.
@@ -213,25 +286,26 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     {
         uint256 actionId = computeActionId(
             providerId,
+            providers[providerId].version,
             instrumentAddr,
             instrumentIdOrAmt,
             from,
             to,
             data
         );
-        CheckStatus storage status = statuses[providerId][instrumentAddr][actionId];
+        CheckStatus storage status = statuses[actionId];
 
         // Check that the status check has been performed.
         if (status.blockToExpire == 0) {
-            return 100;
+            return E_CASYNC_CHECK_NOT_PERFORMED;
         }
 
         // Check that the status check has not expired. 
         if (status.blockToExpire <= block.number) {
-            return 101;
+            return E_CASYNC_CHECK_NOT_EXPIRED;
         }
 
-        return  status.checkResult;
+        return status.checkResult;
     }
 
     /**
@@ -315,7 +389,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
             );
             ComplianceCheckPerformed(
                 providerId,
-                address(0),
+                providerInfo.version,
                 instrumentAddr,
                 instrumentIdOrAmt,
                 from,
@@ -353,7 +427,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         // For auditing
         ComplianceCheckPerformed(
             providerId,
-            standard,
+            providerInfo.version,
             instrumentAddr,
             instrumentIdOrAmt,
             from,
