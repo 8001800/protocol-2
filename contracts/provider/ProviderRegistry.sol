@@ -54,7 +54,12 @@ contract ProviderRegistry {
     /**
      * @dev Stores a mapping of provider id to the latest provider info.
      */
-    mapping (uint256 => ProviderInfo) providers;
+    mapping (uint256 => mapping (uint256 => ProviderInfo)) public providers;
+
+    /**
+     * @dev The latest version of a provider.
+     */
+    mapping (uint256 => uint256) public latestProviderVersion;
 
     /**
      * @dev The id of next provider registered. This ensures that provider ids are unique.
@@ -75,7 +80,7 @@ contract ProviderRegistry {
     ) external
     {
         uint256 providerId = nextProviderId++;
-        providers[providerId] = ProviderInfo({
+        providers[providerId][1] = ProviderInfo({
             id: providerId,
             name: name,
             metadata: metadata,
@@ -91,6 +96,28 @@ contract ProviderRegistry {
         });
     }
 
+    function getLatestProvider(
+        uint256 providerId
+    ) view private returns (ProviderInfo storage)
+    {
+        return providers[providerId][latestProviderVersion[providerId]];
+    }
+
+    function latestProvider(
+        uint256 providerId
+    ) view external returns (uint256, string, string, address, uint256, bool)
+    {
+        ProviderInfo storage info = getLatestProvider(providerId);
+        return (
+            info.id,
+            info.name,
+            info.metadata,
+            info.owner,
+            info.version,
+            bytes(info.metadata).length > 0
+        );
+    }
+
     /**
      * @dev Upgrades a provider, changing its metadata and owner.
      *
@@ -103,7 +130,7 @@ contract ProviderRegistry {
     ) external returns (bool)
     {
         uint256 providerId = nextProviderId++;
-        ProviderInfo storage info = providers[providerId];
+        ProviderInfo storage info = getLatestProvider(providerId);
         // Check if the provider existed
         if (info.version == 1) {
             return false;
@@ -115,14 +142,14 @@ contract ProviderRegistry {
         }
         uint256 nextVersion = info.version + 1;
 
-        // Check if we're allowed.
-        providers[providerId] = ProviderInfo({
+        providers[providerId][nextVersion] = ProviderInfo({
             id: providerId,
             name: info.name,
             metadata: metadata,
             owner: owner,
             version: nextVersion
         });
+        latestProviderVersion[providerId] = nextVersion;
         ProviderInfoUpdate({
             id: providerId,
             name: info.name,
@@ -147,7 +174,7 @@ contract ProviderRegistry {
      * @param providerId The id of the provider to trust.
      */
     function trustProvider(uint256 providerId) external {
-        trustMatrix[msg.sender][providerId] = providers[providerId].version;
+        trustMatrix[msg.sender][providerId] = latestProviderVersion[providerId];
     }
 
     /**
@@ -165,7 +192,7 @@ contract ProviderRegistry {
      * @param providerId The id of the provider to look up.
      */
     function providerOwner(uint256 providerId) view external returns (address) {
-        return providers[providerId].owner;
+        return getLatestProvider(providerId).owner;
     }
 
 }

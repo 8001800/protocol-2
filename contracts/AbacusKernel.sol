@@ -13,16 +13,19 @@ contract AbacusKernel {
   AbacusToken public token;
   ComplianceRegistry public complianceRegistry;
   IdentityDatabase public identityDatabase;
+  ProviderRegistry public providerRegistry;
 
   function AbacusKernel(
     AbacusToken _token,
     ComplianceRegistry _complianceRegistry,
-    IdentityDatabase _identityDatabase
+    IdentityDatabase _identityDatabase,
+    ProviderRegistry _providerRegistry
   ) public
   {
     token = _token;
     complianceRegistry = _complianceRegistry;
     identityDatabase = _identityDatabase;
+    providerRegistry = _providerRegistry;
   }
 
   /**
@@ -40,7 +43,7 @@ contract AbacusKernel {
     uint256 cost
   ) external returns (bool)
   {
-    address owner = complianceRegistry.providerOwner(providerId);
+    address owner = providerRegistry.providerOwner(providerId);
     if (!token.transferFrom(requester, owner, cost)) {
       return false;
     }

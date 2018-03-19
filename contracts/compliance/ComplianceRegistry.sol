@@ -8,7 +8,13 @@ import "../provider/ProviderRegistry.sol";
 /**
  * Registry for compliance providers.
  */
-contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
+contract ComplianceRegistry is NeedsAbacus {
+    ProviderRegistry public providerRegistry;
+
+    function ComplianceRegistry(ProviderRegistry _providerRegistry) public  {
+        providerRegistry = _providerRegistry;
+    }
+
     /**
      * @dev Stores the status of an asynchronous compliance check.
      */
@@ -130,7 +136,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     {
         ComplianceCheckRequested(
             providerId,
-            providers[providerId].version,
+            providerRegistry.latestProviderVersion(providerId),
             instrumentAddr,
             instrumentIdOrAmt,
             from,
@@ -169,19 +175,22 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         uint8 checkResult
     ) external returns (uint8)
     {
-        ProviderInfo storage providerInfo = providers[providerId];
+        // Check provider version is correct
+        if (providerRegistry.latestProviderVersion(providerId) != providerVersion) {
+            return E_RESULT_VERSION_MISMATCH;
+        }
+
+        uint256 id;
+        address owner;
+        (id,,, owner,,) = providerRegistry.latestProvider(providerId);
 
         // Check service exists
-        if (providerInfo.id == 0) {
+        if (id == 0) {
             return E_RESULT_SERVICE_NOT_FOUND;
         }
         // Check service owner is correct
-        if (providerInfo.owner != msg.sender) {
+        if (owner != msg.sender) {
             return E_RESULT_UNAUTHORIZED;
-        }
-        // Check provider version is correct
-        if (providerInfo.version != providerVersion) {
-            return E_RESULT_VERSION_MISMATCH;
         }
 
         uint256 actionId = computeActionId(
@@ -225,17 +234,17 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         bytes32 data
     ) external returns (bool)
     {
-        ProviderInfo storage providerInfo = providers[providerId];
         uint256 actionId = computeActionId(
             providerId,
-            providerInfo.version,
+            providerRegistry.latestProviderVersion(providerId),
             instrumentAddr,
             instrumentIdOrAmt,
             from,
             to,
             data
         );
-        if (providerInfo.owner != msg.sender || instrumentAddr != msg.sender) {
+        address owner = providerRegistry.providerOwner(providerId);
+        if (owner != msg.sender || instrumentAddr != msg.sender) {
             return false;
         }
         delete statuses[actionId];
@@ -286,7 +295,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
     {
         uint256 actionId = computeActionId(
             providerId,
-            providers[providerId].version,
+            providerRegistry.latestProviderVersion(providerId),
             instrumentAddr,
             instrumentIdOrAmt,
             from,
@@ -320,10 +329,12 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         bytes32 data
     ) view public returns (uint8)
     {
-        ProviderInfo storage providerInfo = providers[providerId];
+        address owner;
+        bool hasMetadata;
+        (,,, owner,, hasMetadata) = providerRegistry.latestProvider(providerId);
 
         // Async checks
-        if (bytes(providerInfo.metadata).length > 0) {
+        if (hasMetadata) {
             return checkAsync(
                 providerId,
                 instrumentAddr,
@@ -335,7 +346,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         }
 
         // Sync checks
-        ComplianceStandard standard = ComplianceStandard(providerInfo.owner);
+        ComplianceStandard standard = ComplianceStandard(owner);
 
         uint8 checkResult;
         uint256 nextProviderId;
@@ -373,12 +384,15 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         bytes32 data
     ) fromKernel public returns (uint8, uint256)
     {
-        ProviderInfo storage providerInfo = providers[providerId];
+        address owner;
+        uint256 providerVersion;
+        bool hasMetadata;
+        (,,, owner, providerVersion, hasMetadata) = providerRegistry.latestProvider(providerId);
 
         uint8 checkResult;
 
         // Async checks
-        if (bytes(providerInfo.metadata).length > 0) {
+        if (hasMetadata) {
             checkResult = checkAsync(
                 providerId,
                 instrumentAddr,
@@ -389,7 +403,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
             );
             ComplianceCheckPerformed(
                 providerId,
-                providerInfo.version,
+                providerVersion,
                 instrumentAddr,
                 instrumentIdOrAmt,
                 from,
@@ -405,7 +419,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         }
 
         // Sync checks
-        ComplianceStandard standard = ComplianceStandard(providerInfo.owner);
+        ComplianceStandard standard = ComplianceStandard(owner);
 
         checkResult;
         uint256 nextProviderId;
@@ -427,7 +441,7 @@ contract ComplianceRegistry is ProviderRegistry, NeedsAbacus {
         // For auditing
         ComplianceCheckPerformed(
             providerId,
-            providerInfo.version,
+            providerVersion,
             instrumentAddr,
             instrumentIdOrAmt,
             from,
