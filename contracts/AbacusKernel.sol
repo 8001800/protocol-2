@@ -15,6 +15,8 @@ contract AbacusKernel {
   IdentityDatabase public identityDatabase;
   ProviderRegistry public providerRegistry;
 
+  mapping (address => bool) coordinators;
+
   function AbacusKernel(
     AbacusToken _token,
     ComplianceRegistry _complianceRegistry,
@@ -26,6 +28,23 @@ contract AbacusKernel {
     complianceRegistry = _complianceRegistry;
     identityDatabase = _identityDatabase;
     providerRegistry = _providerRegistry;
+
+    coordinators[complianceRegistry] = coordinators[identityDatabase] = true;
+  }
+
+  /**
+   * @dev Transfers ABA from an approved person to another.
+   */
+  function transferTokensFrom(
+    address from,
+    address to,
+    uint256 cost
+  ) external returns (bool)
+  {
+    if (!coordinators[msg.sender]) {
+      return false;
+    }
+    return token.transferFrom(from, to, cost);
   }
 
   /**
