@@ -114,10 +114,8 @@ contract ComplianceRegistry is NeedsAbacus {
 
     /**
      * @dev Requests a compliance check from a Compliance Provider.
-     * Only the kernel may call this function. This ensures payments were made.
      *
      * @param providerId The id of the provider.
-     * @param instrumentAddr The address of the instrument contract.
      * @param instrumentIdOrAmt The instrument id (NFT) or amount (ERC20).
      * @param from The from address of the token transfer.
      * @param to The to address of the token transfer.
@@ -132,8 +130,12 @@ contract ComplianceRegistry is NeedsAbacus {
         address to,
         bytes32 data,
         uint256 cost
-    ) fromKernel external
+    ) external returns (bool)
     {
+        address owner = providerRegistry.providerOwner(providerId);
+        if (!kernel.transferTokensFrom(msg.sender, owner, cost)) {
+            return false;
+        }
         ComplianceCheckRequested(
             providerId,
             providerRegistry.latestProviderVersion(providerId),
@@ -372,6 +374,8 @@ contract ComplianceRegistry is NeedsAbacus {
         return checkResult;
     }
 
+    uint8 constant E_CHECK_INSTRUMENT_WRONG_SENDER = 140;
+
     /**
      * @dev Checks the result of a compliance check and performs any necessary state changes.
      */
@@ -382,8 +386,11 @@ contract ComplianceRegistry is NeedsAbacus {
         address from,
         address to,
         bytes32 data
-    ) fromKernel public returns (uint8, uint256)
+    ) public returns (uint8, uint256)
     {
+        if (msg.sender != instrumentAddr) {
+            return (E_CHECK_INSTRUMENT_WRONG_SENDER, 0);
+        }
         address owner;
         uint256 providerVersion;
         bool hasMetadata;
