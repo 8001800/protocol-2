@@ -1,10 +1,10 @@
-var ComplianceRegistry = artifacts.require("./ComplianceRegistry.sol");
+var ComplianceCoordinator = artifacts.require("./ComplianceCoordinator.sol");
 var AbacusToken = artifacts.require("./AbacusToken.sol");
 var AbacusKernel = artifacts.require("./AbacusKernel.sol");
 
 module.exports = function(deployer) {
   deployer
-    .deploy(ComplianceRegistry)
+    .deploy(ComplianceCoordinator)
     .then(() => {
       return deployer.deploy(AbacusToken);
     })
@@ -12,7 +12,7 @@ module.exports = function(deployer) {
       return deployer.deploy(
         AbacusKernel,
         AbacusToken.address,
-        ComplianceRegistry.address
+        ComplianceCoordinator.address
       );
     });
 };

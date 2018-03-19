@@ -1,8 +1,8 @@
 pragma solidity ^0.4.19;
 
 import "./AbacusToken.sol";
-import "./compliance/ComplianceRegistry.sol";
-import "./identity/IdentityDatabase.sol";
+import "./compliance/ComplianceCoordinator.sol";
+import "./identity/IdentityCoordinator.sol";
 
 /**
  * @title AbacusKernel
@@ -11,25 +11,25 @@ import "./identity/IdentityDatabase.sol";
  */
 contract AbacusKernel {
   AbacusToken public token;
-  ComplianceRegistry public complianceRegistry;
-  IdentityDatabase public identityDatabase;
+  ComplianceCoordinator public complianceCoordinator;
+  IdentityCoordinator public identityCoordinator;
   ProviderRegistry public providerRegistry;
 
   mapping (address => bool) coordinators;
 
   function AbacusKernel(
     AbacusToken _token,
-    ComplianceRegistry _complianceRegistry,
-    IdentityDatabase _identityDatabase,
+    ComplianceCoordinator _complianceCoordinator,
+    IdentityCoordinator _identityCoordinator,
     ProviderRegistry _providerRegistry
   ) public
   {
     token = _token;
-    complianceRegistry = _complianceRegistry;
-    identityDatabase = _identityDatabase;
+    complianceCoordinator = _complianceCoordinator;
+    identityCoordinator = _identityCoordinator;
     providerRegistry = _providerRegistry;
 
-    coordinators[complianceRegistry] = coordinators[identityDatabase] = true;
+    coordinators[complianceCoordinator] = coordinators[identityCoordinator] = true;
   }
 
   /**

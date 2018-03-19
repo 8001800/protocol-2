@@ -8,10 +8,10 @@ import "../provider/ProviderRegistry.sol";
 /**
  * Registry for compliance providers.
  */
-contract ComplianceRegistry is NeedsAbacus {
+contract ComplianceCoordinator is NeedsAbacus {
     ProviderRegistry public providerRegistry;
 
-    function ComplianceRegistry(ProviderRegistry _providerRegistry) public  {
+    function ComplianceCoordinator(ProviderRegistry _providerRegistry) public  {
         providerRegistry = _providerRegistry;
     }
 

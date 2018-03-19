@@ -3,10 +3,10 @@ pragma solidity ^0.4.19;
 import "../NeedsAbacus.sol";
 import "../provider/ProviderRegistry.sol";
 
-contract IdentityDatabase is NeedsAbacus {
+contract IdentityCoordinator is NeedsAbacus {
     ProviderRegistry public providerRegistry;
 
-    function IdentityDatabase(ProviderRegistry _providerRegistry) public {
+    function IdentityCoordinator(ProviderRegistry _providerRegistry) public {
         providerRegistry = _providerRegistry;
     }
 
