@@ -1,7 +1,5 @@
 module.exports = {
-
   networks: {
-
     development: {
       host: "127.0.0.1",
       port: 7545,
@@ -15,12 +13,10 @@ module.exports = {
       network_id: 4,
       gas: 4000000
     }
-
   },
 
   optimizer: {
     enabled: true,
     runs: 500
-  },
-
+  }
 };

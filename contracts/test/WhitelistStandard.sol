@@ -3,19 +3,20 @@ pragma solidity ^0.4.19;
 import "../compliance/ComplianceStandard.sol";
 
 /**
- * @dev A compliance standard that ensures everyone is on a list.
+ * @dev A compliance standard that ensures everyone is on a whitelist.
  */
-contract ListStandard is ComplianceStandard {
+contract WhitelistStandard is ComplianceStandard {
 
   mapping (address => bool) allowed;
 
-  uint8 constant E_UNACCREDITED = 1;
+  uint8 constant E_UNWHITELISTED = 1;
   uint256 operations = 0;
 
-  function ListStandard(
+  function WhitelistStandard(
     ProviderRegistry _providerRegistry, uint256 _providerId
   ) Provider(_providerRegistry, _providerId) public
   {
+    allowed[msg.sender] = true;
   }
 
   function allow(address user) external returns (bool) {
@@ -23,17 +24,17 @@ contract ListStandard is ComplianceStandard {
   }
 
   function check(
-    address instrumentAddr,
-    uint256 instrumentIdOrAmt,
+    address,
+    uint256,
     address from,
     address to,
-    bytes32 data
-  ) view external returns (uint8, uint256)
+    bytes32 
+ ) view external returns (uint8, uint256)
   {
     if (allowed[from] && allowed[to]) {
       return (0, 0);
     } else {
-      return (E_UNACCREDITED, 0);
+      return (E_UNWHITELISTED, 0);
     }
   }
 

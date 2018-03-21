@@ -11,6 +11,15 @@ contract AbacusERC20Token is StandardToken, AbacusInstrument {
     ComplianceCoordinator complianceCoordinator;
     uint256 complianceProviderId;
 
+    function AbacusERC20Token(
+        ComplianceCoordinator _complianceCoordinator,
+        uint256 _complianceProviderId
+    ) public
+    {
+        complianceCoordinator = _complianceCoordinator;
+        complianceProviderId = _complianceProviderId;
+    }
+
     function transfer(address to, uint256 value) public returns (bool) {
         if (complianceCoordinator.check(complianceProviderId, this, value, msg.sender, to, 0) != 0) {
             return false;
