@@ -8,7 +8,7 @@ import "../provider/ProviderRegistry.sol";
  * @dev A contract which can be used as a provider in a ProviderRegistry.
  */
 contract Provider is Ownable {
-    uint256 providerId;
+    uint256 public providerId;
     ProviderRegistry providerRegistry;
 
     /**

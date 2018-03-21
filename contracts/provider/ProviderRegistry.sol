@@ -87,6 +87,7 @@ contract ProviderRegistry {
             owner: owner,
             version: 1
         });
+        latestProviderVersion[providerId] = 1;
         ProviderInfoUpdate({
             id: providerId,
             name: name,
