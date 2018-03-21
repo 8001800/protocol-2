@@ -1,8 +1,6 @@
 pragma solidity ^0.4.19;
 
 import "./AbacusToken.sol";
-import "./compliance/ComplianceCoordinator.sol";
-import "./identity/IdentityCoordinator.sol";
 
 /**
  * @title AbacusKernel
@@ -11,17 +9,17 @@ import "./identity/IdentityCoordinator.sol";
  */
 contract AbacusKernel {
   AbacusToken public token;
-  ComplianceCoordinator public complianceCoordinator;
-  IdentityCoordinator public identityCoordinator;
-  ProviderRegistry public providerRegistry;
+  address public complianceCoordinator;
+  address public identityCoordinator;
+  address public providerRegistry;
 
   mapping (address => bool) coordinators;
 
   function AbacusKernel(
     AbacusToken _token,
-    ComplianceCoordinator _complianceCoordinator,
-    IdentityCoordinator _identityCoordinator,
-    ProviderRegistry _providerRegistry
+    address _complianceCoordinator,
+    address _identityCoordinator,
+    address _providerRegistry
   ) public
   {
     token = _token;

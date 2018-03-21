@@ -1,14 +1,14 @@
 pragma solidity ^0.4.19;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "../NeedsAbacus.sol";
+import "../AbacusCoordinator.sol";
 import "./ComplianceStandard.sol";
 import "../provider/ProviderRegistry.sol";
 
 /**
  * Registry for compliance providers.
  */
-contract ComplianceCoordinator is NeedsAbacus {
+contract ComplianceCoordinator is AbacusCoordinator {
     ProviderRegistry public providerRegistry;
 
     function ComplianceCoordinator(ProviderRegistry _providerRegistry) public  {

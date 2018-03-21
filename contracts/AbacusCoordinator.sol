@@ -3,7 +3,7 @@ pragma solidity ^0.4.19;
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./AbacusKernel.sol";
 
-contract NeedsAbacus is Ownable {
+contract AbacusCoordinator is Ownable {
     /**
      * Address of the Abacus kernel.
      */
