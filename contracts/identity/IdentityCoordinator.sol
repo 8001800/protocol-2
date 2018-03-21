@@ -40,6 +40,25 @@ contract IdentityCoordinator is NeedsAbacus {
     );
 
     /**
+     * @dev Emitted when an identity verification has been performed.
+     *
+     * @param providerId The id of the provider.
+     * @param user The address of the user that requests identity services.
+     * @param requestId An arbitrary id to link the request to the off-chain database.
+     */
+    event IdentityVerificationPerformed(
+        uint256 indexed providerId,
+        address user,
+        uint256 requestId
+    );
+
+    /**
+     * @dev Mapping of user address => requestId => existence.
+     * Ensures no duplicate requests were sent.
+     */
+    mapping (address => mapping (uint256 => bool)) requestIds;
+
+    /**
      * @dev Requests verification of identity from a provider.
      *
      * @param providerId The id of the provider.
@@ -58,13 +77,47 @@ contract IdentityCoordinator is NeedsAbacus {
         if (!kernel.transferTokensFrom(msg.sender, owner, cost)) {
             return false;
         }
+        // Ensure that the request id is "unique"
+        if (requestIds[msg.sender][requestId]) {
+            return false;
+        }
         IdentityVerificationRequested(
             providerId,
             providerRegistry.latestProviderVersion(providerId),
             msg.sender,
             args,
             cost,
-            requestToken
+            requestId
+        );
+        requestIds[msg.sender][requestId] = true;
+        return true;
+    }
+
+    /**
+     * @dev Called by the identity provider when it completes its service.
+     *
+     * @param providerId The provider id.
+     * @param user The address of the user getting verified.
+     * @param requestId An arbitrary id to link the request to the off-chain database.
+     */
+    function onVerificationCompleted(
+        uint256 providerId,
+        address user,
+        uint256 requestId
+    ) external returns (bool)
+    {
+        // Ensure requester is the provider owner
+        if (msg.sender != providerRegistry.providerOwner(providerId)) {
+            return false;
+        }
+        // Ensure request exists
+        if (!requestIds[msg.sender][requestId]) {
+            return false;
+        }
+        IdentityVerificationPerformed(
+            providerId,
+            user,
+            requestId
         );
     }
 

@@ -2,23 +2,33 @@ pragma solidity ^0.4.19;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../provider/Upgradable.sol";
+import "../identity/IdentityCoordinator.sol";
 
 contract IdentityProvider is Upgradable {
-    function getBoolField(address user, string field) view external returns (bool);
+    IdentityCoordinator identityCoordinator;
 
-    function getInt256Field(address user, string field) view external returns (int256);
+    function IdentityProvider(
+        IdentityCoordinator _identityCoordinator
+    ) public
+    {
+        identityCoordinator = _identityCoordinator;
+    }
 
-    function getUint256Field(address user, string field) view external returns (uint256);
+    function getBoolField(address user, uint256 fieldId) view external returns (bool);
 
-    function getFixedField(address user, string field) view external returns (fixed);
+    function getInt256Field(address user, uint256 fieldId) view external returns (int256);
 
-    function getUfixedField(address user, string field) view external returns (ufixed);
+    function getUint256Field(address user, uint256 fieldId) view external returns (uint256);
 
-    function getAddressField(address user, string field) view external returns (address);
+    function getFixedField(address user, uint256 fieldId) view external returns (fixed);
 
-    function getBytes32Field(address user, string field) view external returns (bytes32);
+    function getUfixedField(address user, uint256 fieldId) view external returns (ufixed);
 
-    function getBytesField(address user, string field) view external returns (bytes);
+    function getAddressField(address user, uint256 fieldId) view external returns (address);
 
-    function getStringField(address user, string field) view external returns (string);
+    function getBytes32Field(address user, uint256 fieldId) view external returns (bytes32);
+
+    function getBytesField(address user, uint256 fieldId) view external returns (bytes);
+
+    function getStringField(address user, uint256 fieldId) view external returns (string);
 }
