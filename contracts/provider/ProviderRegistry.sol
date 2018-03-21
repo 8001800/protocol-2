@@ -64,7 +64,7 @@ contract ProviderRegistry {
     /**
      * @dev The id of next provider registered. This ensures that provider ids are unique.
      */
-    uint256 nextProviderId = 0;
+    uint256 nextProviderId = 1;
 
     /**
      * @dev Registers a new provider.
@@ -77,7 +77,7 @@ contract ProviderRegistry {
         string name,
         string metadata,
         address owner
-    ) external
+    ) external returns (uint256)
     {
         uint256 providerId = nextProviderId++;
         providers[providerId][1] = ProviderInfo({
@@ -94,6 +94,7 @@ contract ProviderRegistry {
             owner: owner,
             version: 1
         });
+        return providerId;
     }
 
     function getLatestProvider(

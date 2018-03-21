@@ -1,15 +1,15 @@
 pragma solidity ^0.4.19;
 
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "../provider/Upgradable.sol";
+import "../provider/Provider.sol";
 import "../identity/IdentityCoordinator.sol";
 
-contract IdentityProvider is Upgradable {
+contract IdentityProvider is Provider {
     IdentityCoordinator identityCoordinator;
 
     function IdentityProvider(
-        IdentityCoordinator _identityCoordinator
-    ) public
+        IdentityCoordinator _identityCoordinator,
+        uint256 providerId
+    ) Provider(identityCoordinator.providerRegistry(), providerId) public
     {
         identityCoordinator = _identityCoordinator;
     }

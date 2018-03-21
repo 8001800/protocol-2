@@ -7,7 +7,7 @@ contract NeedsAbacus is Ownable {
     /**
      * Address of the Abacus kernel.
      */
-    AbacusKernel kernel = AbacusKernel(address(0));
+    AbacusKernel public kernel = AbacusKernel(address(0));
 
     function setKernel(AbacusKernel _kernel) onlyOwner external {
         require(kernel == address(0));

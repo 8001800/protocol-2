@@ -1,12 +1,12 @@
 pragma solidity ^0.4.19;
 
-import "../provider/Upgradable.sol";
+import "../provider/Provider.sol";
 
 /**
  * @title ComplianceStandard
  * @dev An on-chain Compliance Provider.
  */
-contract ComplianceStandard is Upgradable {
+contract ComplianceStandard is Provider {
   /**
    * @dev Checks to see if an action is compliant.
    *
