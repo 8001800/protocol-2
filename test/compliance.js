@@ -34,6 +34,15 @@ contract("ComplianceCoordinator", accounts => {
       id.toString()
     );
 
-    console.log(accounts.length);
+    // Authorize account 2 on list standard
+    await standard.allow(accounts[2]);
+
+    await token.transfer(accounts[1], 10);
+    await token.transfer(accounts[2], 10);
+    const balance1 = await token.balanceOf(accounts[1]);
+    const balance2 = await token.balanceOf(accounts[2]);
+
+    assert.equal(balance1, 0);
+    assert.equal(balance2, 10);
   });
 });
