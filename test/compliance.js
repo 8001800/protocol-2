@@ -1,6 +1,6 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const ComplianceStandardToken = artifacts.require("ComplianceStandardToken");
+const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const { promisify } = require("es6-promisify");
 
@@ -29,7 +29,7 @@ contract("ComplianceCoordinator", accounts => {
     assert.equal(events[0].args.owner, owner);
 
     // Create token using list standard
-    const token = await ComplianceStandardToken.new(
+    const token = await SampleCompliantToken.new(
       complianceCoordinator.address,
       id.toString()
     );
@@ -42,7 +42,7 @@ contract("ComplianceCoordinator", accounts => {
     const balance1 = await token.balanceOf(accounts[1]);
     const balance2 = await token.balanceOf(accounts[2]);
 
-    assert.equal(balance1, 0);
-    assert.equal(balance2, 10);
+    assert.equal(balance1.toNumber(), 0);
+    assert.equal(balance2.toNumber(), 10);
   });
 });
