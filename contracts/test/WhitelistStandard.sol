@@ -11,11 +11,13 @@ contract WhitelistStandard is ComplianceStandard {
 
   uint8 constant E_UNWHITELISTED = 1;
   uint256 operations = 0;
+  uint256 delegateProviderId;
 
   function WhitelistStandard(
-    ProviderRegistry _providerRegistry, uint256 _providerId
+    ProviderRegistry _providerRegistry, uint256 _providerId, uint256 _delegateProviderId
   ) Provider(_providerRegistry, _providerId) public
   {
+    delegateProviderId = _delegateProviderId;
     allowed[msg.sender] = true;
   }
 
@@ -32,7 +34,7 @@ contract WhitelistStandard is ComplianceStandard {
  ) view external returns (uint8, uint256)
   {
     if (allowed[from] && allowed[to]) {
-      return (0, 0);
+      return (0, delegateProviderId);
     } else {
       return (E_UNWHITELISTED, 0);
     }
