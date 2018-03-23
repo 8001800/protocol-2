@@ -17,16 +17,12 @@ contract("ComplianceCoordinator", accounts => {
 
   it("should ensure registry and compliance", async () => {
     const standard = await WhitelistStandard.new(providerRegistry.address, 0);
-    const registerTx = await standard.registerProvider("Whitelist", "");
+    const regReceipt = await standard.registerProvider("Whitelist", "");
 
-    const events = await promisify(cb =>
-      providerRegistry.ProviderInfoUpdate().get(cb)
-    )();
     const id = await standard.providerId();
     const owner = await providerRegistry.providerOwner(id);
 
-    // Ensure owner is same
-    assert.equal(events[0].args.owner, owner);
+    assert.equal(standard.address, owner);
 
     // Create token using list standard
     const token = await SampleCompliantToken.new(
@@ -37,12 +33,47 @@ contract("ComplianceCoordinator", accounts => {
     // Authorize account 2 on list standard
     await standard.allow(accounts[2]);
 
-    await token.transfer(accounts[1], 10);
-    await token.transfer(accounts[2], 10);
+    const { logs: acc1XferLogs } = await token.transfer(accounts[1], 10);
+    assert.equal(acc1XferLogs.length, 0);
+
+    const { logs: acc2XferLogs } = await token.transfer(accounts[2], 10);
+    assert.equal(acc2XferLogs.length, 1);
+    assert.equal(acc2XferLogs[0].event, "Transfer");
+    assert.equal(acc2XferLogs[0].args.to, accounts[2]);
+    assert.equal(acc2XferLogs[0].args.value.toNumber(), 10);
+
     const balance1 = await token.balanceOf(accounts[1]);
     const balance2 = await token.balanceOf(accounts[2]);
 
     assert.equal(balance1.toNumber(), 0);
     assert.equal(balance2.toNumber(), 10);
+
+    const complianceCheckPerformedEvents = await promisify(cb =>
+      complianceCoordinator
+        .ComplianceCheckPerformed({}, { fromBlock: 0, toBlock: "latest" })
+        .get(cb)
+    )();
+
+    assert.equal(complianceCheckPerformedEvents.length, 2);
+
+    // first xfer is blocked
+    assert.equal(
+      complianceCheckPerformedEvents[0].args.providerId.toNumber(),
+      id.toNumber()
+    );
+    assert.equal(
+      complianceCheckPerformedEvents[0].args.checkResult.toNumber(),
+      1
+    );
+
+    // second xfer is permitted
+    assert.equal(
+      complianceCheckPerformedEvents[1].args.providerId.toNumber(),
+      id.toNumber()
+    );
+    assert.equal(
+      complianceCheckPerformedEvents[1].args.checkResult.toNumber(),
+      0
+    );
   });
 });

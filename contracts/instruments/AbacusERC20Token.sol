@@ -21,14 +21,18 @@ contract AbacusERC20Token is StandardToken, AbacusInstrument {
     }
 
     function transfer(address to, uint256 value) public returns (bool) {
-        if (complianceCoordinator.check(complianceProviderId, this, value, msg.sender, to, 0) != 0) {
+        uint8 checkResult;
+        (checkResult,) = complianceCoordinator.hardCheck(complianceProviderId, this, value, msg.sender, to, 0);
+        if (checkResult != 0) {
             return false;
         }
         return super.transfer(to, value);
     }
 
     function transferFrom(address from, address to, uint256 value) public returns (bool) {
-        if (complianceCoordinator.check(complianceProviderId, this, value, from, to, 0) != 0) {
+        uint8 checkResult;
+        (checkResult,) = complianceCoordinator.hardCheck(complianceProviderId, this, value, from, to, 0);
+        if (checkResult != 0) {
             return false;
         }
         return super.transferFrom(from, to, value);

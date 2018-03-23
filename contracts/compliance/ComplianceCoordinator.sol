@@ -329,15 +329,16 @@ contract ComplianceCoordinator is AbacusCoordinator {
         address from,
         address to,
         bytes32 data
-    ) view public returns (uint8)
+    ) view public returns (uint8, uint256)
     {
+        uint8 checkResult;
         address owner;
         bool hasMetadata;
         (,,, owner,, hasMetadata) = providerRegistry.latestProvider(providerId);
 
         // Async checks
         if (hasMetadata) {
-            return checkAsync(
+            checkResult = checkAsync(
                 providerId,
                 instrumentAddr,
                 instrumentIdOrAmt,
@@ -345,12 +346,15 @@ contract ComplianceCoordinator is AbacusCoordinator {
                 to,
                 data
             );
+            if (checkResult != 0) {
+                return (checkResult, providerId);
+            }
+            return (checkResult, 0);
         }
 
         // Sync checks
         ComplianceStandard standard = ComplianceStandard(owner);
 
-        uint8 checkResult;
         uint256 nextProviderId;
         (checkResult, nextProviderId) = standard.check(
             instrumentAddr,
@@ -362,7 +366,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
 
         if (nextProviderId != 0) {
             // recursively check next service
-            checkResult = check(
+            (checkResult, nextProviderId) = check(
                 nextProviderId,
                 instrumentAddr,
                 instrumentIdOrAmt,
@@ -371,7 +375,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
                 data
             );
         }
-        return checkResult;
+        return (checkResult, nextProviderId);
     }
 
     uint8 constant E_CHECK_INSTRUMENT_WRONG_SENDER = 140;
