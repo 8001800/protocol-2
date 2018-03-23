@@ -15,7 +15,7 @@ contract("ComplianceCoordinator", accounts => {
     );
   });
 
-  it("should allow registry", async () => {
+  it("should ensure registry and compliance", async () => {
     const standard = await WhitelistStandard.new(providerRegistry.address, 0);
     const registerTx = await standard.registerProvider("Whitelist", "");
 
