@@ -5,6 +5,7 @@ const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 const { promisify } = require("es6-promisify");
+const BigNumber = require("bignumber.js");
 
 contract("ComplianceCoordinator", accounts => {
   let providerRegistry = null;
@@ -26,6 +27,7 @@ contract("ComplianceCoordinator", accounts => {
     );
 
     await complianceCoordinator.setKernel(kernel.address);
+    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
 
   it("should ensure registry and compliance", async () => {

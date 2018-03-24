@@ -136,7 +136,6 @@ contract ComplianceCoordinator is AbacusCoordinator {
         if (!kernel.transferTokensFrom(msg.sender, owner, cost)) {
             return false;
         }
-        return true;
         ComplianceCheckRequested(
             providerId,
             providerRegistry.latestProviderVersion(providerId),
