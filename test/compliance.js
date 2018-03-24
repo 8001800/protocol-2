@@ -2,17 +2,30 @@ const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
+const AbacusToken = artifacts.require("AbacusToken");
+const AbacusKernel = artifacts.require("AbacusKernel");
 const { promisify } = require("es6-promisify");
 
 contract("ComplianceCoordinator", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
+  let aba = null;
+  let kernel = null;
 
   beforeEach(async () => {
     providerRegistry = await ProviderRegistry.new();
     complianceCoordinator = await ComplianceCoordinator.new(
       providerRegistry.address
     );
+    aba = await AbacusToken.new();
+    kernel = await AbacusKernel.new(
+      aba.address,
+      complianceCoordinator.address,
+      0,
+      providerRegistry.address
+    );
+
+    await complianceCoordinator.setKernel(kernel.address);
   });
 
   it("should ensure registry and compliance", async () => {
@@ -197,5 +210,67 @@ contract("ComplianceCoordinator", accounts => {
       complianceCheckPerformedEvents[4].args.checkResult.toNumber(),
       1
     );
+  });
+
+  it("should support off-chain checks", async () => {
+    // Create off chain standard
+    const { logs } = await providerRegistry.registerProvider(
+      "Ian",
+      "some sort of ipfs hash",
+      accounts[0]
+    );
+    const id = logs[0].args.id;
+    const owner = await providerRegistry.providerOwner(id);
+    assert.equal(accounts[0], owner);
+
+    // Create token using list standard
+    const token = await SampleCompliantToken.new(
+      complianceCoordinator.address,
+      id.toString()
+    );
+
+    const params = {
+      instrumentAddr: token.address,
+      instrumentIdOrAmt: 10,
+      from: accounts[0],
+      to: accounts[1]
+    };
+
+    // This should be blocked.
+    const { logs: acc1XferLogs } = await token.transfer(accounts[1], 10);
+    assert.equal(acc1XferLogs.length, 0);
+
+    // Make a request
+    const { logs: requestCheckLogs } = await complianceCoordinator.requestCheck(
+      id,
+      params.instrumentAddr,
+      params.instrumentIdOrAmt,
+      params.from,
+      params.to,
+      [],
+      10
+    );
+    return;
+
+    assert.equal(requestCheckLogs.length, 1);
+    assert.equal(requestCheckLogs[0].event, "ComplianceCheckRequested");
+    assert.equal(requestCheckLogs[0].args.cost.toNumber(), 10);
+
+    const {
+      logs: writeCheckLogs
+    } = await complianceCoordinator.writeCheckResult(
+      id,
+      1,
+      params.instrumentAddr,
+      params.instrumentIdOrAmt,
+      params.from,
+      params.to,
+      [],
+      0
+    );
+
+    assert.equal(writeCheckLogs.length, 1);
+    assert.equal(writeCheckLogs[0].event, "ComplianceCheckResultWritten");
+    assert.equal(writeCheckLogs[0].args.checkResult.toNumber(), 0);
   });
 });
