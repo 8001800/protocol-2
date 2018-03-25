@@ -219,11 +219,11 @@ contract("ComplianceCoordinator", accounts => {
     const { logs } = await providerRegistry.registerProvider(
       "Ian",
       "some sort of ipfs hash",
-      accounts[0]
+      accounts[3]
     );
     const id = logs[0].args.id;
     const owner = await providerRegistry.providerOwner(id);
-    assert.equal(accounts[0], owner);
+    assert.equal(accounts[3], owner);
 
     // Create token using list standard
     const token = await SampleCompliantToken.new(
@@ -235,7 +235,8 @@ contract("ComplianceCoordinator", accounts => {
       instrumentAddr: token.address,
       instrumentIdOrAmt: 10,
       from: accounts[0],
-      to: accounts[1]
+      to: accounts[1],
+      cost: 10
     };
 
     // This should be blocked.
@@ -250,13 +251,12 @@ contract("ComplianceCoordinator", accounts => {
       params.from,
       params.to,
       [],
-      10
+      params.cost
     );
-    return;
 
     assert.equal(requestCheckLogs.length, 1);
     assert.equal(requestCheckLogs[0].event, "ComplianceCheckRequested");
-    assert.equal(requestCheckLogs[0].args.cost.toNumber(), 10);
+    assert.equal(requestCheckLogs[0].args.cost.toNumber(), params.cost);
 
     const {
       logs: writeCheckLogs
@@ -267,14 +267,31 @@ contract("ComplianceCoordinator", accounts => {
       params.instrumentIdOrAmt,
       params.from,
       params.to,
-      [],
+      0, // no data
       999999999,
-      0
+      0,
+      { from: accounts[3] }
     );
 
     assert.equal(writeCheckLogs.length, 1);
     assert.equal(writeCheckLogs[0].event, "ComplianceCheckResultWritten");
     assert.equal(writeCheckLogs[0].args.checkResult.toNumber(), 0);
+    assert.equal(await aba.balanceOf(accounts[3]), params.cost);
+
+    // Test transfer is allowed
+    const { logs: acc1XferLogsSuccess } = await token.transfer(
+      accounts[1],
+      params.instrumentIdOrAmt
+    );
+    assert.equal(acc1XferLogsSuccess.length, 1);
+    assert.equal(acc1XferLogsSuccess[0].event, "Transfer");
+
+    // Second transfer should fail, since check result is consumed
+    const { logs: acc1XferLogsSuccess2 } = await token.transfer(
+      accounts[1],
+      params.instrumentIdOrAmt
+    );
+    assert.equal(acc1XferLogsSuccess2.length, 0);
   });
 
   it("should error on nonexistent provider", async () => {

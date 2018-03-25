@@ -290,7 +290,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         address from,
         address to,
         bytes32 data
-    ) view private returns (uint8)
+    ) view private returns (uint8, uint256)
     {
         uint256 actionId = computeActionId(
             providerId,
@@ -305,15 +305,15 @@ contract ComplianceCoordinator is AbacusCoordinator {
 
         // Check that the status check has been performed.
         if (status.blockToExpire == 0) {
-            return E_CASYNC_CHECK_NOT_PERFORMED;
+            return (E_CASYNC_CHECK_NOT_PERFORMED, 0);
         }
 
         // Check that the status check has not expired. 
         if (status.blockToExpire <= block.number) {
-            return E_CASYNC_CHECK_NOT_EXPIRED;
+            return (E_CASYNC_CHECK_NOT_EXPIRED, 0);
         }
 
-        return status.checkResult;
+        return (status.checkResult, actionId);
     }
 
     /**
@@ -335,7 +335,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
 
         // Async checks
         if (hasMetadata) {
-            checkResult = checkAsync(
+            (checkResult,) = checkAsync(
                 providerId,
                 instrumentAddr,
                 instrumentIdOrAmt,
@@ -399,9 +399,12 @@ contract ComplianceCoordinator is AbacusCoordinator {
 
         uint8 checkResult;
 
+        // This variable is used for two purposes to save on stack space.
+        uint256 nextProviderIdOrActionId;
+
         // Async checks
         if (hasMetadata) {
-            checkResult = checkAsync(
+            (checkResult, nextProviderIdOrActionId) = checkAsync(
                 providerId,
                 instrumentAddr,
                 instrumentIdOrAmt,
@@ -423,15 +426,15 @@ contract ComplianceCoordinator is AbacusCoordinator {
             if (checkResult != 0) {
                 return (checkResult, providerId);
             }
+            // Invalidate status if successful check.
+            delete statuses[nextProviderIdOrActionId];
             return (checkResult, 0);
         }
 
         // Sync checks
         ComplianceStandard standard = ComplianceStandard(owner);
 
-        checkResult;
-        uint256 nextProviderId;
-        (checkResult, nextProviderId) = standard.check(
+        (checkResult, nextProviderIdOrActionId) = standard.check(
             instrumentAddr,
             instrumentIdOrAmt,
             from,
@@ -456,13 +459,13 @@ contract ComplianceCoordinator is AbacusCoordinator {
             to,
             data,
             checkResult,
-            nextProviderId
+            nextProviderIdOrActionId
         );
 
-        if (nextProviderId != 0) {
+        if (nextProviderIdOrActionId != 0) {
             // recursively check next service
-            (checkResult, nextProviderId) = hardCheck(
-                nextProviderId,
+            (checkResult, nextProviderIdOrActionId) = hardCheck(
+                nextProviderIdOrActionId,
                 instrumentAddr,
                 instrumentIdOrAmt,
                 from,
@@ -470,6 +473,6 @@ contract ComplianceCoordinator is AbacusCoordinator {
                 data
             );
         }
-        return (checkResult, nextProviderId);
+        return (checkResult, nextProviderIdOrActionId);
     }
 }
