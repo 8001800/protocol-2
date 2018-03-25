@@ -8,6 +8,7 @@
   "scripts": {
     "clean": "rm -fr build/",
     "compile": "truffle compile",
+    "test": "npm run clean && truffle test",
     "lint": "solium -d contracts --fix"
   },
   "dependencies": {
