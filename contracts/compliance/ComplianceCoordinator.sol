@@ -148,10 +148,6 @@ contract ComplianceCoordinator is AbacusCoordinator {
         );
     }
 
-    uint8 constant E_RESULT_SERVICE_NOT_FOUND = 1;
-    uint8 constant E_RESULT_UNAUTHORIZED = 2;
-    uint8 constant E_RESULT_VERSION_MISMATCH = 3;
-
     /**
      * @dev Writes the result of an asynchronous compliance check to the blockchain.
      *
@@ -175,24 +171,24 @@ contract ComplianceCoordinator is AbacusCoordinator {
         bytes32 data,
         uint256 blockToExpire,
         uint8 checkResult
-    ) external returns (uint8)
+    ) external returns (bool)
     {
-        // Check provider version is correct
-        if (providerRegistry.latestProviderVersion(providerId) != providerVersion) {
-            return E_RESULT_VERSION_MISMATCH;
-        }
-
         uint256 id;
         address owner;
-        (id,,, owner,,) = providerRegistry.latestProvider(providerId);
+        uint256 version;
+        (id,,, owner,version,) = providerRegistry.latestProvider(providerId);
 
         // Check service exists
         if (id == 0) {
-            return E_RESULT_SERVICE_NOT_FOUND;
+            return false;
+        }
+        // Check provider version is correct
+        if (version != providerVersion) {
+            return false;
         }
         // Check service owner is correct
         if (owner != msg.sender) {
-            return E_RESULT_UNAUTHORIZED;
+            return false;
         }
 
         uint256 actionId = computeActionId(
@@ -220,6 +216,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
             blockToExpire,
             checkResult
         );
+        return true;
     }
 
     /**

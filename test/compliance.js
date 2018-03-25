@@ -268,11 +268,110 @@ contract("ComplianceCoordinator", accounts => {
       params.from,
       params.to,
       [],
+      999999999,
       0
     );
 
     assert.equal(writeCheckLogs.length, 1);
     assert.equal(writeCheckLogs[0].event, "ComplianceCheckResultWritten");
     assert.equal(writeCheckLogs[0].args.checkResult.toNumber(), 0);
+  });
+
+  it("should error on nonexistent provider", async () => {
+    const params = {
+      instrumentAddr: accounts[0], // doesn't matter
+      instrumentIdOrAmt: 10,
+      from: accounts[0],
+      to: accounts[1]
+    };
+
+    const {
+      logs: writeCheckLogs
+    } = await complianceCoordinator.writeCheckResult(
+      1, // nonexistent id
+      0, // arbitrary version (shouldn't matter)
+      params.instrumentAddr,
+      params.instrumentIdOrAmt,
+      params.from,
+      params.to,
+      [],
+      999999999,
+      0
+    );
+
+    assert.equal(writeCheckLogs.length, 0);
+  });
+
+  it("should error on incorrect provider version", async () => {
+    // Create off chain standard
+    const { logs } = await providerRegistry.registerProvider(
+      "Ian",
+      "some sort of ipfs hash",
+      accounts[0]
+    );
+    const id = logs[0].args.id;
+    const owner = await providerRegistry.providerOwner(id);
+    assert.equal(accounts[0], owner);
+
+    const params = {
+      instrumentAddr: accounts[0], // doesn't matter
+      instrumentIdOrAmt: 10,
+      from: accounts[0],
+      to: accounts[1]
+    };
+
+    const {
+      logs: writeCheckLogs
+    } = await complianceCoordinator.writeCheckResult(
+      id,
+      42, // wrong version
+      params.instrumentAddr,
+      params.instrumentIdOrAmt,
+      params.from,
+      params.to,
+      [],
+      999999999,
+      0
+    );
+
+    assert.equal(writeCheckLogs.length, 0);
+  });
+
+  it("should error on incorrect service owner", async () => {
+    // Create off chain standard
+    const { logs } = await providerRegistry.registerProvider(
+      "Ian",
+      "some sort of ipfs hash",
+      accounts[0]
+    );
+    const id = logs[0].args.id;
+    const owner = await providerRegistry.providerOwner(id);
+    assert.equal(accounts[0], owner);
+
+    const params = {
+      instrumentAddr: accounts[0], // doesn't matter
+      instrumentIdOrAmt: 10,
+      from: accounts[0],
+      to: accounts[1]
+    };
+
+    const {
+      logs: writeCheckLogs
+    } = await complianceCoordinator.writeCheckResult(
+      id,
+      1, // current version of provider
+      params.instrumentAddr,
+      params.instrumentIdOrAmt,
+      params.from,
+      params.to,
+      [],
+      999999999,
+      0,
+      {
+        from: accounts[1] // wrong owner
+      }
+    );
+
+    assert.equal(writeCheckLogs.length, 0);
   });
 });
