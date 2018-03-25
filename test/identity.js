@@ -58,6 +58,7 @@ contract("IdentityCoordinator", accounts => {
       { from: accounts[3] }
     );
     assert.equal(reqLogs.length, 1);
+    assert.equal(reqLogs[0].args.requestId, requestId);
 
     await identityProvider.addPassing(accounts[3], requestId);
     const allowed = await identityProvider.getBoolField(
