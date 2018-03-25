@@ -111,14 +111,16 @@ contract IdentityCoordinator is AbacusCoordinator {
             return false;
         }
         // Ensure request exists
-        if (!requestIds[msg.sender][requestId]) {
+        if (!requestIds[user][requestId]) {
             return false;
         }
+        delete requestIds[user][requestId];
         IdentityVerificationPerformed(
             providerId,
             user,
             requestId
         );
+        return true;
     }
 
 }

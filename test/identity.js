@@ -37,23 +37,53 @@ contract("IdentityCoordinator", accounts => {
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
 
-  it("should not update the identity if no request", async () => {
+  it("should update the identity if request exists", async () => {
     const identityProvider = await BooleanIdentityProvider.new(
       identityCoordinator.address,
       0
     );
-    return;
     await identityProvider.registerProvider(
       "Boolean",
       "http://identity.abacusprotocol.com"
     );
 
-    await identityProvider.addPassing(accounts[3]);
+    const requestId = 1289479214;
+    const cost = 0;
+
+    const { logs: reqLogs } = await identityCoordinator.requestVerification(
+      await identityProvider.providerId(),
+      "",
+      cost,
+      requestId,
+      { from: accounts[3] }
+    );
+    assert.equal(reqLogs.length, 1);
+
+    await identityProvider.addPassing(accounts[3], requestId);
     const allowed = await identityProvider.getBoolField(
       accounts[3],
       await identityProvider.FIELD_PASSES()
     );
 
-    assert.false(allowed, "Should not pass since verification is incomplete");
+    assert(allowed, "Should be allowed in identity provider");
+  });
+
+  it("should not update the identity if no request", async () => {
+    const identityProvider = await BooleanIdentityProvider.new(
+      identityCoordinator.address,
+      0
+    );
+    await identityProvider.registerProvider(
+      "Boolean",
+      "http://identity.abacusprotocol.com"
+    );
+
+    await identityProvider.addPassing(accounts[3], 123);
+    const allowed = await identityProvider.getBoolField(
+      accounts[3],
+      await identityProvider.FIELD_PASSES()
+    );
+
+    assert(!allowed, "Should not pass since verification is incomplete");
   });
 });
