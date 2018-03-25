@@ -9,26 +9,36 @@ contract IdentityProvider is Provider {
     function IdentityProvider(
         IdentityCoordinator _identityCoordinator,
         uint256 providerId
-    ) Provider(identityCoordinator.providerRegistry(), providerId) public
+    ) Provider(_identityCoordinator.providerRegistry(), providerId) public
     {
         identityCoordinator = _identityCoordinator;
     }
 
-    function getBoolField(address user, uint256 fieldId) view external returns (bool);
+    function getBoolField(address user, uint256 fieldId) view external returns (bool) {
+        assert(false);
+    }
 
-    function getInt256Field(address user, uint256 fieldId) view external returns (int256);
+    function getInt256Field(address user, uint256 fieldId) view external returns (int256) {
+        assert(false);
+    }
 
-    function getUint256Field(address user, uint256 fieldId) view external returns (uint256);
+    function getUint256Field(address user, uint256 fieldId) view external returns (uint256) {
+        assert(false);
+    }
 
-    function getFixedField(address user, uint256 fieldId) view external returns (fixed);
+    function getAddressField(address user, uint256 fieldId) view external returns (address) {
+        assert(false);
+    }
 
-    function getUfixedField(address user, uint256 fieldId) view external returns (ufixed);
+    function getBytes32Field(address user, uint256 fieldId) view external returns (bytes32) {
+        assert(false);
+    }
 
-    function getAddressField(address user, uint256 fieldId) view external returns (address);
+    function getBytesField(address user, uint256 fieldId) view external returns (bytes) {
+        assert(false);
+    }
 
-    function getBytes32Field(address user, uint256 fieldId) view external returns (bytes32);
-
-    function getBytesField(address user, uint256 fieldId) view external returns (bytes);
-
-    function getStringField(address user, uint256 fieldId) view external returns (string);
+    function getStringField(address user, uint256 fieldId) view external returns (string) {
+        assert(false);
+    }
 }
