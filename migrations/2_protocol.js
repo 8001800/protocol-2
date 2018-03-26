@@ -11,6 +11,7 @@ module.exports = async deployer => {
   await deployer.deploy(AbacusToken);
   await deployer.deploy(
     AbacusKernel,
+    AbacusToken.address,
     ComplianceCoordinator.address,
     IdentityCoordinator.address,
     ProviderRegistry.address
