@@ -9,23 +9,26 @@ import "./AbacusToken.sol";
  */
 contract AbacusKernel {
   AbacusToken public token;
+  address public providerRegistry;
+
   address public complianceCoordinator;
   address public identityCoordinator;
-  address public providerRegistry;
 
   mapping (address => bool) coordinators;
 
   function AbacusKernel(
     AbacusToken _token,
+    address _providerRegistry,
+
     address _complianceCoordinator,
-    address _identityCoordinator,
-    address _providerRegistry
+    address _identityCoordinator
   ) public
   {
     token = _token;
+    providerRegistry = _providerRegistry;
+
     complianceCoordinator = _complianceCoordinator;
     identityCoordinator = _identityCoordinator;
-    providerRegistry = _providerRegistry;
 
     coordinators[complianceCoordinator] = coordinators[identityCoordinator] = true;
   }

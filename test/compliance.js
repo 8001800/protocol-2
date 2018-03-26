@@ -1,5 +1,6 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
+const IdentityCoordinator = artifacts.require("IdentityCoordinator");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
@@ -10,6 +11,7 @@ const BigNumber = require("bignumber.js");
 contract("ComplianceCoordinator", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
+  let identityCoordinator = null;
   let aba = null;
   let kernel = null;
 
@@ -18,15 +20,19 @@ contract("ComplianceCoordinator", accounts => {
     complianceCoordinator = await ComplianceCoordinator.new(
       providerRegistry.address
     );
+    identityCoordinator = await IdentityCoordinator.new(
+      providerRegistry.address
+    );
     aba = await AbacusToken.new();
     kernel = await AbacusKernel.new(
       aba.address,
+      providerRegistry.address,
       complianceCoordinator.address,
-      0,
-      providerRegistry.address
+      identityCoordinator.address
     );
 
     await complianceCoordinator.setKernel(kernel.address);
+    await identityCoordinator.setKernel(kernel.address);
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
 

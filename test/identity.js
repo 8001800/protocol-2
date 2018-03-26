@@ -27,9 +27,9 @@ contract("IdentityCoordinator", accounts => {
     aba = await AbacusToken.new();
     kernel = await AbacusKernel.new(
       aba.address,
+      providerRegistry.address,
       complianceCoordinator.address,
-      identityCoordinator.address,
-      providerRegistry.address
+      identityCoordinator.address
     );
 
     await complianceCoordinator.setKernel(kernel.address);
