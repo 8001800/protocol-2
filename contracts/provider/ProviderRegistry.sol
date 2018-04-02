@@ -123,15 +123,16 @@ contract ProviderRegistry {
     /**
      * @dev Upgrades a provider, changing its metadata and owner.
      *
+     * @param providerId See ProviderInfo docs.
      * @param metadata See ProviderInfo docs.
      * @param owner See ProviderInfo docs.
      */
     function upgradeProvider(
+        uint256 providerId,
         string metadata,
         address owner
     ) external returns (bool)
     {
-        uint256 providerId = nextProviderId++;
         ProviderInfo storage info = getLatestProvider(providerId);
         // Check if the provider existed
         if (info.version == 1) {
