@@ -28,20 +28,20 @@ module.exports = async deployer => {
   await identity.setKernel(AbacusKernel.address);
 
   // TEST stuff
-  const identityProvider = await deployer.deploy(
-    BooleanIdentityProvider,
+  const identityProvider = await BooleanIdentityProvider.new(
     IdentityCoordinator.address,
     0
   );
   await identityProvider.registerProvider("Boolean", "");
-  const providerId = await identityProvider.providerId();
-  console.log("Identity provider id:", providerId.toString());
+  const identityProviderId = await identityProvider.providerId();
+  console.log("Identity provider id:", identityProviderId.toString());
 
-  const cs = await deployer.deploy(
-    BooleanIdentityComplianceStandard,
-    IdentityCoordinator.address,
-    providerId
+  const cs = await BooleanIdentityComplianceStandard.new(
+    ProviderRegistry.address,
+    0,
+    identityProviderId
   );
+  await cs.registerProvider("BooleanIdentity", "");
   const csId = await cs.providerId();
   console.log("CS provider id:", csId.toString());
 };
