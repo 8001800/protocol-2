@@ -52,7 +52,7 @@ contract Provider is Ownable {
         string nextMetadata, address nextProvider
     ) onlyOwner external returns (bool)
     {
-        return providerRegistry.upgradeProvider(nextMetadata, nextProvider);
+        return providerRegistry.upgradeProvider(providerId, nextMetadata, nextProvider);
     }
 
 }
