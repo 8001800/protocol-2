@@ -35,6 +35,7 @@ module.exports = async deployer => {
   await identityProvider.registerProvider("Boolean", "");
   const identityProviderId = await identityProvider.providerId();
   console.log("Identity provider id:", identityProviderId.toString());
+  console.log("Identity provider address:", identityProvider.address);
 
   const cs = await BooleanIdentityComplianceStandard.new(
     ProviderRegistry.address,
@@ -44,4 +45,5 @@ module.exports = async deployer => {
   await cs.registerProvider("BooleanIdentity", "");
   const csId = await cs.providerId();
   console.log("CS provider id:", csId.toString());
+  console.log("CS address:", cs.address);
 };
