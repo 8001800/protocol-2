@@ -52,7 +52,7 @@ contract ProviderRegistry {
     }
 
     /**
-     * @dev Stores a mapping of provider id to the latest provider info.
+     * @dev Stores a mapping of provider id => provider version => provider info.
      */
     mapping (uint256 => mapping (uint256 => ProviderInfo)) public providers;
 
