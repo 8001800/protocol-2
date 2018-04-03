@@ -16,6 +16,24 @@ contract AbacusKernel {
 
   mapping (address => bool) coordinators;
 
+  struct Escrow {
+    address from;
+    address to;
+    uint256 cost;
+    bool locked;
+    uint256 blockExpiresAt;
+  }
+
+  /**
+   * @dev Contains mapping of escrow id to escrow.
+   */
+  mapping (uint256 => Escrow) escrows;
+
+  /**
+   * @dev The next id for an escrow.
+   */
+  uint256 nextEscrowId = 1;
+
   function AbacusKernel(
     AbacusToken _token,
     address _providerRegistry,
@@ -40,12 +58,116 @@ contract AbacusKernel {
     address from,
     address to,
     uint256 cost
-  ) external returns (bool)
+  ) public returns (bool)
   {
     if (!coordinators[msg.sender]) {
       return false;
     }
     return token.transferFrom(from, to, cost);
+  }
+
+  /**
+   * @dev Initiates an escrow of ABA between two parties.
+   * The steps of a sucessful escrow are:
+   * - begin (initiate escrow)
+   * - lock (ensure payment will be received)
+   * - redeem (retrieve payment)
+   * If at any point the receiver of the payment messes up,
+   * the payer may `revoke` the escrow and get their money back.
+   */
+  function beginEscrow(
+    address from,
+    address to,
+    uint256 cost,
+    uint256 blocksToExpiry
+  ) external returns (uint256)
+  {
+    // Only the coordinator may begin an escrow.
+    if (!transferTokensFrom(from, this, cost)) {
+      return 0;
+    }
+    uint256 escrowId = nextEscrowId++;
+    escrows[escrowId] = Escrow({
+      from: from,
+      to: to,
+      cost: cost,
+      locked: false,
+      blockExpiresAt: blocksToExpiry + block.number
+    });
+    return escrowId;
+  }
+
+  /**
+   * @dev Puts a hold on the escrow so the initiator cannot take the payment back.
+   */
+  function lockEscrow(
+    uint256 escrowId,
+    uint256 blocksToExpiry
+  ) external returns (bool) {
+    // Only the coordinator should be able to call this
+    if (!coordinators[msg.sender]) {
+      return false;
+    }
+
+    Escrow storage escrow = escrows[escrowId];
+    if (escrow.locked || escrow.blockExpiresAt <= block.number) {
+      return false;
+    }
+
+    // If not, lock it and reset expiry
+    escrow.locked = true;
+    escrow.blockExpiresAt = blocksToExpiry + block.number;
+    return true;
+  }
+
+  /**
+   * @dev Allows the receiver to withdraw the escrow payment.
+   */
+  function redeemEscrow(uint256 escrowId) external returns (bool) {
+    // Only the coordinator should be able to call this
+    if (!coordinators[msg.sender]) {
+      return false;
+    }
+
+    Escrow storage escrow = escrows[escrowId];
+    if (!escrow.locked || escrow.blockExpiresAt <= block.number) {
+      return false;
+    }
+
+    // redeem the escrow
+    if (!token.transferFrom(this, escrow.to, escrow.cost)) {
+      return false;
+    }
+
+    // forcefully expire the escrow
+    escrow.blockExpiresAt = 0;
+    return true;
+  }
+
+  /**
+   * @dev Gets the escrow payment back to the initiator if the escrow was not
+   * fulfilled.
+   */
+  function revokeEscrow(uint256 escrowId) external returns (bool) {
+    // Only the coordinator should be able to call this
+    if (!coordinators[msg.sender]) {
+      return false;
+    }
+
+    Escrow storage escrow = escrows[escrowId];
+    // don't allow revoke if escrow is locked and unexpired
+    if (escrow.locked && escrow.blockExpiresAt > block.number) {
+      return false;
+    }
+
+    // revoke the escrow
+    if (!token.transferFrom(this, escrow.from, escrow.cost)) {
+      return false;
+    }
+
+    // forcefully expire the escrow
+    escrow.blockExpiresAt = 0;
+    return true;
   }
 
 }
