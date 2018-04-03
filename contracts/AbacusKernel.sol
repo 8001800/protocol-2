@@ -58,7 +58,7 @@ contract AbacusKernel {
     address from,
     address to,
     uint256 cost
-  ) public returns (bool)
+  ) external returns (bool)
   {
     if (!coordinators[msg.sender]) {
       return false;
@@ -82,10 +82,16 @@ contract AbacusKernel {
     uint256 blocksToExpiry
   ) external returns (uint256)
   {
-    // Only the coordinator may begin an escrow.
-    if (!transferTokensFrom(from, this, cost)) {
+    // Only the coordinator should be able to call this
+    if (!coordinators[msg.sender]) {
       return 0;
     }
+
+    // Transfer tokens to the escrow
+    if (!token.transferFrom(from, this, cost)) {
+      return 0;
+    }
+
     uint256 escrowId = nextEscrowId++;
     escrows[escrowId] = Escrow({
       from: from,
