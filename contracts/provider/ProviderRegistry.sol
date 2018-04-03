@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.21;
 
 /**
  * @title ProviderRegistry
@@ -88,7 +88,7 @@ contract ProviderRegistry {
             version: 1
         });
         latestProviderVersion[providerId] = 1;
-        ProviderInfoUpdate({
+        emit ProviderInfoUpdate({
             id: providerId,
             name: name,
             metadata: metadata,
@@ -153,7 +153,7 @@ contract ProviderRegistry {
             version: nextVersion
         });
         latestProviderVersion[providerId] = nextVersion;
-        ProviderInfoUpdate({
+        emit ProviderInfoUpdate({
             id: providerId,
             name: info.name,
             metadata: metadata,
