@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Abacus Protocol Contracts",
   "repository": "git@github.com:abacusprotocol/protocol.git",
-  "author": "Abacus Team <team@abacus.market>",
+  "author": "Abacus Team <team@abacusprotocol.com>",
   "license": "MIT",
   "scripts": {
     "clean": "rm -fr build/",

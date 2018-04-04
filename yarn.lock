@@ -4950,8 +4950,8 @@ yauzl@^2.4.2:
     fd-slicer "~1.0.1"
 
 zeppelin-solidity@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/zeppelin-solidity/-/zeppelin-solidity-1.7.0.tgz#c43332926b6e84a845015c21753064eeac054df0"
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/zeppelin-solidity/-/zeppelin-solidity-1.8.0.tgz#049fcde7daea9fc85210f8c6db9f8cd1ab8a853a"
   dependencies:
     dotenv "^4.0.0"
     ethjs-abi "^0.2.1"
