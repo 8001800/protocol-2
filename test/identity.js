@@ -1,6 +1,7 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const IdentityCoordinator = artifacts.require("IdentityCoordinator");
+const IdentityDatabase = artifacts.require("IdentityDatabase");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
@@ -13,6 +14,7 @@ contract("IdentityCoordinator", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
   let identityCoordinator = null;
+  let identityDatabase = null;
   let aba = null;
   let kernel = null;
 
@@ -20,6 +22,7 @@ contract("IdentityCoordinator", accounts => {
     providerRegistry = await ProviderRegistry.deployed();
     complianceCoordinator = await ComplianceCoordinator.deployed();
     identityCoordinator = await IdentityCoordinator.deployed();
+    identityDatabase = await IdentityDatabase.deployed();
     aba = await AbacusToken.deployed();
     kernel = await AbacusKernel.deployed();
 
@@ -28,6 +31,7 @@ contract("IdentityCoordinator", accounts => {
 
   it("should update the identity if request exists", async () => {
     const identityProvider = await BooleanIdentityProvider.new(
+      identityDatabase.address,
       identityCoordinator.address,
       0
     );
@@ -50,16 +54,18 @@ contract("IdentityCoordinator", accounts => {
     assert.equal(reqLogs[0].args.requestId, requestId);
 
     await identityProvider.addPassing(accounts[3], requestId);
-    const allowed = await identityProvider.getBoolField(
+    const allowed = await identityDatabase.bytes32Data(
+      await identityProvider.providerId(),
       accounts[3],
       await identityProvider.FIELD_PASSES()
     );
 
-    assert(allowed, "Should be allowed in identity provider");
+    assert(allowed.includes("1"), "Should be allowed in identity provider");
   });
 
   it("should not update the identity if no request", async () => {
     const identityProvider = await BooleanIdentityProvider.new(
+      identityDatabase.address,
       identityCoordinator.address,
       0
     );
@@ -69,11 +75,16 @@ contract("IdentityCoordinator", accounts => {
     );
 
     await identityProvider.addPassing(accounts[3], 123);
-    const allowed = await identityProvider.getBoolField(
+    const allowed = await identityDatabase.bytes32Data(
+      await identityProvider.providerId(),
       accounts[3],
       await identityProvider.FIELD_PASSES()
     );
 
-    assert(!allowed, "Should not pass since verification is incomplete");
+    console.log(allowed);
+    assert(
+      !allowed.includes("1"),
+      "Should not pass since verification is incomplete"
+    );
   });
 });
