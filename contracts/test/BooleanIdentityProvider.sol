@@ -1,24 +1,19 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.21;
 
+import "../identity/IdentityDatabase.sol";
 import "../identity/IdentityProvider.sol";
 
 contract BooleanIdentityProvider is IdentityProvider {
     uint256 constant public FIELD_PASSES = 0x198254;
-
-    mapping (address => bool) passes;
+    IdentityDatabase identityDatabase;
 
     function BooleanIdentityProvider(
+        IdentityDatabase _identityDatabase,
         IdentityCoordinator _identityCoordinator,
         uint256 providerId
     ) IdentityProvider(_identityCoordinator, providerId) public
     {
-    }
-
-    function getBoolField(address user, uint256 fieldId) view external returns (bool) {
-        if (fieldId == FIELD_PASSES) {
-            return passes[user];
-        }
-        assert(false);
+        identityDatabase = _identityDatabase;
     }
 
     function addPassing(address user, uint256 requestId) external returns (bool) {
@@ -28,7 +23,7 @@ contract BooleanIdentityProvider is IdentityProvider {
         }
 
         // Then we make it pass.
-        passes[user] = true;
+        identityDatabase.writeBytes32Field(providerId, user, FIELD_PASSES, bytes32(1));
         return true;
     }
 
