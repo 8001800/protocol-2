@@ -97,7 +97,10 @@ contract("ComplianceCoordinator", accounts => {
       0,
       0
     );
-    await standard.registerProvider("Whitelist", "");
+    const { receipt: { blockNumber } } = await standard.registerProvider(
+      "Whitelist",
+      ""
+    );
 
     const id = await standard.providerId();
     const owner = await providerRegistry.providerOwner(id);
@@ -123,13 +126,17 @@ contract("ComplianceCoordinator", accounts => {
     );
 
     // Authorize account 2 on both standards
-    await standard.allow(accounts[2]);
+    const lol = await standard.allow(accounts[2]);
+    console.log(lol);
     await parentStandard.allow(accounts[2]);
 
     // Authorize account 3 only on parent standard
     await parentStandard.allow(accounts[3]);
 
-    const { logs: acc1XferLogs } = await token.transfer(accounts[1], 10);
+    const { logs: acc1XferLogs, ...test } = await token.transfer(
+      accounts[1],
+      10
+    );
     assert.equal(acc1XferLogs.length, 0);
 
     const { logs: acc2XferLogs } = await token.transfer(accounts[2], 10);
@@ -151,7 +158,10 @@ contract("ComplianceCoordinator", accounts => {
 
     const complianceCheckPerformedEvents = await promisify(cb =>
       complianceCoordinator
-        .ComplianceCheckPerformed({}, { fromBlock: 0, toBlock: "latest" })
+        .ComplianceCheckPerformed(
+          {},
+          { fromBlock: blockNumber, toBlock: "latest" }
+        )
         .get(cb)
     )();
 
