@@ -127,7 +127,6 @@ contract("ComplianceCoordinator", accounts => {
 
     // Authorize account 2 on both standards
     const lol = await standard.allow(accounts[2]);
-    console.log(lol);
     await parentStandard.allow(accounts[2]);
 
     // Authorize account 3 only on parent standard

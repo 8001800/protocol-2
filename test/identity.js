@@ -81,7 +81,6 @@ contract("IdentityCoordinator", accounts => {
       await identityProvider.FIELD_PASSES()
     );
 
-    console.log(allowed);
     assert(
       !allowed.includes("1"),
       "Should not pass since verification is incomplete"
