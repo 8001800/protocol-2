@@ -1,11 +1,12 @@
 const IdentityCoordinator = artifacts.require("IdentityCoordinator");
 const BooleanIdentityProvider = artifacts.require("BooleanIdentityProvider");
 
-const IDENTITY_COORDINATOR_ADDR = "0x212cb0ce7da0334166092b782f456a8ab33c9e6f";
-const BOOLEAN_IDENTITY_PROVIDER_ADDR =
-  "0x72b780c66f71e203cd50f77908854bcaffec2e86";
+const IDENTITY_COORDINATOR_ADDR = IdentityCoordinator.address;
+const BOOLEAN_IDENTITY_PROVIDER_ADDR = BooleanIdentityProvider.address;
 
-const main = async (account: string) => {
+const ACCOUNT = "0x259ddecd8542c7af8e5cb74629c405f11c866e50";
+
+const main = async account => {
   const cost = 0;
   const requestId = Math.floor(Math.random() * 1000000);
 
