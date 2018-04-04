@@ -205,7 +205,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
             blockToExpire: blockToExpire,
             checkResult: checkResult
         });
-        ComplianceCheckResultWritten(
+        emit ComplianceCheckResultWritten(
             providerId,
             providerVersion,
             instrumentAddr,
@@ -412,7 +412,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
                 to,
                 data
             );
-            ComplianceCheckPerformed(
+            emit ComplianceCheckPerformed(
                 providerId,
                 providerVersion,
                 instrumentAddr,
@@ -450,7 +450,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         );
 
         // For auditing
-        ComplianceCheckPerformed(
+        emit ComplianceCheckPerformed(
             providerId,
             providerVersion,
             instrumentAddr,

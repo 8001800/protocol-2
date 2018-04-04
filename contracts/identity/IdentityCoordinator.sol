@@ -154,7 +154,7 @@ contract IdentityCoordinator is AbacusCoordinator {
         }
 
         delete requestEscrows[user][requestId];
-        IdentityVerificationPerformed(
+        emit IdentityVerificationPerformed(
             providerId,
             user,
             requestId
