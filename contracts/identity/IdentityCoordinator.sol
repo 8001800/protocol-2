@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.21;
 
 import "../AbacusCoordinator.sol";
 import "../provider/ProviderRegistry.sol";
@@ -10,6 +10,7 @@ import "../provider/ProviderRegistry.sol";
  * services, writing the results on-chain.
  */
 contract IdentityCoordinator is AbacusCoordinator {
+    uint256 public constant VERIFICATION_EXPIRY_BLOCKS = 4 * 60 * 24;
     ProviderRegistry public providerRegistry;
 
     function IdentityCoordinator(ProviderRegistry _providerRegistry) public {
@@ -53,10 +54,10 @@ contract IdentityCoordinator is AbacusCoordinator {
     );
 
     /**
-     * @dev Mapping of user address => requestId => existence.
+     * @dev Mapping of user address => requestId => escrow.
      * Ensures no duplicate requests were sent.
      */
-    mapping (address => mapping (uint256 => bool)) requestIds;
+    mapping (address => mapping (uint256 => uint256)) requestEscrows;
 
     /**
      * @dev Requests verification of identity from a provider.
@@ -74,14 +75,18 @@ contract IdentityCoordinator is AbacusCoordinator {
     ) external returns (bool)
     {
         address owner = providerRegistry.providerOwner(providerId);
-        if (!kernel.transferTokensFrom(msg.sender, owner, cost)) {
-            return false;
-        }
         // Ensure that the request id is "unique"
-        if (requestIds[msg.sender][requestId]) {
+        if (requestEscrows[msg.sender][requestId] != 0) {
             return false;
         }
-        IdentityVerificationRequested(
+
+        uint256 escrowId = kernel.beginEscrow(msg.sender, owner, cost, VERIFICATION_EXPIRY_BLOCKS);
+        if (escrowId == 0) {
+            return false;
+        }
+        requestEscrows[msg.sender][requestId] = escrowId;
+
+        emit IdentityVerificationRequested(
             providerId,
             providerRegistry.latestProviderVersion(providerId),
             msg.sender,
@@ -89,8 +94,35 @@ contract IdentityCoordinator is AbacusCoordinator {
             cost,
             requestId
         );
-        requestIds[msg.sender][requestId] = true;
+        requestEscrows[msg.sender][requestId] = escrowId;
         return true;
+    }
+
+    function lockVerification(
+        uint256 providerId,
+        address user,
+        uint256 requestId
+    ) external returns (bool)
+    {
+        // Ensure requester is the provider owner
+        if (msg.sender != providerRegistry.providerOwner(providerId)) {
+            return false;
+        }
+        // Ensure request exists
+        uint256 escrowId = requestEscrows[user][requestId];
+        if (escrowId == 0) {
+            return false;
+        }
+        // redeem kernel escrow
+        return kernel.lockEscrow(escrowId, VERIFICATION_EXPIRY_BLOCKS);
+    }
+
+    function revokeVerification(uint256 requestId) external returns (bool) {
+        uint256 escrowId = requestEscrows[msg.sender][requestId];
+        if (escrowId == 0) {
+            return false;
+        }
+        return kernel.revokeEscrow(escrowId);
     }
 
     /**
@@ -111,10 +143,17 @@ contract IdentityCoordinator is AbacusCoordinator {
             return false;
         }
         // Ensure request exists
-        if (!requestIds[user][requestId]) {
+        uint256 escrowId = requestEscrows[user][requestId];
+        if (escrowId == 0) {
             return false;
         }
-        delete requestIds[user][requestId];
+
+        // redeem kernel escrow
+        if (!kernel.redeemEscrow(escrowId)) {
+            return false;
+        }
+
+        delete requestEscrows[user][requestId];
         IdentityVerificationPerformed(
             providerId,
             user,
