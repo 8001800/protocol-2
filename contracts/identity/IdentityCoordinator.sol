@@ -94,7 +94,7 @@ contract IdentityCoordinator is AbacusCoordinator {
             cost,
             requestId
         );
-        requestEscrows[msg.sender][requestId] = escrowId;
+
         return true;
     }
 
