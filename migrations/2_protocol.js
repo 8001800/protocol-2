@@ -1,6 +1,7 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const IdentityCoordinator = artifacts.require("IdentityCoordinator");
+const IdentityDatabase = artifacts.require("IdentityDatabase");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 
@@ -8,42 +9,61 @@ const BooleanIdentityProvider = artifacts.require("BooleanIdentityProvider");
 const BooleanIdentityComplianceStandard = artifacts.require(
   "BooleanIdentityComplianceStandard"
 );
+const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 
 module.exports = async deployer => {
-  await deployer.deploy(ProviderRegistry);
-  await deployer.deploy(ComplianceCoordinator, ProviderRegistry.address);
-  await deployer.deploy(IdentityCoordinator, ProviderRegistry.address);
-  await deployer.deploy(AbacusToken);
-  await deployer.deploy(
-    AbacusKernel,
-    AbacusToken.address,
-    ComplianceCoordinator.address,
-    IdentityCoordinator.address,
-    ProviderRegistry.address
-  );
-  const compliance = await ComplianceCoordinator.deployed();
-  await compliance.setKernel(AbacusKernel.address);
+  await deployer.deploy(ProviderRegistry).then(async () => {
+    await deployer.deploy(ComplianceCoordinator, ProviderRegistry.address);
+    await deployer.deploy(IdentityCoordinator, ProviderRegistry.address);
+    await deployer.deploy(IdentityDatabase, ProviderRegistry.address);
+    await deployer.deploy(AbacusToken);
 
-  const identity = await IdentityCoordinator.deployed();
-  await identity.setKernel(AbacusKernel.address);
+    await deployer.deploy(
+      AbacusKernel,
+      AbacusToken.address,
+      ComplianceCoordinator.address,
+      IdentityCoordinator.address,
+      ProviderRegistry.address
+    );
+    const compliance = await ComplianceCoordinator.deployed();
+    await compliance.setKernel(AbacusKernel.address);
 
-  // TEST stuff
-  const identityProvider = await BooleanIdentityProvider.new(
-    IdentityCoordinator.address,
-    0
-  );
-  await identityProvider.registerProvider("Boolean", "");
-  const identityProviderId = await identityProvider.providerId();
-  console.log("Identity provider id:", identityProviderId.toString());
-  console.log("Identity provider address:", identityProvider.address);
+    const identity = await IdentityCoordinator.deployed();
+    await identity.setKernel(AbacusKernel.address);
 
-  const cs = await BooleanIdentityComplianceStandard.new(
-    ProviderRegistry.address,
-    0,
-    identityProviderId
-  );
-  await cs.registerProvider("BooleanIdentity", "");
-  const csId = await cs.providerId();
-  console.log("CS provider id:", csId.toString());
-  console.log("CS address:", cs.address);
+    // bool identity provider
+    console.log(IdentityDatabase.address, IdentityCoordinator.address);
+    await deployer.deploy(
+      BooleanIdentityProvider,
+      IdentityDatabase.address,
+      IdentityCoordinator.address,
+      0
+    );
+    const identityProvider = await BooleanIdentityProvider.deployed();
+    await identityProvider.registerProvider("Boolean", "");
+    const identityProviderId = await identityProvider.providerId();
+    console.log("Identity provider id:", identityProviderId.toString());
+    console.log("Identity provider address:", identityProvider.address);
+
+    // bool compliance standard
+    await deployer.deploy(
+      BooleanIdentityComplianceStandard,
+      IdentityDatabase.address,
+      ProviderRegistry.address,
+      0,
+      identityProviderId
+    );
+    const cs = await BooleanIdentityComplianceStandard.deployed();
+    await cs.registerProvider("BooleanIdentity", "");
+    const csId = await cs.providerId();
+    console.log("CS provider id:", csId.toString());
+    console.log("CS address:", cs.address);
+
+    // compliant token
+    await deployer.deploy(
+      SampleCompliantToken,
+      ComplianceCoordinator.address,
+      csId
+    );
+  });
 };

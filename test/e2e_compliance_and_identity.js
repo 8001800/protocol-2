@@ -5,14 +5,15 @@ const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
-const { promisify } = require("es6-promisify");
-const BigNumber = require("bignumber.js");
 const BooleanIdentityProvider = artifacts.require("BooleanIdentityProvider");
 const BooleanIdentityComplianceStandard = artifacts.require(
   "BooleanIdentityComplianceStandard"
 );
 
-contract("E2E", accounts => {
+const { promisify } = require("es6-promisify");
+const BigNumber = require("bignumber.js");
+
+contract("E2E compliance and identity", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
   let identityCoordinator = null;
@@ -23,42 +24,18 @@ contract("E2E", accounts => {
   let complianceStandard = null;
   let ctoken = null;
 
-  beforeEach(async () => {
-    providerRegistry = await ProviderRegistry.new();
-    complianceCoordinator = await ComplianceCoordinator.new(
-      providerRegistry.address
-    );
-    identityCoordinator = await IdentityCoordinator.new(
-      providerRegistry.address
-    );
-    aba = await AbacusToken.new();
-    kernel = await AbacusKernel.new(
-      aba.address,
-      providerRegistry.address,
-      complianceCoordinator.address,
-      identityCoordinator.address
-    );
+  before(async () => {
+    providerRegistry = await ProviderRegistry.deployed();
+    complianceCoordinator = await ComplianceCoordinator.deployed();
+    identityCoordinator = await IdentityCoordinator.deployed();
+    aba = await AbacusToken.deployed();
+    kernel = await AbacusKernel.deployed();
 
-    await complianceCoordinator.setKernel(kernel.address);
-    await identityCoordinator.setKernel(kernel.address);
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
 
-    identityProvider = await BooleanIdentityProvider.new(
-      identityCoordinator.address,
-      0
-    );
-    await identityProvider.registerProvider("Boolean", "");
-    complianceStandard = await BooleanIdentityComplianceStandard.new(
-      providerRegistry.address,
-      0,
-      await identityProvider.providerId()
-    );
-    await complianceStandard.registerProvider("BooleanId", "");
-
-    ctoken = await SampleCompliantToken.new(
-      complianceCoordinator.address,
-      await complianceStandard.providerId()
-    );
+    identityProvider = await BooleanIdentityProvider.deployed();
+    complianceStandard = await BooleanIdentityComplianceStandard.deployed();
+    ctoken = await SampleCompliantToken.deployed();
   });
 
   it("should allow transaction for both approved by identity provider", async () => {

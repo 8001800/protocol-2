@@ -16,23 +16,12 @@ contract("ComplianceCoordinator", accounts => {
   let kernel = null;
 
   beforeEach(async () => {
-    providerRegistry = await ProviderRegistry.new();
-    complianceCoordinator = await ComplianceCoordinator.new(
-      providerRegistry.address
-    );
-    identityCoordinator = await IdentityCoordinator.new(
-      providerRegistry.address
-    );
-    aba = await AbacusToken.new();
-    kernel = await AbacusKernel.new(
-      aba.address,
-      providerRegistry.address,
-      complianceCoordinator.address,
-      identityCoordinator.address
-    );
+    providerRegistry = await ProviderRegistry.deployed();
+    complianceCoordinator = await ComplianceCoordinator.deployed();
+    identityCoordinator = await IdentityCoordinator.deployed();
+    aba = await AbacusToken.deployed();
+    kernel = await AbacusKernel.deployed();
 
-    await complianceCoordinator.setKernel(kernel.address);
-    await identityCoordinator.setKernel(kernel.address);
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
 
