@@ -10,7 +10,6 @@ import "../provider/ProviderRegistry.sol";
  * services, writing the results on-chain.
  */
 contract IdentityCoordinator is AbacusCoordinator {
-    uint256 public constant VERIFICATION_EXPIRY_BLOCKS = 4 * 60 * 24;
     ProviderRegistry public providerRegistry;
 
     function IdentityCoordinator(ProviderRegistry _providerRegistry) public {
@@ -71,7 +70,8 @@ contract IdentityCoordinator is AbacusCoordinator {
         uint256 providerId,
         string args,
         uint256 cost,
-        uint256 requestId
+        uint256 requestId,
+        uint256 expiryBlocks
     ) external returns (bool)
     {
         address owner = providerRegistry.providerOwner(providerId);
@@ -80,7 +80,7 @@ contract IdentityCoordinator is AbacusCoordinator {
             return false;
         }
 
-        uint256 escrowId = kernel.beginEscrow(msg.sender, owner, cost, VERIFICATION_EXPIRY_BLOCKS);
+        uint256 escrowId = kernel.beginEscrow(msg.sender, owner, cost, expiryBlocks);
         if (escrowId == 0) {
             return false;
         }
@@ -101,7 +101,8 @@ contract IdentityCoordinator is AbacusCoordinator {
     function lockVerification(
         uint256 providerId,
         address user,
-        uint256 requestId
+        uint256 requestId,
+        uint256 expiryBlocks
     ) external returns (bool)
     {
         // Ensure requester is the provider owner
@@ -114,7 +115,7 @@ contract IdentityCoordinator is AbacusCoordinator {
             return false;
         }
         // redeem kernel escrow
-        return kernel.lockEscrow(escrowId, VERIFICATION_EXPIRY_BLOCKS);
+        return kernel.lockEscrow(escrowId, expiryBlocks);
     }
 
     function revokeVerification(uint256 requestId) external returns (bool) {

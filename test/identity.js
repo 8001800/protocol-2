@@ -48,6 +48,7 @@ contract("IdentityCoordinator", accounts => {
       "",
       cost,
       requestId,
+      10,
       { from: accounts[3] }
     );
     assert.equal(reqLogs.length, 1);

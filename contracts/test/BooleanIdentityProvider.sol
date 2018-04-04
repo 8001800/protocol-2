@@ -18,7 +18,7 @@ contract BooleanIdentityProvider is IdentityProvider {
 
     function addPassing(address user, uint256 requestId) external returns (bool) {
         // First lock the verification so we can "start".
-        if (!identityCoordinator.lockVerification(providerId, user, requestId)) {
+        if (!identityCoordinator.lockVerification(providerId, user, requestId, 10)) {
             return false;
         }
 

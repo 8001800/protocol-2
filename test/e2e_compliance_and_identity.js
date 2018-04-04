@@ -55,6 +55,7 @@ contract("E2E compliance and identity", accounts => {
       "",
       cost,
       requestId1,
+      10,
       { from: accounts[0] }
     );
     assert.equal(reqLogs1.length, 1);
@@ -67,6 +68,7 @@ contract("E2E compliance and identity", accounts => {
       "",
       cost,
       requestId2,
+      10,
       { from: accounts[4] }
     );
     assert.equal(reqLogs2.length, 1);
