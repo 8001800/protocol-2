@@ -167,7 +167,7 @@ contract AbacusKernel {
     }
 
     // revoke the escrow
-    if (!token.transferFrom(this, escrow.from, escrow.cost)) {
+    if (!token.transfer(escrow.from, escrow.cost)) {
       return false;
     }
 
