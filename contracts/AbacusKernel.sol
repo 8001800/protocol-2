@@ -141,7 +141,7 @@ contract AbacusKernel {
     }
 
     // redeem the escrow
-    if (!token.transferFrom(this, escrow.to, escrow.cost)) {
+    if (!token.transfer(escrow.to, escrow.cost)) {
       return false;
     }
 
