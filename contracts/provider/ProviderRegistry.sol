@@ -135,7 +135,7 @@ contract ProviderRegistry {
     {
         ProviderInfo storage info = getLatestProvider(providerId);
         // Check if the provider existed
-        if (info.version == 1) {
+        if (info.version == 0) {
             return false;
         }
 
