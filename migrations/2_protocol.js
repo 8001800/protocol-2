@@ -72,5 +72,7 @@ module.exports = async deployer => {
       IdentityCoordinator.address,
       0
     );
+    const sip = await SandboxIdentityProvider.deployed();
+    await sip.registerProvider("SandboxIdentity", "", false);
   });
 };
