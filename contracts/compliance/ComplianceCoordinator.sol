@@ -330,11 +330,11 @@ contract ComplianceCoordinator is AbacusCoordinator {
     {
         uint8 checkResult;
         address owner;
-        bool hasMetadata;
-        (,,, owner,, hasMetadata) = providerRegistry.latestProvider(providerId);
+        bool isAsync;
+        (,,, owner,, isAsync) = providerRegistry.latestProvider(providerId);
 
         // Async checks
-        if (hasMetadata) {
+        if (isAsync) {
             (checkResult,) = checkAsync(
                 providerId,
                 instrumentAddr,
@@ -394,8 +394,8 @@ contract ComplianceCoordinator is AbacusCoordinator {
         }
         address owner;
         uint256 providerVersion;
-        bool hasMetadata;
-        (,,, owner, providerVersion, hasMetadata) = providerRegistry.latestProvider(providerId);
+        bool isAsync;
+        (,,, owner, providerVersion, isAsync) = providerRegistry.latestProvider(providerId);
 
         uint8 checkResult;
 
@@ -403,7 +403,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         uint256 nextProviderIdOrActionId;
 
         // Async checks
-        if (hasMetadata) {
+        if (isAsync) {
             (checkResult, nextProviderIdOrActionId) = checkAsync(
                 providerId,
                 instrumentAddr,
