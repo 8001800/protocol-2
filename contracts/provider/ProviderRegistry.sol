@@ -22,7 +22,8 @@ contract ProviderRegistry {
         string name,
         string metadata,
         address owner,
-        uint256 version
+        uint256 version,
+        bool isAsync
     );
 
     /**
@@ -38,7 +39,7 @@ contract ProviderRegistry {
          */
         string name;
         /**
-         * @dev Any metadata needed for the provider. Commonly an IPFS hash.
+         * @dev Any metadata needed for the provider. Represented as an IPFS hash.
          */
         string metadata;
         /**
@@ -49,6 +50,10 @@ contract ProviderRegistry {
          * @dev The latest version of the provider.
          */
         uint256 version;
+        /**
+         * @dev Whether this provider should be treated asynchronously.
+         */
+        bool isAsync;
     }
 
     /**
@@ -76,7 +81,8 @@ contract ProviderRegistry {
     function registerProvider(
         string name,
         string metadata,
-        address owner
+        address owner,
+        bool isAsync
     ) external returns (uint256)
     {
         uint256 providerId = nextProviderId++;
@@ -85,7 +91,8 @@ contract ProviderRegistry {
             name: name,
             metadata: metadata,
             owner: owner,
-            version: 1
+            version: 1,
+            isAsync: isAsync
         });
         latestProviderVersion[providerId] = 1;
         emit ProviderInfoUpdate({
@@ -93,7 +100,8 @@ contract ProviderRegistry {
             name: name,
             metadata: metadata,
             owner: owner,
-            version: 1
+            version: 1,
+            isAsync: isAsync
         });
         return providerId;
     }
@@ -116,7 +124,7 @@ contract ProviderRegistry {
             info.metadata,
             info.owner,
             info.version,
-            bytes(info.metadata).length > 0
+            info.isAsync
         );
     }
 
@@ -130,7 +138,8 @@ contract ProviderRegistry {
     function upgradeProvider(
         uint256 providerId,
         string metadata,
-        address owner
+        address owner,
+        bool isAsync
     ) external returns (bool)
     {
         ProviderInfo storage info = getLatestProvider(providerId);
@@ -150,7 +159,8 @@ contract ProviderRegistry {
             name: info.name,
             metadata: metadata,
             owner: owner,
-            version: nextVersion
+            version: nextVersion,
+            isAsync: isAsync
         });
         latestProviderVersion[providerId] = nextVersion;
         emit ProviderInfoUpdate({
@@ -158,7 +168,8 @@ contract ProviderRegistry {
             name: info.name,
             metadata: metadata,
             owner: owner,
-            version: nextVersion
+            version: nextVersion,
+            isAsync: isAsync
         });
         return true;
     }

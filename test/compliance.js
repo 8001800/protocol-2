@@ -223,7 +223,8 @@ contract("ComplianceCoordinator", accounts => {
     const { logs } = await providerRegistry.registerProvider(
       "Ian",
       "some sort of ipfs hash",
-      accounts[3]
+      accounts[3],
+      true
     );
     const id = logs[0].args.id;
     const owner = await providerRegistry.providerOwner(id);
@@ -328,7 +329,8 @@ contract("ComplianceCoordinator", accounts => {
     const { logs } = await providerRegistry.registerProvider(
       "Ian",
       "some sort of ipfs hash",
-      accounts[0]
+      accounts[0],
+      true
     );
     const id = logs[0].args.id;
     const owner = await providerRegistry.providerOwner(id);
@@ -363,7 +365,8 @@ contract("ComplianceCoordinator", accounts => {
     const { logs } = await providerRegistry.registerProvider(
       "Ian",
       "some sort of ipfs hash",
-      accounts[0]
+      accounts[0],
+      true
     );
     const id = logs[0].args.id;
     const owner = await providerRegistry.providerOwner(id);

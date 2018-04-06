@@ -57,7 +57,7 @@ contract("Upgrade Providers", accounts => {
     );
 
     metaData = "new";
-    const upgradeReciept = await standard.performUpgrade(metaData, standard.address);
+    const upgradeReciept = await standard.performUpgrade(metaData, standard.address, false);
     const newId = await newStandard.providerId();
     const newOwner = await providerRegistry.providerOwner(newId);
 

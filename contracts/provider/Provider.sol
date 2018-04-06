@@ -36,7 +36,8 @@ contract Provider is Ownable {
         providerId = providerRegistry.registerProvider(
             name,
             metadata,
-            this
+            this,
+            false
         );
         return providerId;
     }
@@ -49,10 +50,12 @@ contract Provider is Ownable {
      * @return True if the upgrade was successful.
      */
     function performUpgrade(
-        string nextMetadata, address nextProvider
+        string nextMetadata, address nextProvider, bool nextIsAsync
     ) onlyOwner external returns (bool)
     {
-        return providerRegistry.upgradeProvider(providerId, nextMetadata, nextProvider);
+        return providerRegistry.upgradeProvider(
+            providerId, nextMetadata, nextProvider, nextIsAsync
+        );
     }
 
 }
