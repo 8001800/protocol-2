@@ -10,6 +10,7 @@ const BooleanIdentityComplianceStandard = artifacts.require(
   "BooleanIdentityComplianceStandard"
 );
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
+const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 
 module.exports = async deployer => {
   await deployer.deploy(ProviderRegistry).then(async () => {
@@ -63,6 +64,13 @@ module.exports = async deployer => {
       SampleCompliantToken,
       ComplianceCoordinator.address,
       csId
+    );
+
+    await deployer.deploy(
+      SandboxIdentityProvider,
+      IdentityDatabase.address,
+      IdentityCoordinator.address,
+      0
     );
   });
 };
