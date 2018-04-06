@@ -26,7 +26,8 @@ contract Provider is Ownable {
      */
     function registerProvider(
         string name,
-        string metadata
+        string metadata,
+        bool isAsync
     ) onlyOwner external returns (uint256)
     {
         // First, check if the provider id has been already set.
@@ -37,7 +38,7 @@ contract Provider is Ownable {
             name,
             metadata,
             this,
-            false
+            isAsync
         );
         return providerId;
     }

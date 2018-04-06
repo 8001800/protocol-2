@@ -42,7 +42,8 @@ contract("IdentityCoordinator", accounts => {
     );
     await identityProvider.registerProvider(
       "Boolean",
-      "http://identity.abacusprotocol.com"
+      "http://identity.abacusprotocol.com",
+      true
     );
 
     const requestId = 1289479214;
@@ -86,7 +87,8 @@ contract("IdentityCoordinator", accounts => {
     );
     await identityProvider.registerProvider(
       "Boolean",
-      "http://identity.abacusprotocol.com"
+      "http://identity.abacusprotocol.com",
+      true
     );
 
     await identityProvider.addPassing(accounts[3], 123);

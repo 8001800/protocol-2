@@ -31,7 +31,7 @@ contract("ComplianceCoordinator", accounts => {
       0,
       0
     );
-    const regReceipt = await standard.registerProvider("Whitelist", "");
+    const regReceipt = await standard.registerProvider("Whitelist", "", false);
 
     const id = await standard.providerId();
     const owner = await providerRegistry.providerOwner(id);
@@ -99,7 +99,8 @@ contract("ComplianceCoordinator", accounts => {
     );
     const { receipt: { blockNumber } } = await standard.registerProvider(
       "Whitelist",
-      ""
+      "",
+      false
     );
 
     const id = await standard.providerId();
@@ -110,7 +111,7 @@ contract("ComplianceCoordinator", accounts => {
       0,
       id
     );
-    await parentStandard.registerProvider("ParentWhitelist", "");
+    await parentStandard.registerProvider("ParentWhitelist", "", false);
     const parentId = await parentStandard.providerId();
 
     assert.equal(standard.address, owner);

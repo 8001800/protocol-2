@@ -39,7 +39,7 @@ contract("Upgrade Providers", accounts => {
     const name = "Whitelist";
     var metaData = "old";
 
-    const regReceipt = await standard.registerProvider(name, metaData);
+    const regReceipt = await standard.registerProvider(name, metaData, false);
     const id = await standard.providerId();
     const owner = await providerRegistry.providerOwner(id);
 
