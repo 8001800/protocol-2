@@ -32,7 +32,6 @@ module.exports = async deployer => {
     await identity.setKernel(AbacusKernel.address);
 
     // bool identity provider
-    console.log(IdentityDatabase.address, IdentityCoordinator.address);
     await deployer.deploy(
       BooleanIdentityProvider,
       IdentityDatabase.address,
