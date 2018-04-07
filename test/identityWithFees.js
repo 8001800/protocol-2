@@ -28,13 +28,15 @@ contract("IdentityCoordinator", accounts => {
     kernel = await AbacusKernel.deployed();
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
-    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1), {from: accounts[3]});
+    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1), {
+      from: accounts[3]
+    });
   });
 
   it("should update the identity if request exists", async () => {
     //transfer aba tokens to account3
     await aba.transfer(accounts[3], new BigNumber(20 * ethInWei));
-    
+
     const identityProvider = await BooleanIdentityProvider.new(
       identityDatabase.address,
       identityCoordinator.address,
@@ -51,7 +53,6 @@ contract("IdentityCoordinator", accounts => {
 
     const { logs: reqLogs } = await identityCoordinator.requestVerification(
       await identityProvider.providerId(),
-      "",
       cost,
       requestId,
       10,
@@ -68,7 +69,9 @@ contract("IdentityCoordinator", accounts => {
 
     //check if identity provider recieved fees
     const identityProviderId = await identityProvider.providerId();
-    const abaBalanceIdentityProvider = await aba.balanceOf(await providerRegistry.providerOwner(identityProviderId.toNumber()));
+    const abaBalanceIdentityProvider = await aba.balanceOf(
+      await providerRegistry.providerOwner(identityProviderId.toNumber())
+    );
     assert.equal(abaBalanceIdentityProvider.toNumber(), cost.toNumber());
 
     const allowed = await identityDatabase.bytes32Data(

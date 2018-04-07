@@ -46,7 +46,6 @@ contract("IdentityCoordinator", accounts => {
 
     const { logs: reqLogs } = await identityCoordinator.requestVerification(
       await identityProvider.providerId(),
-      "",
       cost,
       requestId,
       10,

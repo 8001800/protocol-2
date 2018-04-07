@@ -52,7 +52,6 @@ contract("E2E compliance and identity", accounts => {
 
     const { logs: reqLogs1 } = await identityCoordinator.requestVerification(
       await identityProvider.providerId(),
-      "",
       cost,
       requestId1,
       10,
@@ -65,7 +64,6 @@ contract("E2E compliance and identity", accounts => {
 
     const { logs: reqLogs2 } = await identityCoordinator.requestVerification(
       await identityProvider.providerId(),
-      "",
       cost,
       requestId2,
       10,

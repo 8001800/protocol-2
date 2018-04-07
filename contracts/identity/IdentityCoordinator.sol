@@ -26,7 +26,6 @@ contract IdentityCoordinator is AbacusCoordinator {
      * @param providerId The id of the provider.
      * @param providerVersion The version of the provider when the request was made.
      * @param user The address of the user that requests identity services.
-     * @param args Any arguments that the identity provider may need.
      * @param cost The amount the user paid to the compliance provider.
      * @param requestId An arbitrary id to link the request to the off-chain database.
      */
@@ -34,7 +33,6 @@ contract IdentityCoordinator is AbacusCoordinator {
         uint256 indexed providerId,
         uint256 providerVersion,
         address user,
-        string args,
         uint256 cost,
         uint256 requestId
     );
@@ -62,13 +60,11 @@ contract IdentityCoordinator is AbacusCoordinator {
      * @dev Requests verification of identity from a provider.
      *
      * @param providerId The id of the provider.
-     * @param args Any arguments that the identity provider may need.
      * @param cost The amount the user paid to the compliance provider.
      * @param requestId An arbitrary id to link the request to the off-chain database.
      */
     function requestVerification(
         uint256 providerId,
-        string args,
         uint256 cost,
         uint256 requestId,
         uint256 expiryBlocks
@@ -90,7 +86,6 @@ contract IdentityCoordinator is AbacusCoordinator {
             providerId,
             providerRegistry.latestProviderVersion(providerId),
             msg.sender,
-            args,
             cost,
             requestId
         );
