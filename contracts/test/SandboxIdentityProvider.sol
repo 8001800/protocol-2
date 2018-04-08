@@ -29,8 +29,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         if (!identityCoordinator.onVerificationCompleted(providerId, user, requestId)) {
             return false;
         }
-        identityDatabase.writeBytes32Field(providerId, user, fieldId, value);
-        return true;
+        return identityDatabase.writeBytes32Field(providerId, user, fieldId, value);
     }
 
     function writeBytesField(
@@ -47,8 +46,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         if (!identityCoordinator.onVerificationCompleted(providerId, user, requestId)) {
             return false;
         }
-        identityDatabase.writeBytesField(providerId, user, fieldId, value);
-        return true;
+        return identityDatabase.writeBytesField(providerId, user, fieldId, value);
     }
 
 }
