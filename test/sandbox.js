@@ -31,9 +31,6 @@ contract("Sandbox", accounts => {
     provider = await SandboxIdentityProvider.deployed();
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
-    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1), {
-      from: accounts[3]
-    });
   });
 
   it("should write bytes field", async () => {
@@ -42,11 +39,11 @@ contract("Sandbox", accounts => {
     const value = "0xdeadbeef";
 
     await identityCoordinator.requestVerification(3, 0, requestId, 10, {
-      from: accounts[0]
+      from: accounts[3]
     });
 
     const result = await provider.writeBytesField(
-      accounts[0],
+      accounts[3],
       requestId,
       fieldId,
       value
@@ -54,7 +51,7 @@ contract("Sandbox", accounts => {
 
     const data = await identityDatabase.bytesData(
       await provider.providerId(),
-      accounts[0],
+      accounts[3],
       fieldId
     );
     assert.equal(data, value);
