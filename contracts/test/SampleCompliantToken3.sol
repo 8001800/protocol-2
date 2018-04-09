@@ -10,7 +10,7 @@ contract SampleCompliantToken3 is AbacusERC20Token {
     string public constant symbol = "SCT3";
     uint8 public constant decimals = 18;
 
-    uint256 public constant INITIAL_SUPPLY = 1000000000 * (10 ** uint256(decimals));
+    uint256 public constant INITIAL_SUPPLY = 1000000000000000 * (10 ** uint256(decimals));
 
     function SampleCompliantToken3(
         ComplianceCoordinator _complianceCoordinator,
@@ -24,15 +24,7 @@ contract SampleCompliantToken3 is AbacusERC20Token {
         emit Transfer(0x0, this, INITIAL_SUPPLY.div(2));
     }
 
-    mapping (address => mapping(address => bool)) redemptions;
-
-    function request(address token) public {
-        require(!redemptions[msg.sender][token]);
+    function request() public {
         transfer(msg.sender, 1000 * (10 ** uint256(18)));
-        redemptions[msg.sender][token] = true;
-    }
-
-    function hasRedeemed(address token) public view returns (bool ok) {
-        return redemptions[msg.sender][token];
     }
 }
