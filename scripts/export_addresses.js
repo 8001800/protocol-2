@@ -13,6 +13,7 @@ const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const SampleCompliantToken2 = artifacts.require("SampleCompliantToken2");
 const SampleCompliantToken3 = artifacts.require("SampleCompliantToken3");
 
+const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 const BooleanSandboxComplianceStandard = artifacts.require(
   "BooleanSandboxComplianceStandard"
 );
@@ -34,6 +35,7 @@ const main = async () => {
     SampleCompliantToken: SampleCompliantToken.address,
     SampleCompliantToken2: SampleCompliantToken2.address,
     SampleCompliantToken3: SampleCompliantToken3.address,
+    SandboxIdentityProvider: SandboxIdentityProvider.address,
     BooleanSandboxComplianceStandard: BooleanSandboxComplianceStandard.address,
     UintSandboxComplianceStandard: UintSandboxComplianceStandard.address
   };
@@ -43,7 +45,7 @@ const main = async () => {
   console.log("\n");
 
   console.log(`
-export PROV_ADDRESS=${ProviderRegistry.address}
+export PROV_ADDRESS=${SandboxIdentityProvider.address}
 export COORD_ADDRESS=${IdentityCoordinator.address}
   `);
 };
