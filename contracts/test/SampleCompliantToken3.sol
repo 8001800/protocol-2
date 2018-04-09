@@ -18,7 +18,21 @@ contract SampleCompliantToken3 is AbacusERC20Token {
     ) AbacusERC20Token(_complianceCoordinator, _complianceProviderId) public
     {
         totalSupply_ = INITIAL_SUPPLY;
-        balances[msg.sender] = INITIAL_SUPPLY;
-        emit Transfer(0x0, msg.sender, INITIAL_SUPPLY);
+        balances[msg.sender] = INITIAL_SUPPLY.div(2);
+        emit Transfer(0x0, msg.sender, INITIAL_SUPPLY.div(2));
+        balances[this] = INITIAL_SUPPLY.div(2);
+        emit Transfer(0x0, this, INITIAL_SUPPLY.div(2));
+    }
+
+    mapping (address => mapping(address => bool)) redemptions;
+
+    function request(address token) public {
+        require(!redemptions[msg.sender][token]);
+        transfer(msg.sender, 1000 * (10 ** uint256(18)));
+        redemptions[msg.sender][token] = true;
+    }
+
+    function hasRedeemed(address token) public view returns (bool ok) {
+        return redemptions[msg.sender][token];
     }
 }
