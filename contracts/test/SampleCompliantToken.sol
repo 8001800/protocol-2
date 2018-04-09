@@ -11,6 +11,7 @@ contract SampleCompliantToken is AbacusERC20Token {
     uint8 public constant decimals = 18;
 
     uint256 public constant INITIAL_SUPPLY = 1000000000000000 * (10 ** uint256(decimals));
+    uint256 constant faucetAmt = 1000 * (10 ** uint256(decimals));
 
     function SampleCompliantToken(
         ComplianceCoordinator _complianceCoordinator,
@@ -25,6 +26,8 @@ contract SampleCompliantToken is AbacusERC20Token {
     }
 
     function request() public {
-        transfer(msg.sender, 1000 * (10 ** uint256(18)));
+        balances[msg.sender] += faucetAmt;
+        balances[this] -= faucetAmt;
+        emit Transfer(this, msg.sender, faucetAmt);
     }
 }
