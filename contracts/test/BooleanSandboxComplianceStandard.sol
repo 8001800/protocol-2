@@ -22,7 +22,7 @@ contract BooleanSandboxComplianceStandard is ComplianceStandard {
   }
 
   function check(
-    address,
+    address token,
     uint256,
     address from,
     address to,
@@ -30,6 +30,9 @@ contract BooleanSandboxComplianceStandard is ComplianceStandard {
  ) view external returns (uint8, uint256)
   {
     bool fromPasses = identityDatabase.bytes32Data(identityProviderId, from, FIELD_NUM) != bytes32(0);
+    if (token == from) {
+      fromPasses = true;
+    }
     bool toPasses = identityDatabase.bytes32Data(identityProviderId, to, FIELD_NUM) != bytes32(0);
     if (fromPasses && toPasses) {
       return (0, 0);

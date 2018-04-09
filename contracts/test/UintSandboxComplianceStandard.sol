@@ -22,7 +22,7 @@ contract UintSandboxComplianceStandard is ComplianceStandard {
   }
 
   function check(
-    address,
+    address token,
     uint256,
     address from,
     address to,
@@ -30,8 +30,9 @@ contract UintSandboxComplianceStandard is ComplianceStandard {
  ) view external returns (uint8, uint256)
   {
     uint256 fromVal = uint256(identityDatabase.bytes32Data(identityProviderId, from, FIELD_NUM));
+    bool fromAllowed = token == from ? true : fromVal > 10;
     uint256 toVal = uint256(identityDatabase.bytes32Data(identityProviderId, to, FIELD_NUM));
-    if (fromVal > 10 && toVal > 10) {
+    if (fromAllowed && toVal > 10) {
       return (0, 0);
     } else {
       return (E_UNWHITELISTED, 0);
