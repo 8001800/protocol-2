@@ -10,6 +10,16 @@ const BooleanIdentityComplianceStandard = artifacts.require(
   "BooleanIdentityComplianceStandard"
 );
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
+const SampleCompliantToken2 = artifacts.require("SampleCompliantToken2");
+const SampleCompliantToken3 = artifacts.require("SampleCompliantToken3");
+
+const BooleanSandboxComplianceStandard = artifacts.require(
+  "BooleanSandboxComplianceStandard"
+);
+const UintSandboxComplianceStandard = artifacts.require(
+  "UintSandboxComplianceStandard"
+);
+
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 
 module.exports = async deployer => {
@@ -44,27 +54,7 @@ module.exports = async deployer => {
     console.log("Identity provider id:", identityProviderId.toString());
     console.log("Identity provider address:", identityProvider.address);
 
-    // bool compliance standard
-    await deployer.deploy(
-      BooleanIdentityComplianceStandard,
-      IdentityDatabase.address,
-      ProviderRegistry.address,
-      0,
-      identityProviderId
-    );
-    const cs = await BooleanIdentityComplianceStandard.deployed();
-    await cs.registerProvider("BooleanIdentity", "", false);
-    const csId = await cs.providerId();
-    console.log("CS provider id:", csId.toString());
-    console.log("CS address:", cs.address);
-
-    // compliant token
-    await deployer.deploy(
-      SampleCompliantToken,
-      ComplianceCoordinator.address,
-      csId
-    );
-
+    // Sandbox identity provider
     await deployer.deploy(
       SandboxIdentityProvider,
       IdentityDatabase.address,
@@ -73,5 +63,65 @@ module.exports = async deployer => {
     );
     const sip = await SandboxIdentityProvider.deployed();
     await sip.registerProvider("SandboxIdentity", "", false);
+
+    // bool compliance standard
+    await deployer.deploy(
+      BooleanIdentityComplianceStandard,
+      IdentityDatabase.address,
+      ProviderRegistry.address,
+      0,
+      identityProviderId
+    );
+    const bics = await BooleanIdentityComplianceStandard.deployed();
+    await bics.registerProvider("BooleanIdentity", "", false);
+    const bicsId = await bics.providerId();
+    console.log("BICS provider id:", bicsId.toString());
+
+    // bool compliance standard
+    await deployer.deploy(
+      BooleanSandboxComplianceStandard,
+      IdentityDatabase.address,
+      ProviderRegistry.address,
+      0,
+      await sip.providerId()
+    );
+    const bscs = await BooleanSandboxComplianceStandard.deployed();
+    await bscs.registerProvider("BooleanSandbox", "", false);
+    const bscsId = await bscs.providerId();
+    console.log("BSCS provider id:", bscsId.toString());
+
+    // bool compliance standard
+    await deployer.deploy(
+      UintSandboxComplianceStandard,
+      IdentityDatabase.address,
+      ProviderRegistry.address,
+      0,
+      await sip.providerId()
+    );
+    const uscs = await UintSandboxComplianceStandard.deployed();
+    await uscs.registerProvider("UintSandbox", "", false);
+    const uscsId = await uscs.providerId();
+    console.log("USCS provider id:", uscsId.toString());
+
+    // compliant token
+    await deployer.deploy(
+      SampleCompliantToken,
+      ComplianceCoordinator.address,
+      bicsId
+    );
+
+    // compliant token
+    await deployer.deploy(
+      SampleCompliantToken2,
+      ComplianceCoordinator.address,
+      bscsId
+    );
+
+    // compliant token
+    await deployer.deploy(
+      SampleCompliantToken3,
+      ComplianceCoordinator.address,
+      uscsId
+    );
   });
 };
