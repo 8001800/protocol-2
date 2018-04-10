@@ -21,7 +21,7 @@ contract Bundle is ERC721Token {
     event BundleDepositERC721(uint256 indexed bundleId, address token, uint256 id);
     event BundleWithdrawERC721(uint256 indexed bundleId, address token, uint256 id);
 
-    function Bundle() public ERC721Token("Bundle", "BKT") {
+    function Bundle() public ERC721Token("Bundle", "BND") {
     }
 
     function create(string _uri) external returns (uint256) {
