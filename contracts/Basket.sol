@@ -15,11 +15,11 @@ contract Basket is ERC721Token {
     mapping (uint256 => mapping (address => uint256)) erc20Assets;
     mapping (uint256 => mapping (address => mapping (uint256 => bool))) erc721Assets;
 
-    event BasketCreate(uint256 basketId, address owner);
-    event BasketDepositERC20(uint256 basketId, address token, uint256 amount);
-    event BasketWithdrawERC20(uint256 basketId, address token, uint256 amount);
-    event BasketDepositERC721(uint256 basketId, address token, uint256 id);
-    event BasketWithdrawERC721(uint256 basketId, address token, uint256 id);
+    event BasketCreate(uint256 indexed basketId, address owner);
+    event BasketDepositERC20(uint256 indexed basketId, address token, uint256 amount);
+    event BasketWithdrawERC20(uint256 indexed basketId, address token, uint256 amount);
+    event BasketDepositERC721(uint256 indexed basketId, address token, uint256 id);
+    event BasketWithdrawERC721(uint256 indexed basketId, address token, uint256 id);
 
     function Basket() public ERC721Token("Basket", "BKT") {
     }
