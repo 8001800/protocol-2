@@ -7,7 +7,7 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 /**
  * @dev A collection of ERC20 and ERC721 assets represented as an ERC721 token.
  */
-contract Basket is ERC721Token {
+contract Bundle is ERC721Token {
     using SafeMath for uint256;
 
     uint256 nextTokenId = 1;
@@ -15,68 +15,68 @@ contract Basket is ERC721Token {
     mapping (uint256 => mapping (address => uint256)) erc20Assets;
     mapping (uint256 => mapping (address => mapping (uint256 => bool))) erc721Assets;
 
-    event BasketCreate(uint256 indexed basketId, address owner);
-    event BasketDepositERC20(uint256 indexed basketId, address token, uint256 amount);
-    event BasketWithdrawERC20(uint256 indexed basketId, address token, uint256 amount);
-    event BasketDepositERC721(uint256 indexed basketId, address token, uint256 id);
-    event BasketWithdrawERC721(uint256 indexed basketId, address token, uint256 id);
+    event BundleCreate(uint256 indexed bundleId, address owner);
+    event BundleDepositERC20(uint256 indexed bundleId, address token, uint256 amount);
+    event BundleWithdrawERC20(uint256 indexed bundleId, address token, uint256 amount);
+    event BundleDepositERC721(uint256 indexed bundleId, address token, uint256 id);
+    event BundleWithdrawERC721(uint256 indexed bundleId, address token, uint256 id);
 
-    function Basket() public ERC721Token("Basket", "BKT") {
+    function Bundle() public ERC721Token("Bundle", "BKT") {
     }
 
     function create(string _uri) external returns (uint256) {
         uint256 id = nextTokenId++;
         _mint(msg.sender, id);
         _setTokenURI(id, _uri);
-        emit BasketCreate(id, msg.sender);
+        emit BundleCreate(id, msg.sender);
     }
 
     function depositERC20Asset(
-        uint256 _basketId, ERC20 _token, uint256 _amount
+        uint256 _bundleId, ERC20 _token, uint256 _amount
     ) external returns (bool) {
         if (!_token.transferFrom(msg.sender, this, _amount)) {
             return false;
         }
-        erc20Assets[_basketId][_token] = erc20Assets[_basketId][_token].add(_amount);
-        emit BasketDepositERC20(_basketId, _token, _amount);
+        erc20Assets[_bundleId][_token] = erc20Assets[_bundleId][_token].add(_amount);
+        emit BundleDepositERC20(_bundleId, _token, _amount);
         return true;
     }
 
     function withdrawERC20Asset(
-        uint256 _basketId, ERC20 _token, uint256 _amount
+        uint256 _bundleId, ERC20 _token, uint256 _amount
     ) external returns (bool) {
-        if (msg.sender != ownerOf(_basketId)) {
+        if (msg.sender != ownerOf(_bundleId)) {
             return false;
         }
         if (!_token.transfer(msg.sender, _amount)) {
             return false;
         }
-        erc20Assets[_basketId][_token] = erc20Assets[_basketId][_token].sub(_amount);
-        emit BasketWithdrawERC20(_basketId, _token, _amount);
+        erc20Assets[_bundleId][_token] = erc20Assets[_bundleId][_token].sub(_amount);
+        emit BundleWithdrawERC20(_bundleId, _token, _amount);
         return true;
     }
 
     function depositERC721Asset(
-        uint256 _basketId, ERC721Basic _token, uint256 _id
+        uint256 _bundleId, ERC721Basic _token, uint256 _id
     ) external returns (bool) {
         _token.transferFrom(msg.sender, this, _id);
-        erc721Assets[_basketId][_token][_id] = true;
-        emit BasketDepositERC721(_basketId, _token, _id);
+        erc721Assets[_bundleId][_token][_id] = true;
+        emit BundleDepositERC721(_bundleId, _token, _id);
         return true;
     }
 
     function withdrawERC721Asset(
-        uint256 _basketId, ERC721Basic _token, uint256 _id
+        uint256 _bundleId, ERC721Basic _token, uint256 _id
     ) external returns (bool) {
-        if (msg.sender != ownerOf(_basketId)) {
+        if (msg.sender != ownerOf(_bundleId)) {
             return false;
         }
-        if (!erc721Assets[_basketId][_token][_id]) {
+        if (!erc721Assets[_bundleId][_token][_id]) {
             return false;
         }
         _token.safeTransferFrom(this, msg.sender, _id);
-        erc721Assets[_basketId][_token][_id] = false;
-        emit BasketWithdrawERC721(_basketId, _token, _id);
+        erc721Assets[_bundleId][_token][_id] = false;
+        emit BundleWithdrawERC721(_bundleId, _token, _id);
         return true;
     }
 
