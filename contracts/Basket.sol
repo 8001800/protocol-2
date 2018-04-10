@@ -1,22 +1,19 @@
 pragma solidity ^0.4.21;
 
-import "zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol";
+import "zeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
 import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @dev A collection of ERC20 and ERC721 assets represented as an ERC721 token.
  */
-contract Basket is ERC721BasicToken {
+contract Basket is ERC721Token {
     using SafeMath for uint256;
-    uint256 public totalSupply;
 
-    string constant public name = "Basket";
-    string constant public symbol = "BKT";
+    uint256 nextTokenId = 1;
 
     mapping (uint256 => mapping (address => uint256)) erc20Assets;
     mapping (uint256 => mapping (address => mapping (uint256 => bool))) erc721Assets;
-    mapping (uint256 => string) public tokenURI;
 
     event BasketCreate(uint256 basketId, address owner);
     event BasketDepositERC20(uint256 basketId, address token, uint256 amount);
@@ -24,10 +21,13 @@ contract Basket is ERC721BasicToken {
     event BasketDepositERC721(uint256 basketId, address token, uint256 id);
     event BasketWithdrawERC721(uint256 basketId, address token, uint256 id);
 
+    function Basket() public ERC721Token("Basket", "BKT") {
+    }
+
     function create(string _uri) external returns (uint256) {
-        uint256 id = ++totalSupply;
+        uint256 id = nextTokenId++;
         _mint(msg.sender, id);
-        tokenURI[id] = _uri;
+        _setTokenURI(id, _uri);
         emit BasketCreate(id, msg.sender);
     }
 
