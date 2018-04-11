@@ -75,35 +75,6 @@ contract ComplianceCoordinator is AbacusCoordinator {
     );
 
     /**
-     * @dev Emitted when an asynchronous compliance check is requested.
-     * This event is to be subscribed to and read by the provider off-chain.
-     * Once the off-chain provider sees this event and ensures the correct cost
-     * has been paid, they are to perform a compliance check then call `writeCheckResult`
-     * with the appropriate parameters.
-     *
-     * @param requestId The id of the compliance check request.
-     * @param providerId The id of the provider.
-     * @param providerVersion The version of the provider.
-     * @param instrumentAddr The address of the instrument contract.
-     * @param instrumentIdOrAmt The instrument id (NFT) or amount (ERC20).
-     * @param from The from address of the token transfer.
-     * @param to The to address of the token transfer.
-     * @param data Any additional data related to the action.
-     * @param cost The amount the user paid to the compliance provider.
-     */
-    event ComplianceCheckRequested(
-        uint256 requestId,
-        uint256 indexed providerId,
-        uint256 providerVersion,
-        address instrumentAddr,
-        uint256 instrumentIdOrAmt,
-        address from,
-        address to,
-        bytes32 data,
-        uint256 cost
-    );
-
-    /**
      * @dev Emitted when the result of an asynchronous compliance check is written.
      *
      * @param providerId The id of the compliance check request.
@@ -115,67 +86,6 @@ contract ComplianceCoordinator is AbacusCoordinator {
         uint256 blockToExpire,
         uint8 checkResult
     );
-
-    /**
-     * @dev Requests a compliance check from a Compliance Provider.
-     * NOTE: this overwrites any existing escrow for this check. Make sure you don't have a pending
-     * escrow when calling this!
-     *
-     * @param providerId The id of the provider.
-     * @param instrumentIdOrAmt The instrument id (NFT) or amount (ERC20).
-     * @param from The from address of the token transfer.
-     * @param to The to address of the token transfer.
-     * @param data Any additional data related to the action.
-     * @param cost The amount the user paid to the compliance provider.
-     * @param expiryBlocks The blocks until the check request expires.
-     */
-    function requestCheck(
-        uint256 providerId,
-        address instrumentAddr,
-        uint256 instrumentIdOrAmt,
-        address from,
-        address to,
-        bytes32 data,
-        uint256 cost,
-        uint256 expiryBlocks
-    ) external returns (uint256)
-    {
-        address owner = providerRegistry.providerOwner(providerId);
-        require(kernel.transferTokensFrom(msg.sender, owner, cost));
-        uint256 escrowId = kernel.beginEscrow(msg.sender, owner, cost, expiryBlocks);
-        require(escrowId != 0);
-
-        uint256 actionId = computeActionId(
-            providerId,
-            providerVersion,
-            instrumentAddr,
-            instrumentIdOrAmt,
-            from,
-            to,
-            data
-        );
-
-        uint256 requestId = nextRequestId++;
-        Request storage request = Request({
-            escrowId: escrowId,
-            blockToExpire: 0,
-            checkResult: 0,
-            actionId: actionId
-        });
-        requests[requestId] = request;
-
-        emit ComplianceCheckRequested({
-            requestId: requestId,
-            providerId: providerId,
-            providerVersion: providerRegistry.latestProviderVersion(providerId),
-            instrumentAddr: instrumentAddr,
-            instrumentIdOrAmt: instrumentIdOrAmt,
-            from: from,
-            to: to,
-            data: data,
-            cost: cost
-        });
-    }
 
     /**
      * @dev Writes the result of an asynchronous compliance check to the blockchain.
