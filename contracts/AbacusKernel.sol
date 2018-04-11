@@ -232,13 +232,13 @@ contract AbacusKernel {
     uint256 escrowId = requestEscrows[user][requestId];
     require(escrowId != 0);
     // redeem kernel escrow
-    return kernel.lockEscrow(escrowId, expiryBlocks);
+    return lockEscrow(escrowId, expiryBlocks);
   }
 
   function revokeVerification(uint256 requestId) external returns (bool) {
     uint256 escrowId = requestEscrows[msg.sender][requestId];
     require(escrowId != 0);
-    return kernel.revokeEscrow(escrowId);
+    return revokeEscrow(escrowId);
   }
 
   /**
