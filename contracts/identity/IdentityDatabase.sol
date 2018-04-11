@@ -9,6 +9,8 @@ contract IdentityDatabase {
         providerRegistry = _providerRegistry;
     }
 
+    function 
+
     mapping (uint256 => mapping (address => mapping (uint256 => bytes32))) public bytes32Data;
     mapping (uint256 => mapping (address => mapping (uint256 => bytes))) public bytesData;
 
