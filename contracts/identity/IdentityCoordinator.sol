@@ -1,8 +1,7 @@
 pragma solidity ^0.4.21;
 
 import "../provider/ProviderRegistry.sol";
-import "../EscrowedCoordinator.sol";
-import "
+import "../AbacusCoordinator.sol";
 
 /**
  * @title IdentityCoordinator
@@ -10,7 +9,7 @@ import "
  * Identity providers subscribe to `IdentityVerificationRequested` events and provide their
  * services, writing the results on-chain.
  */
-contract IdentityCoordinator is EscrowedCoordinator {
+contract IdentityCoordinator is AbacusCoordinator {
     ProviderRegistry providerRegistry;
 
     function IdentityCoordinator(ProviderRegistry _providerRegistry) public
