@@ -150,122 +150,123 @@ contract AbacusKernel {
     return true;
   }
 
-  /**
-   * @dev Gets the escrow payment back to the initiator if the escrow was not
-   * fulfilled.
-   */
-  function revokeEscrow(uint256 escrowId) external returns (bool) {
-    // Only the coordinator should be able to call this
-    if (!coordinators[msg.sender]) {
-      return false;
-    }
-
-    Escrow storage escrow = escrows[escrowId];
-    // don't allow revoke if escrow is locked and unexpired
-    if (escrow.locked && escrow.blockExpiresAt > block.number) {
-      return false;
-    }
-
-    // revoke the escrow
-    if (!token.transfer(escrow.from, escrow.cost)) {
-      return false;
-    }
-
-    // forcefully expire the escrow
-    escrow.blockExpiresAt = 0;
-    return true;
-  }
-
-  event ServiceRequested(
-    uint256 indexed providerId,
-    uint256 providerVersion,
-    address requester,
-    uint256 cost,
-    uint256 requestId
-  );
-
-  event ServicePerformed(
-    uint256 indexed providerId,
-    address requester,
-    uint256 requestId
-  );
-
-  /**
-   * @dev Mapping of requester address => requestId => escrow.
-   */
-  mapping (address => mapping (uint256 => uint256)) requestEscrows;
-
-  function requestService(
-    uint256 providerId,
-    uint256 cost,
-    uint256 requestId,
-    uint256 expiryBlocks
-  ) external {
-    address owner = providerRegistry.providerOwner(providerId);
-
-    // Ensure that the request id is new
-    require(requestEscrows[msg.sender][requestId] == 0);
-
-    // Create escrow
-    uint256 escrowId = beginEscrow(msg.sender, owner, cost, expiryBlocks);
-    require(escrowId != 0);
-    requestEscrows[msg.sender][requestId] = escrowId;
-    emit ServiceRequested({
-      providerId: providerId,
-      providerVersion: providerRegistry.latestProviderVersion(providerId),
-      requester: msg.sender,
-      cost: cost,
-      requestId: requestId
-    });
-  }
-
-  function lockEscrow(
-    uint256 providerId,
-    address user,
-    uint256 requestId,
-    uint256 expiryBlocks
-  ) external returns (bool)
-  {
-    // Ensure requester is the provider owner
-    require(msg.sender == providerRegistry.providerOwner(providerId));
-    // Ensure request exists
-    uint256 escrowId = requestEscrows[user][requestId];
-    require(escrowId != 0);
-    // redeem kernel escrow
-    return lockEscrow(escrowId, expiryBlocks);
-  }
-
-  function revokeVerification(uint256 requestId) external returns (bool) {
-    uint256 escrowId = requestEscrows[msg.sender][requestId];
-    require(escrowId != 0);
-    return revokeEscrow(escrowId);
-  }
-
-  /**
-    * @dev Called by the coordinator when a provider completes its service.
-    *
-    * @param providerId The provider id.
-    * @param requester The address of the requester.
-    * @param requestId An arbitrary id to link the request to the off-chain database.
+    /**
+    * @dev Gets the escrow payment back to the initiator if the escrow was not
+    * fulfilled.
     */
-  function onServiceCompleted(
-    uint256 providerId,
-    address requester,
-    uint256 requestId
-  ) internal {
-    // Ensure requester is the provider owner
-    require(msg.sender != providerRegistry.providerOwner(providerId));
-    // Ensure request exists
-    uint256 escrowId = requestEscrows[requester][requestId];
-    require(escrowId != 0);
-    // redeem kernel escrow
-    require(redeemEscrow(escrowId));
+    function revokeEscrow(uint256 escrowId) external returns (bool) {
+        // Only the coordinator should be able to call this
+        if (!coordinators[msg.sender]) {
+            return false;
+        }
 
-    emit ServicePerformed({
-      providerId: providerId,
-      requester: requester,
-      requestId: requestId
-    });
-  }
+        Escrow storage escrow = escrows[escrowId];
+        // don't allow revoke if escrow is locked and unexpired
+        if (escrow.locked && escrow.blockExpiresAt > block.number) {
+            return false;
+        }
+
+        // revoke the escrow
+        if (!token.transfer(escrow.from, escrow.cost)) {
+            return false;
+        }
+
+        // forcefully expire the escrow
+        escrow.blockExpiresAt = 0;
+        return true;
+    }
+
+    event ServiceRequested(
+        uint256 indexed providerId,
+        uint256 providerVersion,
+        address requester,
+        uint256 cost,
+        uint256 requestId
+    );
+
+    event ServicePerformed(
+        uint256 indexed providerId,
+        address requester,
+        uint256 requestId
+    );
+
+    /**
+    * @dev Mapping of requester address => requestId => escrow.
+    */
+    mapping (address => mapping (uint256 => uint256)) requestEscrows;
+
+    function requestService(
+        uint256 providerId,
+        uint256 cost,
+        uint256 requestId,
+        uint256 expiryBlocks
+    ) external {
+        address owner = providerRegistry.providerOwner(providerId);
+
+        // Ensure that the request id is new
+        require(requestEscrows[msg.sender][requestId] == 0);
+
+        // Create escrow
+        uint256 escrowId = beginEscrow(msg.sender, owner, cost, expiryBlocks);
+        require(escrowId != 0);
+        requestEscrows[msg.sender][requestId] = escrowId;
+        emit ServiceRequested({
+            providerId: providerId,
+            providerVersion: providerRegistry.latestProviderVersion(providerId),
+            requester: msg.sender,
+            cost: cost,
+            requestId: requestId
+        });
+    }
+
+    function lockEscrow(
+        uint256 providerId,
+        address user,
+        uint256 requestId,
+        uint256 expiryBlocks
+    ) external returns (bool)
+    {
+        // Ensure requester is the provider owner
+        require(msg.sender == providerRegistry.providerOwner(providerId));
+        // Ensure request exists
+        uint256 escrowId = requestEscrows[user][requestId];
+        require(escrowId != 0);
+        // redeem kernel escrow
+        return lockEscrow(escrowId, expiryBlocks);
+    }
+
+    function revokeVerification(uint256 requestId) external returns (bool) {
+        uint256 escrowId = requestEscrows[msg.sender][requestId];
+        require(escrowId != 0);
+        return revokeEscrow(escrowId);
+    }
+
+    /**
+      * @dev Called by the coordinator when a provider completes its service.
+      *
+      * @param providerId The provider id.
+      * @param requester The address of the requester.
+      * @param requestId An arbitrary id to link the request to the off-chain database.
+      */
+    function onServiceCompleted(
+        uint256 providerId,
+        address requester,
+        uint256 requestId
+    ) internal {
+        require(coordinators[msg.sender]);
+        // Ensure requester is the provider owner
+        require(msg.sender != providerRegistry.providerOwner(providerId));
+        // Ensure request exists
+        uint256 escrowId = requestEscrows[requester][requestId];
+        require(escrowId != 0);
+        // redeem kernel escrow
+        require(redeemEscrow(escrowId));
+
+        emit ServicePerformed({
+            providerId: providerId,
+            requester: requester,
+            requestId: requestId
+        });
+    }
 
 }

@@ -32,7 +32,6 @@ contract IdentityCoordinator is AbacusCoordinator {
         bytes32Data[providerId][user][fieldId] = value;
         kernel.onServiceCompleted(providerId, requester, requestId);
     }
-
     function writeBytesField(
         address requester,
         uint256 requestId,
