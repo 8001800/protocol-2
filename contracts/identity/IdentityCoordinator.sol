@@ -10,7 +10,7 @@ import "../AbacusCoordinator.sol";
  * services, writing the results on-chain.
  */
 contract IdentityCoordinator is AbacusCoordinator {
-    ProviderRegistry providerRegistry;
+    ProviderRegistry public providerRegistry;
 
     function IdentityCoordinator(ProviderRegistry _providerRegistry) public
     {
@@ -21,8 +21,6 @@ contract IdentityCoordinator is AbacusCoordinator {
     mapping (uint256 => mapping (address => mapping (uint256 => bytes))) public bytesData;
 
     function writeBytes32Field(
-        address requester,
-        uint256 requestId,
         uint256 providerId,
         address user,
         uint256 fieldId,
@@ -30,11 +28,9 @@ contract IdentityCoordinator is AbacusCoordinator {
     ) external {
         require(msg.sender == providerRegistry.providerOwner(providerId));
         bytes32Data[providerId][user][fieldId] = value;
-        kernel.onServiceCompleted(providerId, requester, requestId);
     }
+
     function writeBytesField(
-        address requester,
-        uint256 requestId,
         uint256 providerId,
         address user,
         uint256 fieldId,
@@ -42,7 +38,6 @@ contract IdentityCoordinator is AbacusCoordinator {
     ) external {
         require(msg.sender == providerRegistry.providerOwner(providerId));
         bytesData[providerId][user][fieldId] = value;
-        kernel.onServiceCompleted(providerId, requester, requestId);
     }
 
 }

@@ -1,6 +1,8 @@
 pragma solidity ^0.4.21;
 
 import "./AbacusToken.sol";
+import "./provider/ProviderRegistry.sol";
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title AbacusKernel
@@ -8,172 +10,133 @@ import "./AbacusToken.sol";
  * one only needs to grant the kernel allowance rather than several registries.
  */
 contract AbacusKernel {
-  AbacusToken public token;
-  address public providerRegistry;
+    using SafeMath for uint256;
 
-  address public complianceCoordinator;
-  address public identityCoordinator;
+    AbacusToken public token;
+    ProviderRegistry public providerRegistry;
 
-  mapping (address => bool) coordinators;
+    address public complianceCoordinator;
+    address public identityCoordinator;
 
-  struct Escrow {
-    address from;
-    address to;
-    uint256 cost;
-    bool locked;
-    uint256 blockExpiresAt;
-  }
+    mapping (address => bool) coordinators;
 
-  /**
-   * @dev Contains mapping of escrow id to escrow.
-   */
-  mapping (uint256 => Escrow) escrows;
-
-  /**
-   * @dev The next id for an escrow.
-   */
-  uint256 nextEscrowId = 1;
-
-  function AbacusKernel(
-    AbacusToken _token,
-    address _providerRegistry,
-
-    address _complianceCoordinator,
-    address _identityCoordinator
-  ) public
-  {
-    token = _token;
-    providerRegistry = _providerRegistry;
-
-    complianceCoordinator = _complianceCoordinator;
-    identityCoordinator = _identityCoordinator;
-
-    coordinators[complianceCoordinator] = coordinators[identityCoordinator] = true;
-  }
-
-  /**
-   * @dev Transfers ABA from an approved person to another.
-   */
-  function transferTokensFrom(
-    address from,
-    address to,
-    uint256 cost
-  ) external returns (bool)
-  {
-    if (!coordinators[msg.sender]) {
-      return false;
-    }
-    return token.transferFrom(from, to, cost);
-  }
-
-  /**
-   * @dev Initiates an escrow of ABA between two parties.
-   * The steps of a sucessful escrow are:
-   * - begin (initiate escrow)
-   * - lock (ensure payment will be received)
-   * - redeem (retrieve payment)
-   * If at any point the receiver of the payment messes up,
-   * the payer may `revoke` the escrow and get their money back.
-   */
-  function beginEscrow(
-    address from,
-    address to,
-    uint256 cost,
-    uint256 blocksToExpiry
-  ) external returns (uint256)
-  {
-    // Only the coordinator should be able to call this
-    if (!coordinators[msg.sender]) {
-      return 0;
+    struct Escrow {
+        address from;
+        address to;
+        uint256 cost;
+        bool locked;
+        uint256 blockExpiresAt;
     }
 
-    // Transfer tokens to the escrow
-    if (!token.transferFrom(from, this, cost)) {
-      return 0;
+    /**
+    * @dev Contains mapping of escrow id to escrow.
+    */
+    mapping (uint256 => Escrow) escrows;
+
+    /**
+    * @dev The next id for an escrow.
+    */
+    uint256 nextEscrowId = 1;
+
+    function AbacusKernel(
+        AbacusToken _token,
+        ProviderRegistry _providerRegistry,
+
+        address _complianceCoordinator,
+        address _identityCoordinator
+    ) public
+    {
+        token = _token;
+        providerRegistry = _providerRegistry;
+
+        complianceCoordinator = _complianceCoordinator;
+        identityCoordinator = _identityCoordinator;
+
+        coordinators[complianceCoordinator] = coordinators[identityCoordinator] = true;
     }
 
-    uint256 escrowId = nextEscrowId++;
-    escrows[escrowId] = Escrow({
-      from: from,
-      to: to,
-      cost: cost,
-      locked: false,
-      blockExpiresAt: blocksToExpiry + block.number
-    });
-    return escrowId;
-  }
-
-  /**
-   * @dev Puts a hold on the escrow so the initiator cannot take the payment back.
-   */
-  function lockEscrow(
-    uint256 escrowId,
-    uint256 blocksToExpiry
-  ) external returns (bool) {
-    // Only the coordinator should be able to call this
-    if (!coordinators[msg.sender]) {
-      return false;
+    /**
+    * @dev Transfers ABA from an approved person to another.
+    */
+    function transferTokensFrom(
+        address from,
+        address to,
+        uint256 cost
+    ) external returns (bool)
+    {
+        if (!coordinators[msg.sender]) {
+            return false;
+        }
+        return token.transferFrom(from, to, cost);
     }
 
-    Escrow storage escrow = escrows[escrowId];
-    if (escrow.locked || escrow.blockExpiresAt <= block.number) {
-      return false;
+    /**
+    * @dev Initiates an escrow of ABA between two parties.
+    * The steps of a sucessful escrow are:
+    * - begin (initiate escrow)
+    * - lock (ensure payment will be received)
+    * - redeem (retrieve payment)
+    * If at any point the receiver of the payment messes up,
+    * the payer may `revoke` the escrow and get their money back.
+    */
+    function beginEscrow(
+        address from,
+        address to,
+        uint256 cost
+    ) internal returns (uint256)
+    {
+        // Transfer tokens to the escrow
+        require(token.transferFrom(from, this, cost));
+        uint256 escrowId = nextEscrowId++;
+        escrows[escrowId] = Escrow({
+            from: from,
+            to: to,
+            cost: cost,
+            locked: false,
+            blockExpiresAt: 0
+        });
+        return escrowId;
     }
 
-    // If not, lock it and reset expiry
-    escrow.locked = true;
-    escrow.blockExpiresAt = blocksToExpiry + block.number;
-    return true;
-  }
-
-  /**
-   * @dev Allows the receiver to withdraw the escrow payment.
-   */
-  function redeemEscrow(uint256 escrowId) external returns (bool) {
-    // Only the coordinator should be able to call this
-    if (!coordinators[msg.sender]) {
-      return false;
+    /**
+    * @dev Puts a hold on the escrow so the initiator cannot take the payment back.
+    */
+    function lockEscrow(
+        uint256 escrowId,
+        uint256 blocksToExpiry
+    ) internal {
+        Escrow storage escrow = escrows[escrowId];
+        require(!escrow.locked);
+        require(escrow.from != address(0) || escrow.to != address(0));
+        escrow.locked = true;
+        escrow.blockExpiresAt = blocksToExpiry.add(block.number);
     }
 
-    Escrow storage escrow = escrows[escrowId];
-    if (!escrow.locked || escrow.blockExpiresAt <= block.number) {
-      return false;
-    }
+    /**
+    * @dev Allows the receiver to withdraw the escrow payment.
+    */
+    function redeemEscrow(uint256 escrowId) internal {
+        Escrow storage escrow = escrows[escrowId];
+        require(escrow.locked);
+        require(escrow.blockExpiresAt > block.number);
+        require(msg.sender == escrow.to);
+        require(token.transfer(escrow.to, escrow.cost));
 
-    // redeem the escrow
-    if (!token.transfer(escrow.to, escrow.cost)) {
-      return false;
+        // forcefully expire the escrow
+        escrow.blockExpiresAt = 0;
     }
-
-    // forcefully expire the escrow
-    escrow.blockExpiresAt = 0;
-    return true;
-  }
 
     /**
     * @dev Gets the escrow payment back to the initiator if the escrow was not
     * fulfilled.
     */
-    function revokeEscrow(uint256 escrowId) external returns (bool) {
-        // Only the coordinator should be able to call this
-        if (!coordinators[msg.sender]) {
-            return false;
-        }
-
+    function revokeEscrow(uint256 escrowId) internal {
         Escrow storage escrow = escrows[escrowId];
-        // don't allow revoke if escrow is locked and unexpired
-        if (escrow.locked && escrow.blockExpiresAt > block.number) {
-            return false;
-        }
-
-        // revoke the escrow
-        if (!token.transfer(escrow.from, escrow.cost)) {
-            return false;
-        }
+        require(!escrow.locked);
+        require(token.transfer(escrow.from, escrow.cost));
 
         // forcefully expire the escrow
         escrow.blockExpiresAt = 0;
-        return true;
     }
 
     event ServiceRequested(
@@ -195,11 +158,13 @@ contract AbacusKernel {
     */
     mapping (address => mapping (uint256 => uint256)) requestEscrows;
 
+    /**
+     * @dev Requests a service from the given service provider.
+     */
     function requestService(
         uint256 providerId,
         uint256 cost,
-        uint256 requestId,
-        uint256 expiryBlocks
+        uint256 requestId
     ) external {
         address owner = providerRegistry.providerOwner(providerId);
 
@@ -207,8 +172,7 @@ contract AbacusKernel {
         require(requestEscrows[msg.sender][requestId] == 0);
 
         // Create escrow
-        uint256 escrowId = beginEscrow(msg.sender, owner, cost, expiryBlocks);
-        require(escrowId != 0);
+        uint256 escrowId = beginEscrow(msg.sender, owner, cost);
         requestEscrows[msg.sender][requestId] = escrowId;
         emit ServiceRequested({
             providerId: providerId,
@@ -219,30 +183,36 @@ contract AbacusKernel {
         });
     }
 
-    function lockEscrow(
+    /**
+     * @dev Locks payment for a service request.
+     */
+    function lockRequest(
         uint256 providerId,
         address user,
         uint256 requestId,
         uint256 expiryBlocks
-    ) external returns (bool)
+    ) external
     {
         // Ensure requester is the provider owner
         require(msg.sender == providerRegistry.providerOwner(providerId));
         // Ensure request exists
         uint256 escrowId = requestEscrows[user][requestId];
         require(escrowId != 0);
-        // redeem kernel escrow
-        return lockEscrow(escrowId, expiryBlocks);
-    }
-
-    function revokeVerification(uint256 requestId) external returns (bool) {
-        uint256 escrowId = requestEscrows[msg.sender][requestId];
-        require(escrowId != 0);
-        return revokeEscrow(escrowId);
+        // lock kernel escrow
+        lockEscrow(escrowId, expiryBlocks);
     }
 
     /**
-      * @dev Called by the coordinator when a provider completes its service.
+     * @dev Revokes a request.
+     */
+    function revokeRequest(uint256 requestId) external {
+        uint256 escrowId = requestEscrows[msg.sender][requestId];
+        require(escrowId != 0);
+        revokeEscrow(escrowId);
+    }
+
+    /**
+      * @dev Called by the provider when it completes its service.
       *
       * @param providerId The provider id.
       * @param requester The address of the requester.
@@ -252,15 +222,14 @@ contract AbacusKernel {
         uint256 providerId,
         address requester,
         uint256 requestId
-    ) internal {
-        require(coordinators[msg.sender]);
+    ) external {
         // Ensure requester is the provider owner
         require(msg.sender != providerRegistry.providerOwner(providerId));
         // Ensure request exists
         uint256 escrowId = requestEscrows[requester][requestId];
         require(escrowId != 0);
         // redeem kernel escrow
-        require(redeemEscrow(escrowId));
+        redeemEscrow(escrowId);
 
         emit ServicePerformed({
             providerId: providerId,

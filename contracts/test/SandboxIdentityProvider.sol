@@ -1,18 +1,20 @@
 pragma solidity ^0.4.21;
 
-import "../identity/IdentityDatabase.sol";
+import "../AbacusKernel.sol";
+import "../identity/IdentityCoordinator.sol";
 import "../identity/IdentityProvider.sol";
 
 contract SandboxIdentityProvider is IdentityProvider {
-    IdentityDatabase identityDatabase;
+    AbacusKernel kernel;
+    IdentityCoordinator identityCoordinator;
 
     function SandboxIdentityProvider(
-        IdentityDatabase _identityDatabase,
+        AbacusKernel _kernel,
         IdentityCoordinator _identityCoordinator,
         uint256 providerId
     ) IdentityProvider(_identityCoordinator, providerId) public
     {
-        identityDatabase = _identityDatabase;
+        kernel = _kernel;
     }
 
     function writeBytes32Field(
@@ -20,16 +22,10 @@ contract SandboxIdentityProvider is IdentityProvider {
         uint256 requestId,
         uint256 fieldId,
         bytes32 value
-    ) external onlyOwner returns (bool) {
-        // First lock the verification so we can "start".
-        if (!identityCoordinator.lockVerification(providerId, user, requestId, 10)) {
-            return false;
-        }
-        // Then complete the verification.
-        if (!identityCoordinator.onVerificationCompleted(providerId, user, requestId)) {
-            return false;
-        }
-        return identityDatabase.writeBytes32Field(providerId, user, fieldId, value);
+    ) external onlyOwner {
+        kernel.lockRequest(providerId, user, requestId, 10);
+        kernel.onServiceCompleted(providerId, user, requestId);
+        identityCoordinator.writeBytes32Field(providerId, user, fieldId, value);
     }
 
     function writeBytesField(
@@ -37,16 +33,10 @@ contract SandboxIdentityProvider is IdentityProvider {
         uint256 requestId,
         uint256 fieldId,
         bytes value
-    ) external onlyOwner returns (bool) {
-        // First lock the verification so we can "start".
-        if (!identityCoordinator.lockVerification(providerId, user, requestId, 10)) {
-            return false;
-        }
-        // Then complete the verification.
-        if (!identityCoordinator.onVerificationCompleted(providerId, user, requestId)) {
-            return false;
-        }
-        return identityDatabase.writeBytesField(providerId, user, fieldId, value);
+    ) external onlyOwner {
+        kernel.lockRequest(providerId, user, requestId, 10);
+        kernel.onServiceCompleted(providerId, user, requestId);
+        identityCoordinator.writeBytesField(providerId, user, fieldId, value);
     }
 
 }
