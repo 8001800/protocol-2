@@ -1,12 +1,11 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const IdentityCoordinator = artifacts.require("IdentityCoordinator");
-const IdentityDatabase = artifacts.require("IdentityDatabase");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
-const BooleanIdentityProvider = artifacts.require("BooleanIdentityProvider");
+const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 const { promisify } = require("es6-promisify");
 const BigNumber = require("bignumber.js");
 
@@ -14,33 +13,23 @@ contract("IdentityCoordinator", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
   let identityCoordinator = null;
-  let identityDatabase = null;
   let aba = null;
   let kernel = null;
+  let identityProvider = null;
 
   beforeEach(async () => {
     providerRegistry = await ProviderRegistry.deployed();
     complianceCoordinator = await ComplianceCoordinator.deployed();
     identityCoordinator = await IdentityCoordinator.deployed();
-    identityDatabase = await IdentityDatabase.deployed();
     aba = await AbacusToken.deployed();
     kernel = await AbacusKernel.deployed();
+
+    identityProvider = await SandboxIdentityProvier.deployed();
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
 
   it("should update the identity if request exists", async () => {
-    const identityProvider = await BooleanIdentityProvider.new(
-      identityDatabase.address,
-      identityCoordinator.address,
-      0
-    );
-    await identityProvider.registerProvider(
-      "Boolean",
-      "http://identity.abacusprotocol.com",
-      true
-    );
-
     const requestId = 1289479214;
     const cost = 0;
 
@@ -54,33 +43,22 @@ contract("IdentityCoordinator", accounts => {
     assert.equal(reqLogs.length, 1);
     assert.equal(reqLogs[0].args.requestId, requestId);
 
-    await identityProvider.addPassing(accounts[3], requestId);
-    const allowed = await identityDatabase.bytes32Data(
+    await identityProvider.writeBytes32Field(accounts[3], requestId, 88, "0x1");
+    const allowed = await identityCoordinator.bytes32Data(
       await identityProvider.providerId(),
       accounts[3],
-      await identityProvider.FIELD_PASSES()
+      88
     );
 
     assert(allowed.includes("1"), "Should be allowed in identity provider");
   });
 
   it("should not update the identity if no request", async () => {
-    const identityProvider = await BooleanIdentityProvider.new(
-      identityDatabase.address,
-      identityCoordinator.address,
-      0
-    );
-    await identityProvider.registerProvider(
-      "Boolean",
-      "http://identity.abacusprotocol.com",
-      true
-    );
-
-    await identityProvider.addPassing(accounts[3], 123);
-    const allowed = await identityDatabase.bytes32Data(
+    await identityProvider.writeBytes32Field(accounts[3], 123, 88, "0x1");
+    const allowed = await identityCoordinator.bytes32Data(
       await identityProvider.providerId(),
       accounts[3],
-      await identityProvider.FIELD_PASSES()
+      88
     );
 
     assert(

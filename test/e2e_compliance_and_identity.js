@@ -5,9 +5,9 @@ const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
-const BooleanIdentityProvider = artifacts.require("BooleanIdentityProvider");
-const BooleanIdentityComplianceStandard = artifacts.require(
-  "BooleanIdentityComplianceStandard"
+const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
+const BooleanSandboxComplianceStandard = artifacts.require(
+  "BooleanSandboxComplianceStandard"
 );
 
 const { promisify } = require("es6-promisify");
@@ -33,8 +33,8 @@ contract("E2E compliance and identity", accounts => {
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
 
-    identityProvider = await BooleanIdentityProvider.deployed();
-    complianceStandard = await BooleanIdentityComplianceStandard.deployed();
+    identityProvider = await SandboxIdentityProvider.deployed();
+    complianceStandard = await BooleanSandboxComplianceStandard.deployed();
     ctoken = await SampleCompliantToken.deployed();
   });
 
@@ -60,7 +60,7 @@ contract("E2E compliance and identity", accounts => {
     assert.equal(reqLogs1.length, 1);
     assert.equal(reqLogs1[0].args.requestId, requestId1);
 
-    await identityProvider.addPassing(accounts[0], requestId1);
+    await identityProvider.writeBytes32Field(accounts[0], requestId, 88, "0x1");
 
     const { logs: reqLogs2 } = await identityCoordinator.requestVerification(
       await identityProvider.providerId(),
@@ -72,7 +72,12 @@ contract("E2E compliance and identity", accounts => {
     assert.equal(reqLogs2.length, 1);
     assert.equal(reqLogs2[0].args.requestId, requestId2);
 
-    await identityProvider.addPassing(accounts[4], requestId2);
+    await identityProvider.writeBytes32Field(
+      accounts[4],
+      requestId2,
+      88,
+      "0x1"
+    );
 
     const { logs: xferLogs } = await ctoken.transfer(accounts[4], 100);
     assert.equal(xferLogs.length, 1);

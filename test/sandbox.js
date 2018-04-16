@@ -1,12 +1,10 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const IdentityCoordinator = artifacts.require("IdentityCoordinator");
-const IdentityDatabase = artifacts.require("IdentityDatabase");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
-const BooleanIdentityProvider = artifacts.require("BooleanIdentityProvider");
 const { promisify } = require("es6-promisify");
 const BigNumber = require("bignumber.js");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
@@ -16,7 +14,6 @@ contract("Sandbox", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
   let identityCoordinator = null;
-  let identityDatabase = null;
   let aba = null;
   let kernel = null;
   let provider = null;
@@ -25,7 +22,6 @@ contract("Sandbox", accounts => {
     providerRegistry = await ProviderRegistry.deployed();
     complianceCoordinator = await ComplianceCoordinator.deployed();
     identityCoordinator = await IdentityCoordinator.deployed();
-    identityDatabase = await IdentityDatabase.deployed();
     aba = await AbacusToken.deployed();
     kernel = await AbacusKernel.deployed();
     provider = await SandboxIdentityProvider.deployed();
@@ -49,7 +45,7 @@ contract("Sandbox", accounts => {
       value
     );
 
-    const data = await identityDatabase.bytesData(
+    const data = await identityCoordinator.bytesData(
       await provider.providerId(),
       accounts[3],
       fieldId
