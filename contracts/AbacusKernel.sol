@@ -119,11 +119,11 @@ contract AbacusKernel {
         Escrow storage escrow = escrows[escrowId];
         require(escrow.locked);
         require(escrow.blockExpiresAt > block.number);
-        require(msg.sender == escrow.to);
-        require(token.transfer(escrow.to, escrow.cost));
+        // require(msg.sender == escrow.to);
+        // require(token.transfer(escrow.to, escrow.cost));
 
-        // forcefully expire the escrow
-        escrow.blockExpiresAt = 0;
+        // // forcefully expire the escrow
+        // escrow.blockExpiresAt = 0;
     }
 
     /**
@@ -224,7 +224,7 @@ contract AbacusKernel {
         uint256 requestId
     ) external {
         // Ensure requester is the provider owner
-        require(msg.sender != providerRegistry.providerOwner(providerId));
+        require(msg.sender == providerRegistry.providerOwner(providerId));
         // Ensure request exists
         uint256 escrowId = requestEscrows[requester][requestId];
         require(escrowId != 0);

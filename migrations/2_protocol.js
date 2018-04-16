@@ -38,7 +38,7 @@ module.exports = async deployer => {
     // Sandbox identity provider
     await deployer.deploy(
       SandboxIdentityProvider,
-      IdentityCoordinator.address,
+      AbacusKernel.address,
       IdentityCoordinator.address,
       0
     );

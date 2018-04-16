@@ -6,7 +6,6 @@ import "../identity/IdentityProvider.sol";
 
 contract SandboxIdentityProvider is IdentityProvider {
     AbacusKernel kernel;
-    IdentityCoordinator identityCoordinator;
 
     function SandboxIdentityProvider(
         AbacusKernel _kernel,

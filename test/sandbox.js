@@ -34,7 +34,7 @@ contract("Sandbox", accounts => {
     const fieldId = "1234";
     const value = "0xdeadbeef";
 
-    await identityCoordinator.requestVerification(3, 0, requestId, 10, {
+    await kernel.requestService(await provider.providerId(), 0, requestId, {
       from: accounts[3]
     });
 
