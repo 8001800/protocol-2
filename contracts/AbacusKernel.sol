@@ -46,9 +46,7 @@ contract AbacusKernel {
         uint256 cost
     ) public returns (bool)
     {
-        if (!coordinators[msg.sender]) {
-            return false;
-        }
+        require(coordinators[msg.sender] || msg.sender == from);
         return token.transferFrom(from, to, cost);
     }
 
@@ -85,7 +83,10 @@ contract AbacusKernel {
         require(!requests[msg.sender][requestId]);
 
         // Transfer tokens to the owner of the service.
+        // Must be called by the requester of the service.
         require(transferTokensFrom(msg.sender, owner, cost));
+
+        requests[msg.sender][requestId] = true;
 
         emit ServiceRequested({
             providerId: providerId,
