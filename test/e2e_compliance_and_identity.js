@@ -50,23 +50,26 @@ contract("E2E compliance and identity", accounts => {
       from: accounts[4]
     });
 
-    const { logs: reqLogs1 } = await identityCoordinator.requestVerification(
+    const { logs: reqLogs1 } = await kernel.requestService(
       await identityProvider.providerId(),
       cost,
       requestId1,
-      10,
       { from: accounts[0] }
     );
     assert.equal(reqLogs1.length, 1);
     assert.equal(reqLogs1[0].args.requestId, requestId1);
 
-    await identityProvider.writeBytes32Field(accounts[0], requestId, 88, "0x1");
+    await identityProvider.writeBytes32Field(
+      accounts[0],
+      requestId1,
+      88,
+      "0x1"
+    );
 
-    const { logs: reqLogs2 } = await identityCoordinator.requestVerification(
+    const { logs: reqLogs2 } = await kernel.requestService(
       await identityProvider.providerId(),
       cost,
       requestId2,
-      10,
       { from: accounts[4] }
     );
     assert.equal(reqLogs2.length, 1);
