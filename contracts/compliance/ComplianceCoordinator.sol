@@ -83,14 +83,10 @@ contract ComplianceCoordinator is AbacusCoordinator {
      */
     event ComplianceCheckResultWritten(
         uint256 requestId,
+        address requester,
         uint256 actionId,
         uint256 providerId,
         uint256 providerVersion,
-        address instrumentAddr,
-        uint256 instrumentIdOrAmt,
-        address from,
-        address to,
-        bytes32 data,
         uint256 blockToExpire,
         uint8 checkResult
     );
@@ -104,13 +100,10 @@ contract ComplianceCoordinator is AbacusCoordinator {
      */
     function writeCheckResult(
         uint256 requestId,
+        address requester,
         uint256 providerId,
         uint256 providerVersion,
-        address instrumentAddr,
-        uint256 instrumentIdOrAmt,
-        address from,
-        address to,
-        bytes32 data,
+        uint256 actionId,
         uint256 blockToExpire,
         uint8 checkResult
     ) external
@@ -125,31 +118,25 @@ contract ComplianceCoordinator is AbacusCoordinator {
         // Check provider version is correct
         require(version == providerVersion);
         // Check service owner is correct
-        require(owner == msg.sender);
-
-        uint256 actionId = computeActionId(
-            providerId,
-            providerVersion,
-            instrumentAddr,
-            instrumentIdOrAmt,
-            from,
-            to,
-            data
-        );
+        require(msg.sender == owner);
 
         // Overwrite existing action
         actionsToRequests[actionId] = requestId;
+        checkResults[requestId] = CheckResult({
+            requestId: requestId,
+            actionId: actionId,
+            blockToExpire: blockToExpire,
+            checkResult: checkResult
+        });
+
+        kernel.onServiceCompleted(providerId, requester, requestId);
 
         emit ComplianceCheckResultWritten({
             requestId: requestId,
+            requester: requester,
             actionId: actionId,
             providerId: providerId,
             providerVersion: providerVersion,
-            instrumentAddr: instrumentAddr,
-            instrumentIdOrAmt: instrumentIdOrAmt,
-            from: from,
-            to: to,
-            data: data,
             blockToExpire: blockToExpire,
             checkResult: checkResult
         });
@@ -195,7 +182,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         address from,
         address to,
         bytes32 data
-    ) pure private returns (uint256)
+    ) pure public returns (uint256)
     {
         return uint256(
             keccak256(

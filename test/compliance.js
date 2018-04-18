@@ -242,7 +242,8 @@ contract("ComplianceCoordinator", accounts => {
       instrumentIdOrAmt: 10,
       from: accounts[0],
       to: accounts[1],
-      cost: 10
+      cost: 10,
+      requestId: "912832"
     };
 
     // This should be blocked.
@@ -250,30 +251,34 @@ contract("ComplianceCoordinator", accounts => {
     assert.equal(acc1XferLogs.length, 0);
 
     // Make a request
-    const { logs: requestCheckLogs } = await complianceCoordinator.requestCheck(
+    const { logs: requestCheckLogs } = await kernel.requestService(
       id,
-      params.instrumentAddr,
-      params.instrumentIdOrAmt,
-      params.from,
-      params.to,
-      [],
-      params.cost
+      params.cost,
+      params.requestId
     );
 
     assert.equal(requestCheckLogs.length, 1);
-    assert.equal(requestCheckLogs[0].event, "ComplianceCheckRequested");
+    assert.equal(requestCheckLogs[0].event, "ServiceRequested");
     assert.equal(requestCheckLogs[0].args.cost.toNumber(), params.cost);
 
-    const {
-      logs: writeCheckLogs
-    } = await complianceCoordinator.writeCheckResult(
+    const actionId = await complianceCoordinator.computeActionId(
       id,
       1,
       params.instrumentAddr,
       params.instrumentIdOrAmt,
       params.from,
       params.to,
-      0, // no data
+      0
+    );
+
+    const {
+      logs: writeCheckLogs
+    } = await complianceCoordinator.writeCheckResult(
+      params.requestId,
+      accounts[0],
+      id,
+      1,
+      actionId,
       999999999,
       0,
       { from: accounts[3] }

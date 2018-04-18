@@ -109,8 +109,11 @@ contract AbacusKernel {
         address requester,
         uint256 requestId
     ) external {
-        // Must be called from the service provider.
-        require(msg.sender == providerRegistry.providerOwner(providerId));
+        // Must be called from the service provider or by a coordinator.
+        require(
+            coordinators[msg.sender] ||
+            msg.sender == providerRegistry.providerOwner(providerId)
+        );
         require(requests[requester][requestId]);
 
         emit ServicePerformed({
