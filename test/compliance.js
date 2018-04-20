@@ -1,3 +1,6 @@
+const chai = require('chai').use(require('chai-as-promised'));
+const assert = chai.assert;
+
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const IdentityCoordinator = artifacts.require("IdentityCoordinator");
@@ -312,7 +315,8 @@ contract("ComplianceCoordinator", accounts => {
       from: accounts[0],
       to: accounts[1],
       providerId: 999,
-      providerVersion: 1 // doesn't matter
+      providerVersion: 1, // doesn't matter
+      requestId: 10 // doesn't matter
     };
 
     const actionId = await complianceCoordinator.computeActionId(
@@ -325,54 +329,82 @@ contract("ComplianceCoordinator", accounts => {
       0
     );
 
-    try {
-      await complianceCoordinator.writeCheckResult(
-        10, // requestId: doesn't matter
+    // Make a request
+    await assert.isRejected(
+      kernel.requestService(
+        params.providerId,
+        0, // (cost) doesn't matter
+        params.requestId
+      )
+    );
+
+    // Write check result
+    await assert.isRejected(
+      complianceCoordinator.writeCheckResult(
+        params.requestId,
         params.from,
         params.providerId,
         params.providerVersion,
         actionId,
         999999999,
         0
-      );
-      assert.fail();
-    } catch (e) {}
+      )
+    );
   });
 
   it("should error on incorrect provider version", async () => {
     // Create off chain standard
     const { logs } = await providerRegistry.registerProvider(
-      "Ian",
-      "some sort of ipfs hash",
-      accounts[0],
+      "Ahri",
+      "metadata",
+      accounts[4],
       true
     );
     const id = logs[0].args.id;
     const owner = await providerRegistry.providerOwner(id);
-    assert.equal(accounts[0], owner);
+    assert.equal(accounts[4], owner);
 
     const params = {
+      providerId: id,
+      providerVersion: 1,
       instrumentAddr: accounts[0], // doesn't matter
-      instrumentIdOrAmt: 10,
+      instrumentIdOrAmt: 10, // doesn't matter
       from: accounts[0],
-      to: accounts[1]
+      to: accounts[1],
+      requestId: 10 // doesn't matter
     };
 
-    const {
-      logs: writeCheckLogs
-    } = await complianceCoordinator.writeCheckResult(
-      id,
-      42, // wrong version
+    const actionId = await complianceCoordinator.computeActionId(
+      params.providerId,
+      params.providerVersion,
       params.instrumentAddr,
       params.instrumentIdOrAmt,
       params.from,
       params.to,
-      [],
-      999999999,
       0
     );
 
-    assert.equal(writeCheckLogs.length, 0);
+    // Make a request
+    const { logs: requestCheckLogs } = await kernel.requestService(
+      params.providerId,
+      0, // doesn't matter
+      params.requestId
+    );
+    assert.equal(requestCheckLogs.length, 1);
+    assert.equal(requestCheckLogs[0].event, "ServiceRequested");
+
+    await assert.isRejected(
+      complianceCoordinator.writeCheckResult(
+        10, // requestId: doesn't matter
+        params.from,
+        params.providerId,
+        999, // wrong version
+        actionId,
+        999999999,
+        0,
+        { from: accounts[4] }
+      )
+    );
   });
 
   it("should error on incorrect service owner", async () => {
