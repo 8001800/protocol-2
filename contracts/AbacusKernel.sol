@@ -16,25 +16,18 @@ contract AbacusKernel {
     ProviderRegistry public providerRegistry;
 
     address public complianceCoordinator;
-    address public identityCoordinator;
-
     mapping (address => bool) coordinators;
 
     function AbacusKernel(
         AbacusToken _token,
         ProviderRegistry _providerRegistry,
-
-        address _complianceCoordinator,
-        address _identityCoordinator
+        address _complianceCoordinator
     ) public
     {
         token = _token;
         providerRegistry = _providerRegistry;
-
         complianceCoordinator = _complianceCoordinator;
-        identityCoordinator = _identityCoordinator;
-
-        coordinators[complianceCoordinator] = coordinators[identityCoordinator] = true;
+        coordinators[complianceCoordinator] = true;
     }
 
     /**

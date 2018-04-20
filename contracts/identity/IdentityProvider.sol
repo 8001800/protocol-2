@@ -1,16 +1,45 @@
 pragma solidity ^0.4.21;
 
 import "../provider/Provider.sol";
-import "../identity/IdentityCoordinator.sol";
+import "../identity/IdentityToken.sol";
 
 contract IdentityProvider is Provider {
-    IdentityCoordinator identityCoordinator;
+    IdentityToken identityToken;
 
     function IdentityProvider(
-        IdentityCoordinator _identityCoordinator,
-        uint256 providerId
-    ) Provider(_identityCoordinator.providerRegistry(), providerId) public
+        IdentityToken _identityToken,
+        ProviderRegistry _providerRegistry,
+        uint256 _providerId
+    ) Provider(_providerRegistry, _providerId) public
     {
-        identityCoordinator = _identityCoordinator;
+        identityToken = _identityToken;
+    }
+
+    function writeBytes32Field(
+        address user,
+        uint256 fieldId,
+        bytes32 value
+    ) internal {
+        identityToken.annotationDatabase().writeBytes32Field(
+            identityToken,
+            identityToken.tokenOf(user),
+            providerId,
+            fieldId,
+            value
+        );
+    }
+
+    function writeBytesField(
+        address user,
+        uint256 fieldId,
+        bytes value
+    ) internal {
+        identityToken.annotationDatabase().writeBytesField(
+            identityToken,
+            identityToken.tokenOf(user),
+            providerId,
+            fieldId,
+            value
+        );
     }
 }

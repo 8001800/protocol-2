@@ -1,10 +1,11 @@
 pragma solidity ^0.4.21;
 
-import "../identity/IdentityCoordinator.sol";
+import "../identity/IdentityToken.sol";
+import "../AnnotationDatabase.sol";
 import "../compliance/ComplianceStandard.sol";
 
 contract BooleanSandboxComplianceStandard is ComplianceStandard {
-    IdentityCoordinator identityCoordinator;
+    IdentityToken identityToken;
 
     uint8 constant E_UNWHITELISTED = 1;
     uint256 operations = 0;
@@ -12,13 +13,13 @@ contract BooleanSandboxComplianceStandard is ComplianceStandard {
     uint256 constant public FIELD_NUM = 88;
 
     function BooleanSandboxComplianceStandard(
-        IdentityCoordinator _identityCoordinator,
+        IdentityToken _identityToken,
         ProviderRegistry _providerRegistry,
         uint256 _providerId,
         uint256 _identityProviderId
     ) Provider(_providerRegistry, _providerId) public
     {
-        identityCoordinator = _identityCoordinator;
+        identityToken = _identityToken;
         identityProviderId = _identityProviderId;
     }
 
@@ -30,11 +31,15 @@ contract BooleanSandboxComplianceStandard is ComplianceStandard {
         bytes32 
     ) view external returns (uint8, uint256)
     {
-        bool fromPasses = identityCoordinator.bytes32Data(identityProviderId, from, FIELD_NUM) != bytes32(0);
+        bool fromPasses = identityToken.annotationDatabase().bytes32Data(
+            identityToken, identityToken.tokenOf(from), identityProviderId, FIELD_NUM
+        ) != bytes32(0);
         if (token == from) {
             fromPasses = true;
         }
-        bool toPasses = identityCoordinator.bytes32Data(identityProviderId, to, FIELD_NUM) != bytes32(0);
+        bool toPasses = identityToken.annotationDatabase().bytes32Data(
+            identityToken, identityToken.tokenOf(to), identityProviderId, FIELD_NUM
+        ) != bytes32(0);
         if (fromPasses && toPasses) {
             return (0, 0);
         } else {

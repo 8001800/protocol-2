@@ -7,47 +7,47 @@ import "../compliance/ComplianceStandard.sol";
  */
 contract WhitelistStandard is ComplianceStandard {
 
-  mapping (address => bool) allowed;
+    mapping (address => bool) allowed;
 
-  uint8 constant E_UNWHITELISTED = 1;
-  uint256 operations = 0;
-  uint256 delegateProviderId;
+    uint8 constant E_UNWHITELISTED = 1;
+    uint256 operations = 0;
+    uint256 delegateProviderId;
 
-  function WhitelistStandard(
-    ProviderRegistry _providerRegistry, uint256 _providerId, uint256 _delegateProviderId
-  ) Provider(_providerRegistry, _providerId) public
-  {
-    delegateProviderId = _delegateProviderId;
-    allowed[msg.sender] = true;
-  }
-
-  function allow(address user) external returns (bool) {
-    allowed[user] = true;
-  }
-
-  function check(
-    address,
-    uint256,
-    address from,
-    address to,
-    bytes32 
- ) view external returns (uint8, uint256)
-  {
-    if (allowed[from] && allowed[to]) {
-      return (0, delegateProviderId);
-    } else {
-      return (E_UNWHITELISTED, 0);
+    function WhitelistStandard(
+        ProviderRegistry _providerRegistry, uint256 _providerId, uint256 _delegateProviderId
+    ) Provider(_providerRegistry, _providerId) public
+    {
+        delegateProviderId = _delegateProviderId;
+        allowed[msg.sender] = true;
     }
-  }
 
-  function onHardCheck(
-    address,
-    uint256,
-    address,
-    address,
-    bytes32
-  ) external
-  {
-    operations++;
-  }
+    function allow(address user) external returns (bool) {
+        allowed[user] = true;
+    }
+
+    function check(
+        address,
+        uint256,
+        address from,
+        address to,
+        bytes32 
+  ) view external returns (uint8, uint256)
+    {
+        if (allowed[from] && allowed[to]) {
+            return (0, delegateProviderId);
+        } else {
+            return (E_UNWHITELISTED, 0);
+        }
+    }
+
+    function onHardCheck(
+        address,
+        uint256,
+        address,
+        address,
+        bytes32
+    ) external
+    {
+        operations++;
+    }
 }

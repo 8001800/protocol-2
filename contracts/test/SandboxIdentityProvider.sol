@@ -1,7 +1,6 @@
 pragma solidity ^0.4.21;
 
 import "../AbacusKernel.sol";
-import "../identity/IdentityCoordinator.sol";
 import "../identity/IdentityProvider.sol";
 
 contract SandboxIdentityProvider is IdentityProvider {
@@ -9,9 +8,13 @@ contract SandboxIdentityProvider is IdentityProvider {
 
     function SandboxIdentityProvider(
         AbacusKernel _kernel,
-        IdentityCoordinator _identityCoordinator,
-        uint256 providerId
-    ) IdentityProvider(_identityCoordinator, providerId) public
+        IdentityToken _identityToken,
+        uint256 _providerId
+    ) IdentityProvider(
+        _identityToken,
+        _kernel.providerRegistry(),
+        _providerId
+    ) public
     {
         kernel = _kernel;
     }
@@ -23,7 +26,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         bytes32 value
     ) external onlyOwner {
         kernel.onServiceCompleted(providerId, user, requestId);
-        identityCoordinator.writeBytes32Field(providerId, user, fieldId, value);
+        writeBytes32Field(user, fieldId, value);
     }
 
     function writeBytesField(
@@ -33,7 +36,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         bytes value
     ) external onlyOwner {
         kernel.onServiceCompleted(providerId, user, requestId);
-        identityCoordinator.writeBytesField(providerId, user, fieldId, value);
+        writeBytesField(user, fieldId, value);
     }
 
 }

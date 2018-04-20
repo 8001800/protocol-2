@@ -1,10 +1,11 @@
 pragma solidity ^0.4.21;
 
-import "../identity/IdentityCoordinator.sol";
+import "../identity/IdentityToken.sol";
+import "../AnnotationDatabase.sol";
 import "../compliance/ComplianceStandard.sol";
 
 contract UintSandboxComplianceStandard is ComplianceStandard {
-    IdentityCoordinator identityCoordinator;
+    IdentityToken identityToken;
 
     uint8 constant E_UNWHITELISTED = 1;
     uint256 operations = 0;
@@ -12,13 +13,13 @@ contract UintSandboxComplianceStandard is ComplianceStandard {
     uint256 constant public FIELD_NUM = 888;
 
     function UintSandboxComplianceStandard(
-        IdentityCoordinator _identityCoordinator,
+        IdentityToken _identityToken,
         ProviderRegistry _providerRegistry,
         uint256 _providerId,
         uint256 _identityProviderId
     ) Provider(_providerRegistry, _providerId) public
     {
-        identityCoordinator = _identityCoordinator;
+        identityToken = _identityToken;
         identityProviderId = _identityProviderId;
     }
 
@@ -30,9 +31,17 @@ contract UintSandboxComplianceStandard is ComplianceStandard {
         bytes32 
     ) view external returns (uint8, uint256)
     {
-        uint256 fromVal = uint256(identityCoordinator.bytes32Data(identityProviderId, from, FIELD_NUM));
+        uint256 fromVal = uint256(
+            identityToken.annotationDatabase().bytes32Data(
+                identityToken, identityToken.tokenOf(from), identityProviderId, FIELD_NUM
+            )
+        );
         bool fromAllowed = token == from ? true : fromVal > 10;
-        uint256 toVal = uint256(identityCoordinator.bytes32Data(identityProviderId, to, FIELD_NUM));
+        uint256 toVal = uint256(
+            identityToken.annotationDatabase().bytes32Data(
+                identityToken, identityToken.tokenOf(to), identityProviderId, FIELD_NUM
+            )
+        );
         if (fromAllowed && toVal > 10) {
             return (0, 0);
         } else {
