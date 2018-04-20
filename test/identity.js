@@ -16,6 +16,7 @@ contract("IdentityCoordinator", accounts => {
   let aba = null;
   let kernel = null;
   let identityProvider = null;
+  let nextId = 100;
 
   beforeEach(async () => {
     providerRegistry = await ProviderRegistry.deployed();
@@ -24,33 +25,50 @@ contract("IdentityCoordinator", accounts => {
     aba = await AbacusToken.deployed();
     kernel = await AbacusKernel.deployed();
 
-    identityProvider = await SandboxIdentityProvider.deployed();
+    identityProvider = await SandboxIdentityProvider.new(
+      kernel.address,
+      identityCoordinator.address,
+      0
+    );
+
+    await identityProvider.registerProvider(
+      "Ionia", "Valoran", true
+    )
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
 
   it("should update the identity if request exists", async () => {
-    const requestId = 1289479214;
-    const cost = 0;
+    const params = {
+      providerId: await identityProvider.providerId(),
+      requestId: 201011,
+      cost: 0
+    }
 
-    const { logs: reqLogs } = await identityCoordinator.requestVerification(
-      await identityProvider.providerId(),
-      cost,
-      requestId,
-      10,
-      { from: accounts[3] }
+    // Make a request
+    const { logs: requestCheckLogs } = await kernel.requestService(
+      params.providerId,
+      params.cost,
+      params.requestId
     );
-    assert.equal(reqLogs.length, 1);
-    assert.equal(reqLogs[0].args.requestId, requestId);
+    assert.equal(requestCheckLogs.length, 1);
+    assert.equal(requestCheckLogs[0].event, "ServiceRequested");
 
-    await identityProvider.writeBytes32Field(accounts[3], requestId, 88, "0x1");
-    const allowed = await identityCoordinator.bytes32Data(
-      await identityProvider.providerId(),
-      accounts[3],
-      88
+    // Write data
+    const { logs: writeLogs } = await identityProvider.writeBytes32Field(
+      accounts[0],
+      params.requestId,
+      16,
+      "0x1"
     );
 
-    assert(allowed.includes("1"), "Should be allowed in identity provider");
+    const data = await identityCoordinator.bytes32Data(
+      params.providerId,
+      accounts[0],
+      16
+    );
+
+    assert(data.includes("1"), "Data should exist in identity provider");
   });
 
   it("should not update the identity if no request", async () => {
