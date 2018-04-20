@@ -310,24 +310,33 @@ contract("ComplianceCoordinator", accounts => {
       instrumentAddr: accounts[0], // doesn't matter
       instrumentIdOrAmt: 10,
       from: accounts[0],
-      to: accounts[1]
+      to: accounts[1],
+      providerId: 999,
+      providerVersion: 1 // doesn't matter
     };
 
-    const {
-      logs: writeCheckLogs
-    } = await complianceCoordinator.writeCheckResult(
-      1, // nonexistent id
-      0, // arbitrary version (shouldn't matter)
+    const actionId = await complianceCoordinator.computeActionId(
+      params.providerId,
+      params.providerVersion,
       params.instrumentAddr,
       params.instrumentIdOrAmt,
       params.from,
       params.to,
-      [],
-      999999999,
       0
     );
 
-    assert.equal(writeCheckLogs.length, 0);
+    try {
+      await complianceCoordinator.writeCheckResult(
+        10, // requestId: doesn't matter
+        params.from,
+        params.providerId,
+        params.providerVersion,
+        actionId,
+        999999999,
+        0
+      );
+      assert.fail();
+    } catch (e) {}
   });
 
   it("should error on incorrect provider version", async () => {
