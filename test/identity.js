@@ -24,7 +24,7 @@ contract("IdentityCoordinator", accounts => {
     aba = await AbacusToken.deployed();
     kernel = await AbacusKernel.deployed();
 
-    identityProvider = await SandboxIdentityProvier.deployed();
+    identityProvider = await SandboxIdentityProvider.deployed();
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });

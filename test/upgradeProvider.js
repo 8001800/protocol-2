@@ -25,7 +25,7 @@ contract("Upgrade Providers", accounts => {
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
 
-  it("Reigster and upgrade compliance standard", async () => {
+  it("Register and upgrade compliance standard", async () => {
     const standard = await WhitelistStandard.new(
       providerRegistry.address,
       0,
