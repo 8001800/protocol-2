@@ -1,3 +1,6 @@
+const chai = require('chai').use(require('chai-as-promised'));
+const assert = chai.assert;
+
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const IdentityCoordinator = artifacts.require("IdentityCoordinator");
@@ -42,6 +45,7 @@ contract("IdentityCoordinator", accounts => {
     const params = {
       providerId: await identityProvider.providerId(),
       requestId: 201011,
+      fieldId: 16,
       cost: 0
     }
 
@@ -58,30 +62,34 @@ contract("IdentityCoordinator", accounts => {
     const { logs: writeLogs } = await identityProvider.writeBytes32Field(
       accounts[0],
       params.requestId,
-      16,
+      params.fieldId,
       "0x1"
     );
 
     const data = await identityCoordinator.bytes32Data(
       params.providerId,
       accounts[0],
-      16
+      params.fieldId
     );
 
     assert(data.includes("1"), "Data should exist in identity provider");
   });
 
   it("should not update the identity if no request", async () => {
-    await identityProvider.writeBytes32Field(accounts[3], 123, 88, "0x1");
-    const allowed = await identityCoordinator.bytes32Data(
-      await identityProvider.providerId(),
-      accounts[3],
-      88
-    );
+    const params = {
+      providerId: await identityProvider.providerId(),
+      requestId: 201005,
+      fieldId: 11,
+      cost: 0
+    }
 
-    assert(
-      !allowed.includes("1"),
-      "Should not pass since verification is incomplete"
+    await assert.isRejected(
+      identityProvider.writeBytes32Field(
+        accounts[0],
+        params.requestId,
+        11,
+        "0x1"
+      )
     );
   });
 });
