@@ -36,7 +36,7 @@ contract("IdentityCoordinator", accounts => {
 
     await identityProvider.registerProvider(
       "Ionia", "Valoran", true
-    )
+    );
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
@@ -47,7 +47,7 @@ contract("IdentityCoordinator", accounts => {
       requestId: 201011,
       fieldId: 16,
       cost: 0
-    }
+    };
 
     // Make a request
     const { logs: requestCheckLogs } = await kernel.requestService(
@@ -81,7 +81,7 @@ contract("IdentityCoordinator", accounts => {
       requestId: 201005,
       fieldId: 11,
       cost: 0
-    }
+    };
 
     await assert.isRejected(
       identityProvider.writeBytes32Field(
