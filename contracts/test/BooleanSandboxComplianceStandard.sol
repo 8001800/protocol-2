@@ -31,15 +31,19 @@ contract BooleanSandboxComplianceStandard is ComplianceStandard {
         bytes32 
     ) view external returns (uint8, uint256)
     {
-        bool fromPasses = identityToken.annotationDatabase().bytes32Data(
+        bytes32 fromVal;
+        (,fromVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(from), identityProviderId, FIELD_NUM
-        ) != bytes32(0);
+        );
+        bool fromPasses = fromVal != bytes32(0);
         if (token == from) {
             fromPasses = true;
         }
-        bool toPasses = identityToken.annotationDatabase().bytes32Data(
+        bytes32 toVal;
+        (,toVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(to), identityProviderId, FIELD_NUM
-        ) != bytes32(0);
+        );
+        bool toPasses = toVal != bytes32(0);
         if (fromPasses && toPasses) {
             return (0, 0);
         } else {

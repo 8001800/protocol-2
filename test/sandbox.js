@@ -54,6 +54,6 @@ contract("Sandbox", accounts => {
       await provider.providerId(),
       fieldId
     );
-    assert.equal(data, value);
+    assert.equal(data[1], value);
   });
 });

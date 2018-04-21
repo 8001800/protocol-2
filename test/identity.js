@@ -68,7 +68,7 @@ contract("IdentityCoordinator", accounts => {
       params.fieldId
     );
 
-    assert(data.includes("1"), "Data should exist in identity provider");
+    assert(data[1].includes("1"), "Data should exist in identity provider");
   });
 
   it("should not update the identity if no request", async () => {

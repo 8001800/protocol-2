@@ -14,8 +14,18 @@ contract AnnotationDatabase {
         providerRegistry = _providerRegistry;
     }
 
-    mapping (address => mapping (uint256 => mapping (uint256 => mapping (uint256 => bytes32)))) public bytes32Data;
-    mapping (address => mapping (uint256 => mapping (uint256 => mapping (uint256 => bytes)))) public bytesData;
+    struct Bytes32Entry {
+        uint256 blockNumber;
+        bytes32 value;
+    }
+
+    struct BytesEntry {
+        uint256 blockNumber;
+        bytes value;
+    }
+
+    mapping (address => mapping (uint256 => mapping (uint256 => mapping (uint256 => Bytes32Entry)))) public bytes32Data;
+    mapping (address => mapping (uint256 => mapping (uint256 => mapping (uint256 => BytesEntry)))) public bytesData;
 
     function writeBytes32Field(
         address nftAddr,
@@ -25,7 +35,10 @@ contract AnnotationDatabase {
         bytes32 value
     ) external {
         require(msg.sender == providerRegistry.providerOwner(providerId));
-        bytes32Data[nftAddr][nftId][providerId][fieldId] = value;
+        bytes32Data[nftAddr][nftId][providerId][fieldId] = Bytes32Entry({
+            blockNumber: block.number,
+            value: value
+        });
     }
 
     function writeBytesField(
@@ -36,7 +49,10 @@ contract AnnotationDatabase {
         bytes value
     ) external {
         require(msg.sender == providerRegistry.providerOwner(providerId));
-        bytesData[nftAddr][nftId][providerId][fieldId] = value;
+        bytesData[nftAddr][nftId][providerId][fieldId] = BytesEntry({
+            blockNumber: block.number,
+            value: value
+        });
     }
 
 }

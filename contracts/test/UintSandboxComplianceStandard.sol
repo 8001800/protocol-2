@@ -31,18 +31,18 @@ contract UintSandboxComplianceStandard is ComplianceStandard {
         bytes32 
     ) view external returns (uint8, uint256)
     {
-        uint256 fromVal = uint256(
+        bytes32 fromVal;
+        (,fromVal) = 
             identityToken.annotationDatabase().bytes32Data(
                 identityToken, identityToken.tokenOf(from), identityProviderId, FIELD_NUM
-            )
-        );
-        bool fromAllowed = token == from ? true : fromVal > 10;
-        uint256 toVal = uint256(
+            );
+        bool fromAllowed = token == from || (uint256(fromVal) > 10);
+        bytes32 toVal;
+        (,toVal) = 
             identityToken.annotationDatabase().bytes32Data(
                 identityToken, identityToken.tokenOf(to), identityProviderId, FIELD_NUM
-            )
-        );
-        if (fromAllowed && toVal > 10) {
+            );
+        if (fromAllowed && uint256(toVal) > 10) {
             return (0, 0);
         } else {
             return (E_UNWHITELISTED, 0);
