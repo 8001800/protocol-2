@@ -1,0 +1,52 @@
+{
+  "title": "Provider Metadata",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the Provider."
+    },
+    "owners": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Ethereum address of the owner."
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the owner."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the owner."
+          }
+        },
+        "required": ["address"]
+      }
+    },
+    "description": {
+      "type": "string",
+      "decription": "Description of what this Provider does."
+    },
+    "url": {
+      "type": "string",
+      "descritpion": "URL of the Provider."
+    },
+    "quoteEndpoint": {
+      "type": "string",
+      "description":
+        "HTTP URL in which a POST request is sent to retrieve a quote for an off-chain Service."
+    },
+    "providerType": {
+      "type": "string",
+      "enum": ["compliance", "identity", "appraisal"]
+    },
+    "quoteForm": {
+      "type": "object",
+      "description": "The form to be displayed when requesting a quote."
+    }
+  }
+}
