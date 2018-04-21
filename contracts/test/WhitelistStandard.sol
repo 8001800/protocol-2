@@ -25,7 +25,7 @@ contract WhitelistStandard is ComplianceStandard {
         allowed[user] = true;
     }
 
-    function check(
+    function performCheck(
         address,
         uint256,
         address from,
@@ -40,7 +40,7 @@ contract WhitelistStandard is ComplianceStandard {
         }
     }
 
-    function onHardCheck(
+    function performHardCheck(
         address,
         uint256,
         address,

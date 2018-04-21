@@ -23,7 +23,7 @@ contract BooleanSandboxComplianceStandard is ComplianceStandard {
         identityProviderId = _identityProviderId;
     }
 
-    function check(
+    function performCheck(
         address token,
         uint256,
         address from,
@@ -47,7 +47,7 @@ contract BooleanSandboxComplianceStandard is ComplianceStandard {
         }
     }
 
-    function onHardCheck(
+    function performHardCheck(
         address,
         uint256,
         address,

@@ -18,7 +18,7 @@ contract ComplianceStandard is Provider {
    *
    * @return result and next serviceId.
    */
-  function check(
+  function performCheck(
     address instrumentAddr,
     uint256 instrumentIdOrAmt,
     address from,
@@ -35,7 +35,7 @@ contract ComplianceStandard is Provider {
    * @param to The to address of the token transfer.
    * @param data Any additional data related to the action.
    */
-  function onHardCheck(
+  function performHardCheck(
     address instrumentAddr,
     uint256 instrumentIdOrAmt,
     address from,

@@ -274,7 +274,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         ComplianceStandard standard = ComplianceStandard(owner);
 
         uint256 nextProviderId;
-        (checkResult, nextProviderId) = standard.check(
+        (checkResult, nextProviderId) = standard.performCheck(
             instrumentAddr,
             instrumentIdOrAmt,
             from,
@@ -355,14 +355,14 @@ contract ComplianceCoordinator is AbacusCoordinator {
         // Sync checks
         ComplianceStandard standard = ComplianceStandard(owner);
 
-        (checkResult, nextProviderIdOrActionId) = standard.check(
+        (checkResult, nextProviderIdOrActionId) = standard.performCheck(
             instrumentAddr,
             instrumentIdOrAmt,
             from,
             to,
             data
         );
-        standard.onHardCheck(
+        standard.performHardCheck(
             instrumentAddr,
             instrumentIdOrAmt,
             from,
