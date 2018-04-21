@@ -16,6 +16,20 @@ contract IdentityToken is ERC721Basic {
         annotationDatabase = _annotationDatabase;
     }
 
+    function readBytes32Data(
+        address _user,
+        uint256 _providerId,
+        uint256 _fieldId
+    ) external view returns (uint256, bytes32)
+    {
+        return annotationDatabase.bytes32Data(
+            this,
+            tokenOf(_user),
+            _providerId,
+            _fieldId
+        );
+    }
+
     function tokenOf(address _owner) public view returns (uint256) {
         return uint256(_owner);
     }
