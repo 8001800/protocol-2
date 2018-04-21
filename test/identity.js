@@ -1,21 +1,23 @@
-const chai = require('chai').use(require('chai-as-promised'));
+const chai = require("chai").use(require("chai-as-promised"));
 const assert = chai.assert;
 
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const IdentityCoordinator = artifacts.require("IdentityCoordinator");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
+const AnnotationDatabase = artifacts.require("AnnotationDatabase");
+const IdentityToken = artifacts.require("IdentityToken");
 const { promisify } = require("es6-promisify");
 const BigNumber = require("bignumber.js");
 
 contract("IdentityCoordinator", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
-  let identityCoordinator = null;
+  let annoDb = null;
+  let identityToken = null;
   let aba = null;
   let kernel = null;
   let identityProvider = null;
@@ -24,19 +26,12 @@ contract("IdentityCoordinator", accounts => {
   beforeEach(async () => {
     providerRegistry = await ProviderRegistry.deployed();
     complianceCoordinator = await ComplianceCoordinator.deployed();
-    identityCoordinator = await IdentityCoordinator.deployed();
     aba = await AbacusToken.deployed();
     kernel = await AbacusKernel.deployed();
+    annoDb = await AnnotationDatabase.deployed();
+    identityToken = await IdentityToken.deployed();
 
-    identityProvider = await SandboxIdentityProvider.new(
-      kernel.address,
-      identityCoordinator.address,
-      0
-    );
-
-    await identityProvider.registerProvider(
-      "Ionia", "Valoran", true
-    );
+    identityProvider = await SandboxIdentityProvider.deployed();
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
@@ -66,9 +61,10 @@ contract("IdentityCoordinator", accounts => {
       "0x1"
     );
 
-    const data = await identityCoordinator.bytes32Data(
+    const data = await annoDb.bytes32Data(
+      identityToken.address,
+      await identityToken.tokenOf(accounts[0]),
       params.providerId,
-      accounts[0],
       params.fieldId
     );
 

@@ -1,6 +1,5 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const IdentityCoordinator = artifacts.require("IdentityCoordinator");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
@@ -16,7 +15,6 @@ const BigNumber = require("bignumber.js");
 contract("E2E compliance and identity", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
-  let identityCoordinator = null;
   let aba = null;
   let kernel = null;
 
@@ -27,7 +25,6 @@ contract("E2E compliance and identity", accounts => {
   before(async () => {
     providerRegistry = await ProviderRegistry.deployed();
     complianceCoordinator = await ComplianceCoordinator.deployed();
-    identityCoordinator = await IdentityCoordinator.deployed();
     aba = await AbacusToken.deployed();
     kernel = await AbacusKernel.deployed();
 

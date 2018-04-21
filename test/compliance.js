@@ -1,9 +1,8 @@
-const chai = require('chai').use(require('chai-as-promised'));
+const chai = require("chai").use(require("chai-as-promised"));
 const assert = chai.assert;
 
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const IdentityCoordinator = artifacts.require("IdentityCoordinator");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
@@ -21,7 +20,6 @@ contract("ComplianceCoordinator", accounts => {
   beforeEach(async () => {
     providerRegistry = await ProviderRegistry.deployed();
     complianceCoordinator = await ComplianceCoordinator.deployed();
-    identityCoordinator = await IdentityCoordinator.deployed();
     aba = await AbacusToken.deployed();
     kernel = await AbacusKernel.deployed();
 
