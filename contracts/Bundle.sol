@@ -14,6 +14,7 @@ contract Bundle is ERC721Token {
 
     mapping (uint256 => mapping (address => uint256)) erc20Assets;
     mapping (uint256 => mapping (address => mapping (uint256 => bool))) erc721Assets;
+    mapping (uint256 => bool) locked;
 
     event BundleCreate(uint256 indexed bundleId, address owner);
     event BundleDepositERC20(uint256 indexed bundleId, address token, uint256 amount);
@@ -79,5 +80,46 @@ contract Bundle is ERC721Token {
         emit BundleWithdrawERC721(_bundleId, _token, _id);
         return true;
     }
+
+    function lock(
+        uint256 _bundleId
+    ) external returns (bool) {
+        if (msg.sender != ownerOf(_bundleId)) {
+            return false;
+        }
+        locked[_bundleId] = true;
+        return true;
+    }
+
+    function unlock(
+        uint256 _bundleId
+    ) external returns (bool) {
+        if (msg.sender != ownerOf(_bundleId)) {
+            return false;
+        }
+        locked[_bundleId] = false;
+        return true;
+    }
+
+    function transferFrom(address _from, address _to, uint256 _tokenId) public {
+        require(locked[_tokenId]);
+        super.transferFrom(_from, _to, _tokenId);
+    }
+
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId) public {
+        require(locked[_tokenId]);
+        super.safeTransferFrom(_from, _to, _tokenId);
+    }
+
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId,
+        bytes _data
+    ) public {
+        require(locked[_tokenId]);
+        super.safeTransferFrom(_from, _to, _tokenId, _data);
+    }
+
 
 }
