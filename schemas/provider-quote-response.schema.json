@@ -13,13 +13,13 @@
         "The form to be displayed when requesting the service. If omitted, a form does not need to be displayed."
     },
     "requestId": {
-      "type": "number",
+      "type": "string",
       "description":
-        "The request id that the user should send to the form endpoint and send to the blockchain."
+        "The request id that the user should send to the form endpoint and send to the blockchain. Uint256."
     },
     "cost": {
       "type": "string",
-      "description": "The cost of the service in ABA."
+      "description": "The cost of the service in ABA. Uint256."
     }
   },
   "required": ["formEndpoint", "requestId", "cost"]
