@@ -252,7 +252,7 @@ contract("ComplianceCoordinator", accounts => {
     assert.equal(acc1XferLogs.length, 0);
 
     // Make a request
-    const { logs: requestCheckLogs } = await kernel.requestService(
+    const { logs: requestCheckLogs } = await kernel.requestAsyncService(
       id,
       params.cost,
       params.requestId
@@ -329,7 +329,7 @@ contract("ComplianceCoordinator", accounts => {
 
     // Make a request
     await assert.isRejected(
-      kernel.requestService(
+      kernel.requestAsyncService(
         params.providerId,
         0, // (cost) doesn't matter
         params.requestId
@@ -380,7 +380,7 @@ contract("ComplianceCoordinator", accounts => {
     );
 
     // Make a request
-    const { logs: requestCheckLogs } = await kernel.requestService(
+    const { logs: requestCheckLogs } = await kernel.requestAsyncService(
       params.providerId,
       0, // doesn't matter
       params.requestId
@@ -432,7 +432,7 @@ contract("ComplianceCoordinator", accounts => {
     );
 
     // Make a request
-    const { logs: requestCheckLogs } = await kernel.requestService(
+    const { logs: requestCheckLogs } = await kernel.requestAsyncService(
       params.providerId,
       0, // doesn't matter
       params.requestId

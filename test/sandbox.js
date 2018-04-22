@@ -37,7 +37,7 @@ contract("Sandbox", accounts => {
     const fieldId = "1234";
     const value = "0xdeadbeef";
 
-    await kernel.requestService(await provider.providerId(), 0, requestId, {
+    await kernel.requestAsyncService(await provider.providerId(), 0, requestId, {
       from: accounts[3]
     });
 

@@ -45,7 +45,7 @@ contract("IdentityCoordinator", accounts => {
     };
 
     // Make a request
-    const { logs: requestCheckLogs } = await kernel.requestService(
+    const { logs: requestCheckLogs } = await kernel.requestAsyncService(
       params.providerId,
       params.cost,
       params.requestId

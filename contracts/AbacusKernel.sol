@@ -65,7 +65,7 @@ contract AbacusKernel {
     /**
      * @dev Requests a service from the given service provider.
      */
-    function requestService(
+    function requestAsyncService(
         uint256 providerId,
         uint256 cost,
         uint256 requestId

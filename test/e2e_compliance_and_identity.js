@@ -47,7 +47,7 @@ contract("E2E compliance and identity", accounts => {
       from: accounts[4]
     });
 
-    const { logs: reqLogs1 } = await kernel.requestService(
+    const { logs: reqLogs1 } = await kernel.requestAsyncService(
       await identityProvider.providerId(),
       cost,
       requestId1,
@@ -63,7 +63,7 @@ contract("E2E compliance and identity", accounts => {
       "0x1"
     );
 
-    const { logs: reqLogs2 } = await kernel.requestService(
+    const { logs: reqLogs2 } = await kernel.requestAsyncService(
       await identityProvider.providerId(),
       cost,
       requestId2,
