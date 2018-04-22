@@ -1,0 +1,25 @@
+{
+  "title": "Provider Quote Response",
+  "type": "object",
+  "properties": {
+    "formEndpoint": {
+      "type": "string",
+      "description":
+        "The HTTP URL of the form that the user should send a POST request to."
+    },
+    "form": {
+      "type": "object",
+      "description": "The form to be displayed when requesting the service."
+    },
+    "requestId": {
+      "type": "number",
+      "description":
+        "The request id that the user should send to the form endpoint and send to the blockchain."
+    },
+    "cost": {
+      "type": "string",
+      "description": "The cost of the service in ABA."
+    }
+  },
+  "required": ["formEndpoint", "requestId", "cost"]
+}
