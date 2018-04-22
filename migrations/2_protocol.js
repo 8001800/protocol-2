@@ -35,10 +35,6 @@ module.exports = async deployer => {
     await deployer.deploy(IdentityToken, AnnotationDatabase.address);
     const identity = await IdentityToken.deployed();
 
-    console.log("identity", IdentityToken.address, identity.address);
-    const kernel = await AbacusKernel.deployed();
-    console.log("prov reg", await kernel.providerRegistry());
-
     // Sandbox identity provider
     await deployer.deploy(
       artifacts.require("IdentityProvider"),

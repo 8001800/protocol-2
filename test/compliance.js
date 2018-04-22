@@ -262,7 +262,7 @@ contract("ComplianceCoordinator", accounts => {
     assert.equal(requestCheckLogs[0].event, "ServiceRequested");
     assert.equal(requestCheckLogs[0].args.cost.toNumber(), params.cost);
 
-    const actionId = await complianceCoordinator.computeActionId(
+    const actionId = await complianceCoordinator.computeActionHash(
       id,
       1,
       params.instrumentAddr,
@@ -317,7 +317,7 @@ contract("ComplianceCoordinator", accounts => {
       requestId: 10 // doesn't matter
     };
 
-    const actionId = await complianceCoordinator.computeActionId(
+    const actionId = await complianceCoordinator.computeActionHash(
       params.providerId,
       params.providerVersion,
       params.instrumentAddr,
@@ -369,7 +369,7 @@ contract("ComplianceCoordinator", accounts => {
       requestId: 10 // doesn't matter
     };
 
-    const actionId = await complianceCoordinator.computeActionId(
+    const actionId = await complianceCoordinator.computeActionHash(
       params.providerId,
       params.providerVersion,
       params.instrumentAddr,
@@ -421,7 +421,7 @@ contract("ComplianceCoordinator", accounts => {
       requestId: 11 // doesn't matter
     };
 
-    const actionId = await complianceCoordinator.computeActionId(
+    const actionId = await complianceCoordinator.computeActionHash(
       params.providerId,
       params.providerVersion,
       params.instrumentAddr,

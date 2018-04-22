@@ -26,7 +26,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         /**
          * @dev Id of the action associated with the request.
          */
-        uint256 actionId;
+        uint256 actionHash;
 
         /**
          * @dev Block when this check status has expired. 0 if we haven't writen.
@@ -84,7 +84,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
     event ComplianceCheckResultWritten(
         uint256 requestId,
         address requester,
-        uint256 actionId,
+        uint256 actionHash,
         uint256 providerId,
         uint256 providerVersion,
         uint256 blockToExpire,
@@ -103,7 +103,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         address requester,
         uint256 providerId,
         uint256 providerVersion,
-        uint256 actionId,
+        uint256 actionHash,
         uint256 blockToExpire,
         uint8 checkResult
     ) external
@@ -121,10 +121,10 @@ contract ComplianceCoordinator is AbacusCoordinator {
         require(msg.sender == owner);
 
         // Overwrite existing action
-        actionsToRequests[actionId] = requestId;
+        actionsToRequests[actionHash] = requestId;
         checkResults[requestId] = CheckResult({
             requestId: requestId,
-            actionId: actionId,
+            actionHash: actionHash,
             blockToExpire: blockToExpire,
             checkResult: checkResult
         });
@@ -134,7 +134,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         emit ComplianceCheckResultWritten({
             requestId: requestId,
             requester: requester,
-            actionId: actionId,
+            actionHash: actionHash,
             providerId: providerId,
             providerVersion: providerVersion,
             blockToExpire: blockToExpire,
@@ -156,7 +156,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         bytes32 data
     ) external
     {
-        uint256 actionId = computeActionId(
+        uint256 actionHash = computeActionHash(
             providerId,
             providerRegistry.latestProviderVersion(providerId),
             instrumentAddr,
@@ -167,14 +167,14 @@ contract ComplianceCoordinator is AbacusCoordinator {
         );
         address owner = providerRegistry.providerOwner(providerId);
         require(msg.sender == owner || msg.sender == instrumentAddr);
-        delete checkResults[actionsToRequests[actionId]];
-        delete actionsToRequests[actionId];
+        delete checkResults[actionsToRequests[actionHash]];
+        delete actionsToRequests[actionHash];
     }
 
     /**
      * @dev Computes an id for an action using keccak256.
      */
-    function computeActionId(
+    function computeActionHash(
         uint256 providerId,
         uint256 providerVersion,
         address instrumentAddr,
@@ -213,7 +213,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
         bytes32 data
     ) view private returns (uint8, uint256)
     {
-        uint256 actionId = computeActionId(
+        uint256 actionHash = computeActionHash(
             providerId,
             providerRegistry.latestProviderVersion(providerId),
             instrumentAddr,
@@ -222,7 +222,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
             to,
             data
         );
-        CheckResult storage result = checkResults[actionsToRequests[actionId]];
+        CheckResult storage result = checkResults[actionsToRequests[actionHash]];
 
         // Check that the status check has been performed.
         if (result.blockToExpire == 0) {
@@ -234,7 +234,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
             return (E_CASYNC_CHECK_NOT_EXPIRED, 0);
         }
 
-        return (result.checkResult, actionId);
+        return (result.checkResult, actionHash);
     }
 
     /**
@@ -321,11 +321,11 @@ contract ComplianceCoordinator is AbacusCoordinator {
         uint8 checkResult;
 
         // This variable is used for two purposes to save on stack space.
-        uint256 nextProviderIdOrActionId;
+        uint256 nextProviderIdOrActionHash;
 
         // Async checks
         if (isAsync) {
-            (checkResult, nextProviderIdOrActionId) = checkAsync(
+            (checkResult, nextProviderIdOrActionHash) = checkAsync(
                 providerId,
                 instrumentAddr,
                 instrumentIdOrAmt,
@@ -348,14 +348,14 @@ contract ComplianceCoordinator is AbacusCoordinator {
                 return (checkResult, providerId);
             }
             // Invalidate check result if successful check.
-            delete actionsToRequests[nextProviderIdOrActionId];
+            delete actionsToRequests[nextProviderIdOrActionHash];
             return (checkResult, 0);
         }
 
         // Sync checks
         ComplianceStandard standard = ComplianceStandard(owner);
 
-        (checkResult, nextProviderIdOrActionId) = standard.performCheck(
+        (checkResult, nextProviderIdOrActionHash) = standard.performCheck(
             instrumentAddr,
             instrumentIdOrAmt,
             from,
@@ -380,13 +380,13 @@ contract ComplianceCoordinator is AbacusCoordinator {
             to,
             data,
             checkResult,
-            nextProviderIdOrActionId
+            nextProviderIdOrActionHash
         );
 
-        if (nextProviderIdOrActionId != 0) {
+        if (nextProviderIdOrActionHash != 0) {
             // recursively check next service
-            (checkResult, nextProviderIdOrActionId) = hardCheck(
-                nextProviderIdOrActionId,
+            (checkResult, nextProviderIdOrActionHash) = hardCheck(
+                nextProviderIdOrActionHash,
                 instrumentAddr,
                 instrumentIdOrAmt,
                 from,
@@ -394,6 +394,6 @@ contract ComplianceCoordinator is AbacusCoordinator {
                 data
             );
         }
-        return (checkResult, nextProviderIdOrActionId);
+        return (checkResult, nextProviderIdOrActionHash);
     }
 }
