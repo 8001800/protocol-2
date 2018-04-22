@@ -21,6 +21,8 @@ contract Bundle is ERC721Token {
     event BundleWithdrawERC20(uint256 indexed bundleId, address token, uint256 amount);
     event BundleDepositERC721(uint256 indexed bundleId, address token, uint256 id);
     event BundleWithdrawERC721(uint256 indexed bundleId, address token, uint256 id);
+    event BundleLock(uint256 indexed bundleId);
+    event BundleUnlock(uint256 indexed bundleId);
 
     function Bundle() public ERC721Token("Bundle", "BND") {
     }
@@ -88,6 +90,7 @@ contract Bundle is ERC721Token {
             return false;
         }
         locked[_bundleId] = true;
+        emit BundleLock(_bundleId);
         return true;
     }
 
@@ -98,6 +101,7 @@ contract Bundle is ERC721Token {
             return false;
         }
         locked[_bundleId] = false;
+        emit BundleUnlock(_bundleId);
         return true;
     }
 
