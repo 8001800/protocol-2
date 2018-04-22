@@ -25,7 +25,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         uint256 fieldId,
         bytes32 value
     ) external onlyOwner {
-        kernel.onServiceCompleted(providerId, user, requestId);
+        kernel.onAsyncServiceCompleted(providerId, user, requestId);
         writeBytes32Field(user, fieldId, value);
     }
 
@@ -35,7 +35,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         uint256 fieldId,
         bytes value
     ) external onlyOwner {
-        kernel.onServiceCompleted(providerId, user, requestId);
+        kernel.onAsyncServiceCompleted(providerId, user, requestId);
         writeBytesField(user, fieldId, value);
     }
 

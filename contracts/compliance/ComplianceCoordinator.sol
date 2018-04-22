@@ -129,7 +129,7 @@ contract ComplianceCoordinator is AbacusCoordinator {
             checkResult: checkResult
         });
 
-        kernel.onServiceCompleted(providerId, requester, requestId);
+        kernel.onAsyncServiceCompleted(providerId, requester, requestId);
 
         emit ComplianceCheckResultWritten({
             requestId: requestId,

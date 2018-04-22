@@ -97,7 +97,7 @@ contract AbacusKernel {
       * @param requester The address of the requester.
       * @param requestId An arbitrary id to link the request to the off-chain database.
       */
-    function onServiceCompleted(
+    function onAsyncServiceCompleted(
         uint256 providerId,
         address requester,
         uint256 requestId
