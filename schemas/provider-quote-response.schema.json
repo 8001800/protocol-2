@@ -9,7 +9,8 @@
     },
     "form": {
       "type": "object",
-      "description": "The form to be displayed when requesting the service."
+      "description":
+        "The form to be displayed when requesting the service. If omitted, a form does not need to be displayed."
     },
     "requestId": {
       "type": "number",
