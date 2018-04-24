@@ -1,33 +1,18 @@
 pragma solidity ^0.4.21;
 
-import "../instruments/AbacusERC20Token.sol";
+import "./FaucetToken.sol";
 
 /**
  * @dev A very simple token that implements a single compliance standard.
  */
-contract SampleCompliantToken is AbacusERC20Token {
+contract SampleCompliantToken is FaucetToken {
     string public constant name = "Sample Compliant Token";
-    string public constant symbol = "SCT";
-    uint8 public constant decimals = 18;
-
-    uint256 public constant INITIAL_SUPPLY = 1000000000000000 * (10 ** uint256(decimals));
-    uint256 constant faucetAmt = 1000 * (10 ** uint256(decimals));
+    string public constant symbol = "SC1";
 
     function SampleCompliantToken(
         ComplianceCoordinator _complianceCoordinator,
-        uint256 _complianceProviderId
-    ) AbacusERC20Token(_complianceCoordinator, _complianceProviderId) public
+        uint56 _complianceProviderId
+    ) FaucetToken(_complianceCoordinator, _complianceProviderId) public
     {
-        totalSupply_ = INITIAL_SUPPLY;
-        balances[msg.sender] = INITIAL_SUPPLY.div(2);
-        emit Transfer(0x0, msg.sender, INITIAL_SUPPLY.div(2));
-        balances[this] = INITIAL_SUPPLY.div(2);
-        emit Transfer(0x0, this, INITIAL_SUPPLY.div(2));
-    }
-
-    function request() public {
-        balances[msg.sender] += faucetAmt;
-        balances[this] -= faucetAmt;
-        emit Transfer(this, msg.sender, faucetAmt);
     }
 }

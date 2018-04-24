@@ -1,14 +1,10 @@
+const AnnotationDatabase = artifacts.require("AnnotationDatabase");
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const IdentityCoordinator = artifacts.require("IdentityCoordinator");
-const IdentityDatabase = artifacts.require("IdentityDatabase");
+const IdentityToken = artifacts.require("IdentityToken");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 
-const BooleanIdentityProvider = artifacts.require("BooleanIdentityProvider");
-const BooleanIdentityComplianceStandard = artifacts.require(
-  "BooleanIdentityComplianceStandard"
-);
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const SampleCompliantToken2 = artifacts.require("SampleCompliantToken2");
 const SampleCompliantToken3 = artifacts.require("SampleCompliantToken3");
@@ -23,15 +19,12 @@ const UintSandboxComplianceStandard = artifacts.require(
 
 const main = async () => {
   const addresses = {
+    AnnotationDatabase: AnnotationDatabase.address,
     ProviderRegistry: ProviderRegistry.address,
     ComplianceCoordinator: ComplianceCoordinator.address,
-    IdentityCoordinator: IdentityCoordinator.address,
-    IdentityDatabase: IdentityDatabase.address,
+    IdentityToken: IdentityToken.address,
     AbacusToken: AbacusToken.address,
     AbacusKernel: AbacusKernel.address,
-    BooleanIdentityProvider: BooleanIdentityProvider.address,
-    BooleanIdentityComplianceStandard:
-      BooleanIdentityComplianceStandard.address,
     SampleCompliantToken: SampleCompliantToken.address,
     SampleCompliantToken2: SampleCompliantToken2.address,
     SampleCompliantToken3: SampleCompliantToken3.address,
@@ -46,7 +39,7 @@ const main = async () => {
 
   console.log(`
 export PROV_ADDRESS=${SandboxIdentityProvider.address}
-export COORD_ADDRESS=${IdentityCoordinator.address}
+export TOKEN_ADDRESS=${IdentityToken.address}
   `);
 };
 
