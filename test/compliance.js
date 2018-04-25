@@ -44,6 +44,7 @@ contract("ComplianceCoordinator", accounts => {
       complianceCoordinator.address,
       id.toString()
     );
+    await token.request();
 
     // Authorize account 2 on list standard
     await standard.allow(accounts[2]);
@@ -98,11 +99,9 @@ contract("ComplianceCoordinator", accounts => {
       0,
       0
     );
-    const { receipt: { blockNumber } } = await standard.registerProvider(
-      "Whitelist",
-      "",
-      false
-    );
+    const {
+      receipt: { blockNumber }
+    } = await standard.registerProvider("Whitelist", "", false);
 
     const id = await standard.providerId();
     const owner = await providerRegistry.providerOwner(id);
@@ -126,6 +125,7 @@ contract("ComplianceCoordinator", accounts => {
       complianceCoordinator.address,
       parentId.toString()
     );
+    await token.request();
 
     // Authorize account 2 on both standards
     const lol = await standard.allow(accounts[2]);
@@ -237,6 +237,8 @@ contract("ComplianceCoordinator", accounts => {
       complianceCoordinator.address,
       id.toString()
     );
+
+    await token.request();
 
     const params = {
       instrumentAddr: token.address,

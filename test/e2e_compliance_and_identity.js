@@ -40,6 +40,8 @@ contract("E2E compliance and identity", accounts => {
     const requestId2 = 5678;
     const cost = 0;
 
+    await ctoken.request();
+
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1), {
       from: accounts[0]
     });
