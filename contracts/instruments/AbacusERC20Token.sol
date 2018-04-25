@@ -20,6 +20,10 @@ contract AbacusERC20Token is StandardToken, AbacusInstrument {
         complianceProviderId = _complianceProviderId;
     }
 
+    function canTransfer(address to, uint256 value) public view returns (uint8, uint256) {
+        return complianceCoordinator.check(complianceProviderId, this, value, msg.sender, to, 0);
+    }
+
     function transfer(address to, uint256 value) public returns (bool) {
         uint8 checkResult;
         (checkResult,) = complianceCoordinator.hardCheck(complianceProviderId, this, value, msg.sender, to, 0);
@@ -27,6 +31,10 @@ contract AbacusERC20Token is StandardToken, AbacusInstrument {
             return false;
         }
         return super.transfer(to, value);
+    }
+
+    function canTransferFrom(address from, address to, uint256 value) public view returns (uint8, uint256) {
+        return complianceCoordinator.check(complianceProviderId, this, value, from, to, 0);
     }
 
     function transferFrom(address from, address to, uint256 value) public returns (bool) {
