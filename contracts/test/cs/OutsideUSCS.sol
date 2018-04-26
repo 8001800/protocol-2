@@ -1,8 +1,8 @@
 pragma solidity ^0.4.21;
 
-import "../identity/IdentityToken.sol";
-import "../AnnotationDatabase.sol";
-import "../compliance/ComplianceStandard.sol";
+import "../../identity/IdentityToken.sol";
+import "../../AnnotationDatabase.sol";
+import "../../compliance/ComplianceStandard.sol";
 
 contract OutsideUSCS is ComplianceStandard {
     IdentityToken identityToken;

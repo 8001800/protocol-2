@@ -1,8 +1,8 @@
 pragma solidity ^0.4.21;
 
-import "../identity/IdentityToken.sol";
-import "../AnnotationDatabase.sol";
-import "../compliance/ComplianceStandard.sol";
+import "../../identity/IdentityToken.sol";
+import "../../AnnotationDatabase.sol";
+import "../../compliance/ComplianceStandard.sol";
 
 contract AccreditedUSCS is ComplianceStandard {
     IdentityToken identityToken;
@@ -23,14 +23,7 @@ contract AccreditedUSCS is ComplianceStandard {
         identityProviderId = _identityProviderId;
     }
 
-    function performCheck(
-        address token,
-        uint256,
-        address from,
-        address to,
-        bytes32 
-    ) view external returns (uint8, uint256)
-    {
+    function fromAllowed(address token, address from) internal returns (uint8) {
         bytes32 fromNonUsVal;
         (,fromNonUsVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(from), identityProviderId, FIELD_NON_US
@@ -48,6 +41,21 @@ contract AccreditedUSCS is ComplianceStandard {
             fromAccredited = true;
         }
 
+        if (fromNonUs || fromAccredited) {
+            return 0;
+        }
+
+        uint8 err = 0x10;
+        if (fromNonUs) {
+            err |= 0x8;
+        }
+        if (fromAccredited) {
+            err |= 0x4;
+        }
+        return err;
+    }
+
+    function toAllowed(address to) internal returns (uint8) {
         bytes32 toNonUsVal;
         (,toNonUsVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(to), identityProviderId, FIELD_NON_US
@@ -60,24 +68,35 @@ contract AccreditedUSCS is ComplianceStandard {
         );
         bool toAccredited = toAccreditedVal != bytes32(0);
 
-        if ((fromNonUs || fromAccredited) && (toNonUs || toAccredited)) {
-            return (0, 0);
+        if (toNonUs || toAccredited) {
+            return 0;
         }
 
         uint8 err = 0x10;
-        if (fromNonUs) {
-            err |= 0x8;
-        }
-        if (fromAccredited) {
-            err |= 0x4;
-        }
         if (toNonUs) {
             err |= 0x2;
         }
         if (toAccredited) {
             err |= 0x1;
         }
-        return (err, 0);
+        return err;
+    }
+
+    function performCheck(
+        address token,
+        uint256,
+        address from,
+        address to,
+        bytes32 
+    ) view external returns (uint8, uint256)
+    {
+        uint8 fromAllowedRes = fromAllowed(token, to);
+        uint8 toAllowedRes = toAllowed(to);
+        if ((fromAllowedRes == 0) && (toAllowedRes == 0)) {
+            return (0, 0);
+        }
+
+        return (fromAllowedRes | toAllowedRes, 0);
     }
 
     function performHardCheck(
