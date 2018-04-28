@@ -1,6 +1,6 @@
 {
   "name": "@abacusprotocol/protocol",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Abacus Protocol Contracts",
   "repository": "git@github.com:abacusprotocol/protocol.git",
   "author": "Abacus Team <team@abacusprotocol.com>",
@@ -8,6 +8,7 @@
   "scripts": {
     "clean": "rm -fr build/",
     "compile": "truffle compile",
+    "prepublish": "npm run clean && npm run compile",
     "test": "npm run clean && truffle test",
     "lint": "solium -d contracts --fix"
   },
