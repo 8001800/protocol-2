@@ -21,8 +21,6 @@ contract FaucetToken is AbacusERC20Token {
     }
 
     function request() public {
-        balances[msg.sender] += faucetAmt;
-        balances[this] -= faucetAmt;
-        emit Transfer(this, msg.sender, faucetAmt);
+        transfer(msg.sender, faucetAmt);
     }
 }
