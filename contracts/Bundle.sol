@@ -37,6 +37,9 @@ contract Bundle is ERC721Token {
     function depositERC20Asset(
         uint256 _bundleId, ERC20 _token, uint256 _amount
     ) external returns (bool) {
+        if (locked[_bundleId]) {
+            return false;
+        }
         if (!_token.transferFrom(msg.sender, this, _amount)) {
             return false;
         }
@@ -62,6 +65,9 @@ contract Bundle is ERC721Token {
     function depositERC721Asset(
         uint256 _bundleId, ERC721Basic _token, uint256 _id
     ) external returns (bool) {
+        if (locked[_bundleId]) {
+            return false;
+        }
         _token.transferFrom(msg.sender, this, _id);
         erc721Assets[_bundleId][_token][_id] = true;
         emit BundleDepositERC721(_bundleId, _token, _id);
