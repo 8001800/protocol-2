@@ -20,6 +20,10 @@ contract FaucetToken is AbacusERC20Token {
         emit Transfer(0x0, this, INITIAL_SUPPLY);
     }
 
+    function canRequest() public view returns (uint8, uint256) {
+        return canTransfer(msg.sender, faucetAmt);
+    }
+
     function request() public {
         transfer(msg.sender, faucetAmt);
     }
