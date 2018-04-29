@@ -23,7 +23,7 @@ contract AccreditedUSCS is ComplianceStandard {
         identityProviderId = _identityProviderId;
     }
 
-    function fromAllowed(address token, address from) internal returns (uint8) {
+    function fromAllowed(address token, address from) view internal returns (uint8) {
         bytes32 fromNonUsVal;
         (,fromNonUsVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(from), identityProviderId, FIELD_NON_US
@@ -55,7 +55,7 @@ contract AccreditedUSCS is ComplianceStandard {
         return err;
     }
 
-    function toAllowed(address to) internal returns (uint8) {
+    function toAllowed(address to) internal view returns (uint8) {
         bytes32 toNonUsVal;
         (,toNonUsVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(to), identityProviderId, FIELD_NON_US
