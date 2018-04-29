@@ -6,8 +6,6 @@ const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
-const SampleCompliantToken2 = artifacts.require("SampleCompliantToken2");
-const SampleCompliantToken3 = artifacts.require("SampleCompliantToken3");
 
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 const BooleanSandboxComplianceStandard = artifacts.require(
@@ -16,6 +14,13 @@ const BooleanSandboxComplianceStandard = artifacts.require(
 const UintSandboxComplianceStandard = artifacts.require(
   "UintSandboxComplianceStandard"
 );
+
+const AccreditedUSCS = artifacts.require("AccreditedUSCS");
+const AccreditedUSToken = artifacts.require("AccreditedUSToken");
+const OutsideUSCS = artifacts.require("OutsideUSCS");
+const OutsideUSToken = artifacts.require("OutsideUSToken");
+const WhitelistCS = artifacts.require("WhitelistCS");
+const WhitelistToken = artifacts.require("WhitelistToken");
 
 const main = async () => {
   const addresses = {
@@ -26,11 +31,16 @@ const main = async () => {
     AbacusToken: AbacusToken.address,
     AbacusKernel: AbacusKernel.address,
     SampleCompliantToken: SampleCompliantToken.address,
-    SampleCompliantToken2: SampleCompliantToken2.address,
-    SampleCompliantToken3: SampleCompliantToken3.address,
     SandboxIdentityProvider: SandboxIdentityProvider.address,
     BooleanSandboxComplianceStandard: BooleanSandboxComplianceStandard.address,
-    UintSandboxComplianceStandard: UintSandboxComplianceStandard.address
+    UintSandboxComplianceStandard: UintSandboxComplianceStandard.address,
+
+    AccreditedUSCS: AccreditedUSCS.address,
+    AccreditedUSToken: AccreditedUSToken.address,
+    OutsideUSCS: OutsideUSCS.address,
+    OutsideUSToken: OutsideUSToken.address,
+    WhitelistCS: WhitelistCS.address,
+    WhitelistToken: WhitelistToken.address
   };
 
   console.log(JSON.stringify(addresses));
