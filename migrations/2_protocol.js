@@ -6,8 +6,6 @@ const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
-const SampleCompliantToken2 = artifacts.require("SampleCompliantToken2");
-const SampleCompliantToken3 = artifacts.require("SampleCompliantToken3");
 
 const BooleanSandboxComplianceStandard = artifacts.require(
   "BooleanSandboxComplianceStandard"
@@ -17,6 +15,13 @@ const UintSandboxComplianceStandard = artifacts.require(
 );
 
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
+
+const AccreditedUSCS = artifacts.require("AccreditedUSCS");
+const AccreditedUSToken = artifacts.require("AccreditedUSToken");
+const OutsideUSCS = artifacts.require("OutsideUSCS");
+const OutsideUSToken = artifacts.require("OutsideUSToken");
+const WhitelistCS = artifacts.require("WhitelistCS");
+const WhitelistToken = artifacts.require("WhitelistToken");
 
 module.exports = async deployer => {
   await deployer.deploy(ProviderRegistry).then(async () => {
@@ -85,18 +90,50 @@ module.exports = async deployer => {
       bscsId
     );
 
-    // compliant token
+    /////////////////
+    // DEMO STUFF
+    /////////////////
+
+    // outside US token
     await deployer.deploy(
-      SampleCompliantToken2,
+      OutsideUSCS,
+      IdentityToken.address,
+      ProviderRegistry.address,
+      0
+    );
+    const outsideUSCS = await OutsideUSCS.deployed();
+    await deployer.deploy(
+      OutsideUSToken,
       ComplianceCoordinator.address,
-      bscsId
+      await outsideUSCS.providerId()
     );
 
-    // compliant token
+    // accredited US token
     await deployer.deploy(
-      SampleCompliantToken3,
+      AccreditedUSCS,
+      IdentityToken.address,
+      ProviderRegistry.address,
+      0
+    );
+    const accreditedUSCS = await AccreditedUSCS.deployed();
+    await deployer.deploy(
+      AccreditedUSToken,
       ComplianceCoordinator.address,
-      uscsId
+      await accreditedUSCS.providerId()
+    );
+
+    // whitelist token
+    await deployer.deploy(
+      WhitelistCS,
+      IdentityToken.address,
+      ProviderRegistry.address,
+      0
+    );
+    const whitelistCS = await WhitelistCS.deployed();
+    await deployer.deploy(
+      WhitelistToken,
+      ComplianceCoordinator.address,
+      await whitelistCS.providerId()
     );
   });
 };

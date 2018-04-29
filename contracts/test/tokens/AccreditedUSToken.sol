@@ -1,15 +1,15 @@
 pragma solidity ^0.4.21;
 
-import "./FaucetToken.sol";
+import "../FaucetToken.sol";
 
 /**
  * @dev A very simple token that implements a single compliance standard.
  */
-contract SampleCompliantToken3 is FaucetToken {
-    string public constant name = "Sample Compliant Token 3";
-    string public constant symbol = "SC3";
+contract AccreditedUSToken is FaucetToken {
+    string public constant name = "Accredited US Token";
+    string public constant symbol = "AUS";
 
-    function SampleCompliantToken3(
+    function AccreditedUSToken(
         ComplianceCoordinator _complianceCoordinator,
         uint256 _complianceProviderId
     ) FaucetToken(_complianceCoordinator, _complianceProviderId) public
