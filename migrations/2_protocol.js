@@ -105,6 +105,7 @@ module.exports = async deployer => {
       await sip.providerId()
     );
     const outsideUSCS = await OutsideUSCS.deployed();
+    await outsideUSCS.registerProvider("Outside US", "", false);
     await deployer.deploy(
       OutsideUSToken,
       ComplianceCoordinator.address,
@@ -120,6 +121,7 @@ module.exports = async deployer => {
       await sip.providerId()
     );
     const accreditedUSCS = await AccreditedUSCS.deployed();
+    await accreditedUSCS.registerProvider("Accredited US", "", false);
     await deployer.deploy(
       AccreditedUSToken,
       ComplianceCoordinator.address,
@@ -135,6 +137,7 @@ module.exports = async deployer => {
       await sip.providerId()
     );
     const whitelistCS = await WhitelistCS.deployed();
+    await whitelistCS.registerProvider("Whitelist", "", false);
     await deployer.deploy(
       WhitelistToken,
       ComplianceCoordinator.address,
