@@ -23,6 +23,8 @@ const OutsideUSToken = artifacts.require("OutsideUSToken");
 const WhitelistCS = artifacts.require("WhitelistCS");
 const WhitelistToken = artifacts.require("WhitelistToken");
 
+const ABAFaucet = artifacts.require("ABAFaucet");
+
 module.exports = async deployer => {
   await deployer.deploy(ProviderRegistry).then(async () => {
     await deployer.deploy(ComplianceCoordinator, ProviderRegistry.address);
@@ -138,5 +140,7 @@ module.exports = async deployer => {
       ComplianceCoordinator.address,
       await whitelistCS.providerId()
     );
+
+    await deployer.deploy(ABAFaucet, AbacusToken.address);
   });
 };
