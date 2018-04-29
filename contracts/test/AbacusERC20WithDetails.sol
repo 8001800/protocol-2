@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 
-import "../../instruments/AbacusERC20Token.sol";
+import "../instruments/AbacusERC20Token.sol";
 
 /**
  * @dev Token that takes all necessary details in as constructor parameters.
