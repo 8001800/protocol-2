@@ -99,7 +99,8 @@ module.exports = async deployer => {
       OutsideUSCS,
       IdentityToken.address,
       ProviderRegistry.address,
-      0
+      0,
+      await sip.providerId()
     );
     const outsideUSCS = await OutsideUSCS.deployed();
     await deployer.deploy(
@@ -113,7 +114,8 @@ module.exports = async deployer => {
       AccreditedUSCS,
       IdentityToken.address,
       ProviderRegistry.address,
-      0
+      0,
+      await sip.providerId()
     );
     const accreditedUSCS = await AccreditedUSCS.deployed();
     await deployer.deploy(
@@ -127,7 +129,8 @@ module.exports = async deployer => {
       WhitelistCS,
       IdentityToken.address,
       ProviderRegistry.address,
-      0
+      0,
+      await sip.providerId()
     );
     const whitelistCS = await WhitelistCS.deployed();
     await deployer.deploy(
