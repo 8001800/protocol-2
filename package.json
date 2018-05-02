@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "rm -fr build/",
     "compile": "truffle compile",
-    "prepublish": "npm run compile && npm run export:rinkeby",
+    "prepublishOnly": "npm run compile && npm run export:rinkeby",
     "export:rinkeby": "truffle exec scripts/export_addresses.js --network rinkeby > build/rinkeby.json",
     "test": "npm run clean && truffle test",
     "lint": "solium -d contracts --fix"
