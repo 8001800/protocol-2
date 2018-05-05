@@ -12,7 +12,7 @@
     "export:rinkeby": "truffle exec scripts/export_addresses.js --network rinkeby > build/rinkeby.json",
     "test": "npm run clean && truffle test",
     "lint": "solium -d contracts --fix",
-    "ganache": "ganache-cli -m \"bennie and the jets\""
+    "ganache": "ganache-cli -m \"bennie and the jets\" --port 7545"
   },
   "dependencies": {
     "transmute-framework": "^0.1.60",
