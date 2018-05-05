@@ -8,8 +8,9 @@
   "scripts": {
     "clean": "rm -fr build/",
     "compile": "truffle compile",
-    "export:development": "truffle exec scripts/export_addresses.js > build/development.json",
-    "export:rinkeby": "truffle exec scripts/export_addresses.js --network rinkeby > build/rinkeby.json",
+    "migrate:development": "truffle migrate --network development",
+    "export:development": "truffle exec scripts/export_addresses.js --network development | tail -1 > build/development.json",
+    "export:rinkeby": "truffle exec scripts/export_addresses.js --network rinkeby | tail -1 > build/rinkeby.json",
     "test": "npm run clean && truffle test",
     "lint": "solium -d contracts --fix",
     "ganache": "ganache-cli -m \"bennie and the jets\" --port 7545"
