@@ -44,13 +44,6 @@ const main = async () => {
   };
 
   console.log(JSON.stringify(addresses));
-
-  //   console.log("\n");
-
-  //   console.log(`
-  // export PROV_ADDRESS=${SandboxIdentityProvider.address}
-  // export TOKEN_ADDRESS=${IdentityToken.address}
-  //   `);
 };
 
 module.exports = cb => {
