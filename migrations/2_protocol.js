@@ -143,7 +143,5 @@ module.exports = async deployer => {
       ComplianceCoordinator.address,
       await whitelistCS.providerId()
     );
-
-    await deployer.deploy(ABAFaucet, AbacusToken.address);
   });
 };
