@@ -35,10 +35,11 @@ contract Bundle is ERC721Token {
         complianceCoordinator = _complianceCoordinator;
     }
 
-    function create(string _uri) external returns (uint256) {
+    function create(string _uri, uint256 _complianceProviderId) external returns (uint256) {
         uint256 id = nextTokenId++;
         _mint(msg.sender, id);
         _setTokenURI(id, _uri);
+        complianceProviderIds[id] = _complianceProviderId;
         emit Create(id, msg.sender);
     }
 
