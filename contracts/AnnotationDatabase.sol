@@ -24,6 +24,24 @@ contract AnnotationDatabase {
         bytes value;
     }
 
+    event WriteBytes32Annotation(
+        address nftAddr,
+        uint256 nftId,
+        uint256 providerId,
+        uint256 fieldId,
+        bytes32 value,
+        uint256 blockNumber
+    );
+
+    event WriteBytesAnnotation(
+        address nftAddr,
+        uint256 nftId,
+        uint256 providerId,
+        uint256 fieldId,
+        bytes value,
+        uint256 blockNumber
+    );
+
     mapping (address => mapping (uint256 => mapping (uint256 => mapping (uint256 => Bytes32Entry)))) public bytes32Data;
     mapping (address => mapping (uint256 => mapping (uint256 => mapping (uint256 => BytesEntry)))) public bytesData;
 
@@ -39,6 +57,14 @@ contract AnnotationDatabase {
             blockNumber: block.number,
             value: value
         });
+        emit WriteBytes32Annotation({
+            nftAddr: nftAddr,
+            nftId: nftId,
+            providerId: providerId,
+            fieldId: fieldId,
+            value: value,
+            blockNumber: block.number
+        });
     }
 
     function writeBytesField(
@@ -52,6 +78,14 @@ contract AnnotationDatabase {
         bytesData[nftAddr][nftId][providerId][fieldId] = BytesEntry({
             blockNumber: block.number,
             value: value
+        });
+        emit WriteBytesAnnotation({
+            nftAddr: nftAddr,
+            nftId: nftId,
+            providerId: providerId,
+            fieldId: fieldId,
+            value: value,
+            blockNumber: block.number
         });
     }
 
