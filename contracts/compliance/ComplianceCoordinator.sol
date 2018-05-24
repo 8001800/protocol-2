@@ -40,14 +40,19 @@ contract ComplianceCoordinator is AbacusCoordinator {
     }
 
     /**
-     * @dev Mapping of requestIds to the check result.
+     * @dev Mapping of requester and requestId to the check result.
      */
-    mapping (uint256 => CheckResult) checkResults;
+    mapping (address => mapping(uint256 => CheckResult)) checkResults;
+
+    struct CheckRequest {
+        address requester;
+        uint256 requestId;
+    }
 
     /**
      * @dev Mapping of action ids to request ids.
      */
-    mapping (uint256 => uint256) actionsToRequests;
+    mapping (uint256 => CheckRequest) actionsToRequests;
 
     /**
      * @dev Emitted when a compliance check is performed.
@@ -121,8 +126,11 @@ contract ComplianceCoordinator is AbacusCoordinator {
         require(msg.sender == owner);
 
         // Overwrite existing action
-        actionsToRequests[actionHash] = requestId;
-        checkResults[requestId] = CheckResult({
+        actionsToRequests[actionHash] = CheckRequest({
+            requester: requester,
+            requestId: requestId
+        });
+        checkResults[requester][requestId] = CheckResult({
             requestId: requestId,
             actionHash: actionHash,
             blockToExpire: blockToExpire,
@@ -167,7 +175,8 @@ contract ComplianceCoordinator is AbacusCoordinator {
         );
         address owner = providerRegistry.providerOwner(providerId);
         require(msg.sender == owner || msg.sender == instrumentAddr);
-        delete checkResults[actionsToRequests[actionHash]];
+        CheckRequest storage request = actionsToRequests[actionHash];
+        delete checkResults[request.requester][request.requestId];
         delete actionsToRequests[actionHash];
     }
 
@@ -222,7 +231,8 @@ contract ComplianceCoordinator is AbacusCoordinator {
             to,
             data
         );
-        CheckResult storage result = checkResults[actionsToRequests[actionHash]];
+        CheckRequest storage request = actionsToRequests[actionHash];
+        CheckResult storage result = checkResults[request.requester][request.requestId];
 
         // Check that the status check has been performed.
         if (result.blockToExpire == 0) {
