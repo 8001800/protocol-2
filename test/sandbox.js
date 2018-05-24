@@ -1,6 +1,5 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
@@ -37,9 +36,14 @@ contract("Sandbox", accounts => {
     const fieldId = "1234";
     const value = "0xdeadbeef";
 
-    await kernel.requestAsyncService(await provider.providerId(), 0, requestId, {
-      from: accounts[3]
-    });
+    await kernel.requestAsyncService(
+      await provider.providerId(),
+      0,
+      requestId,
+      {
+        from: accounts[3]
+      }
+    );
 
     const result = await provider.writeBytesField(
       accounts[3],

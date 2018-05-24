@@ -4,16 +4,7 @@ const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const IdentityToken = artifacts.require("IdentityToken");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
-
-const SampleCompliantToken = artifacts.require("SampleCompliantToken");
-
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
-const BooleanSandboxComplianceStandard = artifacts.require(
-  "BooleanSandboxComplianceStandard"
-);
-const UintSandboxComplianceStandard = artifacts.require(
-  "UintSandboxComplianceStandard"
-);
 
 const AccreditedUSCS = artifacts.require("AccreditedUSCS");
 const AccreditedUSToken = artifacts.require("AccreditedUSToken");
@@ -30,10 +21,7 @@ const main = async () => {
     IdentityToken: IdentityToken.address,
     AbacusToken: AbacusToken.address,
     AbacusKernel: AbacusKernel.address,
-    SampleCompliantToken: SampleCompliantToken.address,
     SandboxIdentityProvider: SandboxIdentityProvider.address,
-    BooleanSandboxComplianceStandard: BooleanSandboxComplianceStandard.address,
-    UintSandboxComplianceStandard: UintSandboxComplianceStandard.address,
 
     AccreditedUSCS: AccreditedUSCS.address,
     AccreditedUSToken: AccreditedUSToken.address,

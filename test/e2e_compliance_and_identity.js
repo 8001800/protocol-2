@@ -1,13 +1,10 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
-const BooleanSandboxComplianceStandard = artifacts.require(
-  "BooleanSandboxComplianceStandard"
-);
+const AccreditedUSToken = artifacts.require("AccreditedUSToken");
 
 const { promisify } = require("es6-promisify");
 const BigNumber = require("bignumber.js");
@@ -19,7 +16,6 @@ contract("E2E compliance and identity", accounts => {
   let kernel = null;
 
   let identityProvider = null;
-  let complianceStandard = null;
   let ctoken = null;
 
   before(async () => {
@@ -31,8 +27,7 @@ contract("E2E compliance and identity", accounts => {
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
 
     identityProvider = await SandboxIdentityProvider.deployed();
-    complianceStandard = await BooleanSandboxComplianceStandard.deployed();
-    ctoken = await SampleCompliantToken.deployed();
+    ctoken = await AccreditedUSToken.deployed();
   });
 
   it("should allow transaction for both approved by identity provider", async () => {
@@ -61,7 +56,7 @@ contract("E2E compliance and identity", accounts => {
     await identityProvider.writeBytes32Field(
       accounts[0],
       requestId1,
-      88,
+      506,
       "0x1"
     );
 
@@ -77,7 +72,7 @@ contract("E2E compliance and identity", accounts => {
     await identityProvider.writeBytes32Field(
       accounts[4],
       requestId2,
-      88,
+      506,
       "0x1"
     );
 
