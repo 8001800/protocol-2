@@ -7,6 +7,8 @@ import "./compliance/ComplianceCoordinator.sol";
 
 /**
  * @dev A collection of ERC20 and ERC721 assets represented as an ERC721 token.
+ * Bundles are initialized in an unlocked state. Transfer of Bundles may only
+ * occur when the Bundle is locked. When a Bundle is unlocked, transfer is forbidden.
  */
 contract Bundle is ERC721Token {
     using SafeMath for uint256;
@@ -35,6 +37,9 @@ contract Bundle is ERC721Token {
         complianceCoordinator = _complianceCoordinator;
     }
 
+    /**
+     * @dev Creates a new Bundle that one may send tokens to.
+     */
     function create(string _uri, uint256 _complianceProviderId) external returns (uint256) {
         uint256 id = nextTokenId++;
         _mint(msg.sender, id);
@@ -43,6 +48,9 @@ contract Bundle is ERC721Token {
         emit Create(id, msg.sender);
     }
 
+    /**
+     * @dev Allows one to inject ERC-20 assets into the Bundle.
+     */
     function depositERC20Asset(
         uint256 _bundleId, ERC20 _token, uint256 _amount
     ) external returns (bool) {
@@ -57,6 +65,9 @@ contract Bundle is ERC721Token {
         return true;
     }
 
+    /**
+     * @dev Allows the bundle owner to withdraw ERC-20 tokens from the Bundle.
+     */
     function withdrawERC20Asset(
         uint256 _bundleId, ERC20 _token, uint256 _amount
     ) external returns (bool) {
@@ -74,6 +85,9 @@ contract Bundle is ERC721Token {
         return true;
     }
 
+    /**
+     * @dev Allows one to inject ERC-721 assets into the Bundle.
+     */
     function depositERC721Asset(
         uint256 _bundleId, ERC721Basic _token, uint256 _id
     ) external returns (bool) {
@@ -86,6 +100,9 @@ contract Bundle is ERC721Token {
         return true;
     }
 
+    /**
+     * @dev Allows the bundle owner to withdraw ERC-721 tokens from the Bundle.
+     */
     function withdrawERC721Asset(
         uint256 _bundleId, ERC721Basic _token, uint256 _id
     ) external returns (bool) {
@@ -104,6 +121,9 @@ contract Bundle is ERC721Token {
         return true;
     }
 
+    /**
+     * @dev Prevents assets from being added to the Bundle.
+     */
     function lock(
         uint256 _bundleId
     ) external returns (bool) {
@@ -115,6 +135,9 @@ contract Bundle is ERC721Token {
         return true;
     }
 
+    /**
+     * @dev Allows assets to be added to the Bundle.
+     */
     function unlock(
         uint256 _bundleId
     ) external returns (bool) {
