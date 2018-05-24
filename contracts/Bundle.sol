@@ -15,10 +15,10 @@ contract Bundle is ERC721Token {
 
     uint256 nextTokenId = 1;
 
-    mapping (uint256 => mapping (address => uint256)) erc20Assets;
-    mapping (uint256 => mapping (address => mapping (uint256 => bool))) erc721Assets;
-    mapping (uint256 => bool) locked;
-    mapping (uint256 => uint256) complianceProviderIds;
+    mapping (uint256 => mapping (address => uint256)) public erc20Assets;
+    mapping (uint256 => mapping (address => mapping (uint256 => bool))) public erc721Assets;
+    mapping (uint256 => bool) public locked;
+    mapping (uint256 => uint256) public complianceProviderIds;
 
     event Create(uint256 indexed bundleId, address owner);
     event DepositERC20(uint256 indexed bundleId, address token, uint256 amount);
