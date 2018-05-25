@@ -32,6 +32,7 @@
   },
   "files": [
     "build/*.json",
-    "build/contracts/*.json"
+    "build/contracts/*.json",
+    "contracts/**/*.sol"
   ]
 }
