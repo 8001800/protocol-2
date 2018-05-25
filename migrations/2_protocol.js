@@ -4,6 +4,7 @@ const AnnotationDatabase = artifacts.require("AnnotationDatabase");
 const IdentityToken = artifacts.require("IdentityToken");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
+const Bundle = artifacts.require("Bundle");
 
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 
@@ -47,6 +48,9 @@ module.exports = async deployer => {
     );
     const sip = await SandboxIdentityProvider.deployed();
     await sip.registerProvider("SandboxIdentity", "", false);
+
+    // Bundle Protocol
+    await deployer.deploy(Bundle, ComplianceCoordinator.address);
 
     /////////////////
     // DEMO STUFF
