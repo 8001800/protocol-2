@@ -4,13 +4,14 @@ import "zeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
 import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./compliance/ComplianceCoordinator.sol";
+import "./IBundle.sol";
 
 /**
  * @dev A collection of ERC20 and ERC721 assets represented as an ERC721 token.
  * Bundles are initialized in an unlocked state. Transfer of Bundles may only
  * occur when the Bundle is locked. When a Bundle is unlocked, transfer is forbidden.
  */
-contract Bundle is ERC721Token {
+contract Bundle is ERC721Token, IBundle {
     using SafeMath for uint256;
 
     uint256 nextTokenId = 1;
@@ -19,14 +20,6 @@ contract Bundle is ERC721Token {
     mapping (uint256 => mapping (address => mapping (uint256 => bool))) public erc721Assets;
     mapping (uint256 => bool) public locked;
     mapping (uint256 => uint256) public complianceProviderIds;
-
-    event Create(uint256 indexed bundleId, address owner);
-    event DepositERC20(uint256 indexed bundleId, address token, uint256 amount);
-    event WithdrawERC20(uint256 indexed bundleId, address token, uint256 amount);
-    event DepositERC721(uint256 indexed bundleId, address token, uint256 id);
-    event WithdrawERC721(uint256 indexed bundleId, address token, uint256 id);
-    event Lock(uint256 indexed bundleId);
-    event Unlock(uint256 indexed bundleId);
 
     ComplianceCoordinator complianceCoordinator;
 
