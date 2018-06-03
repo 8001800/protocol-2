@@ -45,11 +45,12 @@ contract AbacusKernel {
     }
 
     struct Escrow {
+        EscrowState state;
         address from;
         address to;
         uint256 amount;
-        uint256 blockExpiresAt;
-        EscrowState state;
+        uint256 expiryBlockInterval;
+        uint256 blockLocked;
     }
 
     /**
@@ -68,7 +69,8 @@ contract AbacusKernel {
     function openEscrow(
         address from,
         address to,
-        uint256 amount
+        uint256 amount,
+        uint256 expiryBlockInterval
     ) internal returns (uint256 escrowId)
     {
         require(from != address(0) || to != address(0));
@@ -78,11 +80,12 @@ contract AbacusKernel {
 
         escrowId = nextEscrowId++;
         escrows[escrowId] = Escrow({
+            state: EscrowState.OPEN,
             from: from,
             to: to,
             amount: amount,
-            blockExpiresAt: 0,
-            state: EscrowState.OPEN
+            expiryBlockInterval: expiryBlockInterval,
+            blockLocked: 0
         });
     }
 
@@ -90,14 +93,13 @@ contract AbacusKernel {
      * @dev Locks ABA in escrow account
      */
     function lockEscrow(
-        uint256 escrowId,
-        uint256 blocksToExpiry
+        uint256 escrowId
     ) internal {
         Escrow storage escrow = escrows[escrowId];
         require(escrow.state == EscrowState.OPEN);
 
         escrow.state = EscrowState.LOCKED;
-        escrow.blockExpiresAt = blocksToExpiry.add(block.number);
+        escrow.blockLocked = block.number;
     }
 
     /**
@@ -108,7 +110,7 @@ contract AbacusKernel {
     ) internal {
         Escrow storage escrow = escrows[escrowId];
         require(escrow.state == EscrowState.LOCKED);
-        require(escrow.blockExpiresAt >= block.number);
+        require(block.number < escrow.blockLocked + escrow.expiryBlockInterval);
 
         require(token.transfer(escrow.to, escrow.amount));
         escrow.state = EscrowState.CLOSED;
@@ -121,7 +123,9 @@ contract AbacusKernel {
         uint256 escrowId
     ) internal {
         Escrow storage escrow = escrows[escrowId];
-        require(escrow.state == EscrowState.OPEN || escrow.blockExpiresAt >= block.number);
+        require(
+            escrow.state == EscrowState.OPEN ||
+            block.number < escrow.blockLocked + escrow.expiryBlockInterval);
         require(token.transfer(escrow.from, escrow.amount));
         escrow.state = escrow.state == EscrowState.OPEN ? EscrowState.CANCELED : EscrowState.EXPIRED;
     }
@@ -154,9 +158,9 @@ contract AbacusKernel {
     );
 
     /**
-    * @dev Mapping of requester address => request id => existence.
+     * @dev Mapping of requester address => request id => escrow id.
      */
-    mapping (address => mapping (uint256 => bool)) requests;
+    mapping (address => mapping (uint256 => uint256)) requests;
 
     /**
      * @dev Requests a service from the given service provider.
@@ -164,18 +168,16 @@ contract AbacusKernel {
     function requestAsyncService(
         uint256 providerId,
         uint256 cost,
-        uint256 requestId
+        uint256 requestId,
+        uint256 expiryBlockInterval
     ) external {
         address owner = providerRegistry.providerOwner(providerId);
 
         // Ensure that the request id is new
-        require(!requests[msg.sender][requestId]);
+        require(requests[msg.sender][requestId] == 0);
 
-        // Transfer tokens to the owner of the service.
-        // Must be called by the requester of the service.
-        require(transferTokensFrom(msg.sender, owner, cost));
-
-        requests[msg.sender][requestId] = true;
+        // Open and record escrow account
+        requests[msg.sender][requestId] = openEscrow(msg.sender, owner, cost, expiryBlockInterval);
 
         emit ServiceRequested({
             providerId: providerId,
@@ -184,6 +186,35 @@ contract AbacusKernel {
             cost: cost,
             requestId: requestId
         });
+    }
+
+    /**
+     * @dev Locks escrow account for an Async Service Request
+     */
+    function acceptAsyncServiceRequest(
+        uint256 providerId,
+        address requester,
+        uint256 requestId
+    ) external {
+        // Ensure request exists
+        uint256 escrowId = requests[requester][requestId];
+        require(escrowId != 0);
+
+        // Only the owner of the provider can accept requests
+        require(msg.sender == providerRegistry.providerOwner(providerId));
+
+        lockEscrow(escrowId);
+    }
+
+    /**
+     * @dev Revokes an Async Service Request. This will only succeed if escrow account is open or expired.
+     */
+    function revokeAsyncServiceRequest(
+        uint256 requestId
+    ) external {
+        uint256 escrowId = requests[msg.sender][requestId];
+        require(escrowId != 0);
+        revokeEscrow(escrowId);
     }
 
     /**
@@ -201,9 +232,12 @@ contract AbacusKernel {
         // Must be called from the service provider or by a coordinator.
         require(
             coordinators[msg.sender] ||
-            msg.sender == providerRegistry.providerOwner(providerId)
-        );
-        require(requests[requester][requestId]);
+            msg.sender == providerRegistry.providerOwner(providerId));
+
+        uint256 escrowId = requests[requester][requestId];
+        require(escrowId != 0);
+
+        closeEscrow(escrowId);
 
         emit ServicePerformed({
             providerId: providerId,
