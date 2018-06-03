@@ -19,7 +19,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         kernel = _kernel;
     }
 
-    function writeBytes32Field(
+    function writeBytes32FieldForService(
         address user,
         uint256 requestId,
         uint256 fieldId,
@@ -29,7 +29,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         writeBytes32Field(user, fieldId, value);
     }
 
-    function writeBytesField(
+    function writeBytesFieldForService(
         address user,
         uint256 requestId,
         uint256 fieldId,
