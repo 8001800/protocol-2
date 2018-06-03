@@ -2,7 +2,7 @@ pragma solidity ^0.4.21;
 
 import "./AbacusToken.sol";
 import "./provider/ProviderRegistry.sol";
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title AbacusKernel

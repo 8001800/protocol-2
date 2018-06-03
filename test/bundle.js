@@ -1,4 +1,4 @@
-//import expectThrow from "zeppelin-solidity/test/helpers/expectThrow";
+//import expectThrow from "openzeppelin-solidity/test/helpers/expectThrow";
 
 const chai = require("chai").use(require("chai-as-promised"));
 const assert = chai.assert;
