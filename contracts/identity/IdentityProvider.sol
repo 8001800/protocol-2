@@ -19,7 +19,7 @@ contract IdentityProvider is Provider {
         address user,
         uint256 fieldId,
         bytes32 value
-    ) internal {
+    ) public {
         identityToken.annotationDatabase().writeBytes32Field(
             identityToken,
             identityToken.tokenOf(user),
@@ -33,7 +33,7 @@ contract IdentityProvider is Provider {
         address user,
         uint256 fieldId,
         bytes value
-    ) internal {
+    ) public {
         identityToken.annotationDatabase().writeBytesField(
             identityToken,
             identityToken.tokenOf(user),
