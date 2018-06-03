@@ -33,7 +33,11 @@ contract AbacusKernel {
     /**
      * @dev Information needed to facilitate Escrow
      * The Escrow lifecycle has three steps:
-     * - open: an escrow account is created between two parties
+     * - open: escrow account is created with tokens
+     * - lock: locks tokens in an escrow account
+     * - close: closes an escrow account and distributes tokens to the appropriate party
+     * Optionally:
+     * - revoke: revokes an escrow account if requester cancels or wants to retrieve tokens on expiry
      */
 
     enum EscrowState {
