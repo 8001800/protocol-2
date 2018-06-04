@@ -443,7 +443,8 @@ contract("ComplianceCoordinator", accounts => {
       instrumentIdOrAmt: 10,
       from: accounts[0],
       to: accounts[1],
-      requestId: 11 // doesn't matter
+      requestId: 11, // doesn't matter
+      expiryBlockInterval: 50
     };
 
     const actionId = await complianceCoordinator.computeActionHash(
@@ -460,10 +461,21 @@ contract("ComplianceCoordinator", accounts => {
     const { logs: requestCheckLogs } = await kernel.requestAsyncService(
       params.providerId,
       0, // doesn't matter
-      params.requestId
+      params.requestId,
+      params.expiryBlockInterval
     );
     assert.equal(requestCheckLogs.length, 1);
     assert.equal(requestCheckLogs[0].event, "ServiceRequested");
+
+    // Accept the request
+    const { logs: acceptLogs } = await kernel.acceptAsyncServiceRequest(
+      params.providerId,
+      params.from,
+      params.requestId,
+      { from: accounts[4] }
+    );
+    assert.equal(acceptLogs.length, 1);
+    assert.equal(acceptLogs[0].event, "ServiceRequestAccepted");
 
     await assert.isRejected(
       complianceCoordinator.writeCheckResult(
