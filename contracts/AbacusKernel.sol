@@ -65,7 +65,7 @@ contract AbacusKernel {
     /**
      * @dev The next id for an escrow.
      */
-    uint256 nextEscrowId;
+    uint256 nextEscrowId = 1;
 
     /**
      * @dev Opens an escrow account between two parties.

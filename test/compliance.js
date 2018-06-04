@@ -223,8 +223,8 @@ contract("ComplianceCoordinator", accounts => {
   it("should support off-chain checks", async () => {
     // Create off chain standard
     const { logs } = await providerRegistry.registerProvider(
-      "Ian",
-      "some sort of ipfs hash",
+      "Ashe",
+      "The Frost Archer",
       accounts[3],
       true
     );
@@ -246,7 +246,8 @@ contract("ComplianceCoordinator", accounts => {
       from: accounts[0],
       to: accounts[1],
       cost: 10,
-      requestId: "912832"
+      requestId: "912832",
+      expiryBlockInterval: 50
     };
 
     // This should be blocked.
@@ -257,12 +258,23 @@ contract("ComplianceCoordinator", accounts => {
     const { logs: requestCheckLogs } = await kernel.requestAsyncService(
       id,
       params.cost,
-      params.requestId
+      params.requestId,
+      params.expiryBlockInterval
     );
 
     assert.equal(requestCheckLogs.length, 1);
     assert.equal(requestCheckLogs[0].event, "ServiceRequested");
     assert.equal(requestCheckLogs[0].args.cost.toNumber(), params.cost);
+
+    const { logs: abaTransferLogs } = await aba.transfer(params.from, 100);
+
+    // Accept the request
+    const { logs: acceptLogs } = await kernel.acceptAsyncServiceRequest(
+      id,
+      params.from,
+      params.requestId,
+      { from: owner }
+    );
 
     const actionId = await complianceCoordinator.computeActionHash(
       id,
