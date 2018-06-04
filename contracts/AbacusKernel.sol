@@ -35,8 +35,8 @@ contract AbacusKernel {
      * The Escrow lifecycle has three steps:
      * - open: escrow account is created with tokens
      * - lock: locks tokens in an escrow account
+     * And either one of the following:
      * - close: closes an escrow account and distributes tokens to the appropriate party
-     * Optionally:
      * - revoke: revokes an escrow account if requester cancels or wants to retrieve tokens on expiry
      */
 
@@ -44,8 +44,8 @@ contract AbacusKernel {
         OPEN,
         LOCKED,
         CLOSED,
-        CANCELED,
-        EXPIRED
+        REVOKED_CANCEL,
+        REVOKED_EXPIRY
     }
 
     struct Escrow {
@@ -77,7 +77,7 @@ contract AbacusKernel {
         uint256 expiryBlockInterval
     ) internal returns (uint256 escrowId)
     {
-        require(from != address(0) || to != address(0));
+        require(from != address(0) && to != address(0));
 
         // Transfer tokens to kernel
         require(token.transferFrom(from, this, amount));
@@ -125,13 +125,14 @@ contract AbacusKernel {
      */
     function revokeEscrow(
         uint256 escrowId
-    ) internal {
+    ) internal returns (EscrowState) {
         Escrow storage escrow = escrows[escrowId];
         require(
             escrow.state == EscrowState.OPEN ||
             block.number < escrow.blockLocked + escrow.expiryBlockInterval);
         require(token.transfer(escrow.from, escrow.amount));
-        escrow.state = escrow.state == EscrowState.OPEN ? EscrowState.CANCELED : EscrowState.EXPIRED;
+        escrow.state = escrow.state == EscrowState.OPEN ? EscrowState.REVOKED_CANCEL : EscrowState.REVOKED_EXPIRY;
+        return escrow.state;
     }
 
     /**
@@ -153,6 +154,20 @@ contract AbacusKernel {
         address requester,
         uint256 cost,
         uint256 requestId
+    );
+
+    event ServiceRequestAccepted(
+        uint256 indexed providerId,
+        address requester,
+        uint256 requestId
+    );
+
+    event ServiceRequestRevokedByCancel(
+        uint256 indexed requestId
+    );
+
+    event ServiceRequestRevokedByExpiry(
+        uint256 indexed requestId
     );
 
     event ServicePerformed(
@@ -208,6 +223,12 @@ contract AbacusKernel {
         require(msg.sender == providerRegistry.providerOwner(providerId));
 
         lockEscrow(escrowId);
+
+        emit ServiceRequestAccepted({
+            providerId: providerId,
+            requester: requester,
+            requestId: requestId
+        });
     }
 
     /**
@@ -218,7 +239,12 @@ contract AbacusKernel {
     ) external {
         uint256 escrowId = requests[msg.sender][requestId];
         require(escrowId != 0);
-        revokeEscrow(escrowId);
+        EscrowState state = revokeEscrow(escrowId);
+
+        if (state == EscrowState.REVOKED_CANCEL)
+            emit ServiceRequestRevokedByCancel(requestId);
+        else
+            emit ServiceRequestRevokedByExpiry(requestId);
     }
 
     /**
