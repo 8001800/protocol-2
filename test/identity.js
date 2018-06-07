@@ -40,33 +40,35 @@ contract("IdentityCoordinator", accounts => {
       providerId: await identityProvider.providerId(),
       requestId: 201011,
       fieldId: 16,
-      cost: 0
+      cost: 0,
+      expiry: 10
     };
 
     // Make a request
     const { logs: requestCheckLogs } = await kernel.requestAsyncService(
       params.providerId,
       params.cost,
-      params.requestId
+      params.requestId,
+      params.expiry
     );
+    
     assert.equal(requestCheckLogs.length, 1);
     assert.equal(requestCheckLogs[0].event, "ServiceRequested");
-
+    
     // Write data
     const { logs: writeLogs } = await identityProvider.writeBytes32Field(
       accounts[0],
-      params.requestId,
       params.fieldId,
       "0x1"
     );
-
+    
     const data = await annoDb.bytes32Data(
       identityToken.address,
       await identityToken.tokenOf(accounts[0]),
       params.providerId,
       params.fieldId
     );
-
+    
     assert(data[1].includes("1"), "Data should exist in identity provider");
   });
 
