@@ -35,12 +35,15 @@ module.exports = async deployer => {
       artifacts.require("IdentityProvider"),
       IdentityToken.address,
       ProviderRegistry.address,
+      AbacusKernel.address,
+      AbacusToken.address,
       0
     );
 
     await deployer.deploy(
       SandboxIdentityProvider,
       AbacusKernel.address,
+      AbacusToken.address,
       IdentityToken.address,
       0
     );
