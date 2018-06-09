@@ -9,7 +9,7 @@ const AccreditedUSToken = artifacts.require("AccreditedUSToken");
 const { promisify } = require("es6-promisify");
 const BigNumber = require("bignumber.js");
 
-contract("E2E compliance and identity", accounts => {
+contract("E2E Compliance and Identity", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
   let aba = null;
@@ -30,9 +30,8 @@ contract("E2E compliance and identity", accounts => {
     ctoken = await AccreditedUSToken.deployed();
   });
 
-  it("should allow transaction for both approved by identity provider", async () => {
-    const requestId1 = 1234;
-    const requestId2 = 5678;
+  it("should allow free transaction for both approved by identity provider", async () => {
+
     const cost = 0;
 
     await ctoken.request();
@@ -44,34 +43,45 @@ contract("E2E compliance and identity", accounts => {
       from: accounts[4]
     });
 
+    const id = await identityProvider.providerId();
+
+    const params = {
+      providerId: id,
+      cost: 0,
+      requestId1: 1234,
+      requestId2: 5678,
+      requestId: "912834",
+      expiry: 50
+    };
+
     const { logs: reqLogs1 } = await kernel.requestAsyncService(
-      await identityProvider.providerId(),
-      cost,
-      requestId1,
+      params.providerId,
+      params.cost,
+      params.requestId1,
+      params.expiry,
       { from: accounts[0] }
     );
     assert.equal(reqLogs1.length, 1);
-    assert.equal(reqLogs1[0].args.requestId, requestId1);
+    assert.equal(reqLogs1[0].args.requestId, params.requestId1);
 
     await identityProvider.writeBytes32Field(
       accounts[0],
-      requestId1,
       506,
       "0x1"
     );
 
     const { logs: reqLogs2 } = await kernel.requestAsyncService(
-      await identityProvider.providerId(),
-      cost,
-      requestId2,
+      params.providerId,
+      params.cost,
+      params.requestId2,
+      params.expiry,
       { from: accounts[4] }
     );
     assert.equal(reqLogs2.length, 1);
-    assert.equal(reqLogs2[0].args.requestId, requestId2);
+    assert.equal(reqLogs2[0].args.requestId, params.requestId2);
 
     await identityProvider.writeBytes32Field(
       accounts[4],
-      requestId2,
       506,
       "0x1"
     );

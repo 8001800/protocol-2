@@ -220,7 +220,7 @@ contract("ComplianceCoordinator", accounts => {
     );
   });
 
-  it("should support off-chain checks", async () => {
+  it("should support free off-chain checks", async () => {
     // Create off chain standard
     const { logs } = await providerRegistry.registerProvider(
       "Ashe",
@@ -246,7 +246,7 @@ contract("ComplianceCoordinator", accounts => {
       instrumentIdOrAmt: 10,
       from: accounts[0],
       to: accounts[1],
-      cost: 10,
+      cost: 0,
       requestId: "912832",
       expiryBlockInterval: 50
     };
