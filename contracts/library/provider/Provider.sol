@@ -10,13 +10,17 @@ import "../../protocol/ProviderRegistry.sol";
 contract Provider is Ownable {
     uint256 public providerId;
     ProviderRegistry providerRegistry;
-
+    
     /**
      * @dev Constructor used for upgrades.
      *
      * @param _providerId The provider id. If set to 0, the provider can be registered.
      */
-    function Provider(ProviderRegistry _providerRegistry, uint256 _providerId) public {
+    function Provider(
+        ProviderRegistry _providerRegistry, 
+        uint256 _providerId       
+    ) public 
+    {
         providerRegistry = _providerRegistry;
         providerId = _providerId;
     }

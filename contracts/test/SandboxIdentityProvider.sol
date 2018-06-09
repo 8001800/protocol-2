@@ -8,11 +8,14 @@ contract SandboxIdentityProvider is IdentityProvider {
 
     function SandboxIdentityProvider(
         AbacusKernel _kernel,
+        AbacusToken _token,
         IdentityToken _identityToken,
         uint256 _providerId
     ) IdentityProvider(
         _identityToken,
         _kernel.providerRegistry(),
+        _kernel,
+        _token,
         _providerId
     ) public
     {
