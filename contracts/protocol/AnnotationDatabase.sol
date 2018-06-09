@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 
-import "./provider/ProviderRegistry.sol";
+import "./ProviderRegistry.sol";
 
 /**
  * @title AnnotationDatabase

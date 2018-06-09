@@ -1,8 +1,8 @@
 pragma solidity ^0.4.21;
 
-import "../identity/IdentityToken.sol";
-import "../AnnotationDatabase.sol";
-import "../compliance/ComplianceStandard.sol";
+import "../protocol/IdentityToken.sol";
+import "../protocol/AnnotationDatabase.sol";
+import "../library/compliance/ComplianceStandard.sol";
 
 contract UintSandboxComplianceStandard is ComplianceStandard {
     IdentityToken identityToken;

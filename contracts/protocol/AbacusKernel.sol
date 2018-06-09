@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 
 import "./AbacusToken.sol";
-import "./provider/ProviderRegistry.sol";
+import "./ProviderRegistry.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**

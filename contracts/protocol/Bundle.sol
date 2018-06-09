@@ -3,7 +3,7 @@ pragma solidity ^0.4.21;
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./compliance/ComplianceCoordinator.sol";
+import "./coordinator/ComplianceCoordinator.sol";
 
 /**
  * @dev A collection of ERC20 and ERC721 assets represented as an ERC721 token.

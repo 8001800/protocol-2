@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "../provider/ProviderRegistry.sol";
+import "../../protocol/ProviderRegistry.sol";
 
 /**
  * @title Provider

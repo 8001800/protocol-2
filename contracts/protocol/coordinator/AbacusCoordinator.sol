@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./AbacusKernel.sol";
+import "../AbacusKernel.sol";
 
 contract AbacusCoordinator is Ownable {
     /**

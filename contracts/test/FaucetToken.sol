@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 
-import "../instruments/AbacusERC20Token.sol";
+import "../library/instruments/AbacusERC20Token.sol";
 
 /**
  * @dev Faucet token

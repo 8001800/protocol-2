@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 
-import "../provider/Provider.sol";
-import "../identity/IdentityToken.sol";
+import "../../protocol/IdentityToken.sol";
+import "./Provider.sol";
 
 contract IdentityProvider is Provider {
     IdentityToken identityToken;

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 
-import "../AbacusKernel.sol";
-import "../identity/IdentityProvider.sol";
+import "../protocol/AbacusKernel.sol";
+import "../library/provider/IdentityProvider.sol";
 
 contract SandboxIdentityProvider is IdentityProvider {
     AbacusKernel kernel;

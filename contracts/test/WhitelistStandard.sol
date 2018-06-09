@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 
-import "../compliance/ComplianceStandard.sol";
+import "../library/compliance/ComplianceStandard.sol";
 
 /**
  * @dev A compliance standard that ensures everyone is on a whitelist.

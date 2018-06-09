@@ -1,9 +1,9 @@
 pragma solidity ^0.4.21;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "../AbacusCoordinator.sol";
-import "./ComplianceStandard.sol";
-import "../provider/ProviderRegistry.sol";
+import "../ProviderRegistry.sol";
+import "./AbacusCoordinator.sol";
+import "../../library/compliance/ComplianceStandard.sol";
 
 /**
  * Registry for compliance providers.

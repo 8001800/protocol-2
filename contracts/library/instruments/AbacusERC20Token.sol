@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 
 import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import "../compliance/ComplianceCoordinator.sol";
+import "../../protocol/coordinator/ComplianceCoordinator.sol";
 import "./AbacusInstrument.sol";
 
 /**

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Basic.sol";
-import "../AnnotationDatabase.sol";
+import "./AnnotationDatabase.sol";
 
 /**
  * @title IdentityToken
