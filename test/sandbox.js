@@ -32,32 +32,37 @@ contract("Sandbox", accounts => {
   });
 
   it("should write bytes field", async () => {
-    const requestId = "12345678";
-    const fieldId = "1234";
-    const value = "0xdeadbeef";
+    const id = await provider.providerId();
+
+    const params = {
+      providerId: id,
+      cost: 0,
+      requestId: "12345678",
+      fieldId: "1234",
+      value: "0xdeadbeef",
+      expiry: 50
+    }
 
     await kernel.requestAsyncService(
-      await provider.providerId(),
-      0,
-      requestId,
-      {
-        from: accounts[3]
-      }
+      params.providerId,
+      params.cost,
+      params.requestId,
+      params.expiry,
+      { from: accounts[3] }
     );
 
     const result = await provider.writeBytesField(
       accounts[3],
-      requestId,
-      fieldId,
-      value
+      params.fieldId,
+      params.value
     );
 
     const data = await annoDb.bytesData(
       identityToken.address,
       await identityToken.tokenOf(accounts[3]),
       await provider.providerId(),
-      fieldId
+      params.fieldId
     );
-    assert.equal(data[1], value);
+    assert.equal(data[1], params.value);
   });
 });

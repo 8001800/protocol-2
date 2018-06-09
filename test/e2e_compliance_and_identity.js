@@ -50,7 +50,6 @@ contract("E2E Compliance and Identity", accounts => {
       cost: 0,
       requestId1: 1234,
       requestId2: 5678,
-      requestId: "912834",
       expiry: 50
     };
 
