@@ -114,7 +114,7 @@ contract AbacusKernel {
     ) internal {
         Escrow storage escrow = escrows[escrowId];
         require(escrow.state == EscrowState.LOCKED);
-        require(block.number < escrow.blockLocked + escrow.expiryBlockInterval);
+        require(block.number < escrow.blockLocked.add(escrow.expiryBlockInterval));
 
         require(token.transfer(escrow.to, escrow.amount));
         escrow.state = EscrowState.CLOSED;
@@ -129,7 +129,7 @@ contract AbacusKernel {
         Escrow storage escrow = escrows[escrowId];
         require(
             escrow.state == EscrowState.OPEN ||
-            block.number < escrow.blockLocked + escrow.expiryBlockInterval);
+            block.number < escrow.blockLocked.add(escrow.expiryBlockInterval));
         require(token.transfer(escrow.from, escrow.amount));
         escrow.state = escrow.state == EscrowState.OPEN ? EscrowState.REVOKED_CANCEL : EscrowState.REVOKED_EXPIRY;
         return escrow.state;
