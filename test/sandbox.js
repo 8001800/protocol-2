@@ -23,13 +23,6 @@ contract("Sandbox", accounts => {
   let provider = null;
 
   beforeEach(async () => {
-    providerRegistry = await ProviderRegistry.deployed();
-    complianceCoordinator = await ComplianceCoordinator.deployed();
-    aba = await AbacusToken.deployed();
-    kernel = await AbacusKernel.deployed();
-    annoDb = await AnnotationDatabase.deployed();
-    identityToken = await IdentityToken.deployed();
-    
     provider = await SandboxIdentityProvider.new(
       kernel.address,
       aba.address,
@@ -41,7 +34,15 @@ contract("Sandbox", accounts => {
     const regReciept = await provider.registerProvider("Sandbox", "", true); 
   });
 
-  it("distribute ABA tokens", async () => {
+  before(async () => {
+    providerRegistry = await ProviderRegistry.deployed();
+    complianceCoordinator = await ComplianceCoordinator.deployed();
+    aba = await AbacusToken.deployed();
+    kernel = await AbacusKernel.deployed();
+    annoDb = await AnnotationDatabase.deployed();
+    identityToken = await IdentityToken.deployed();
+    
+    //Distribute tokens
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
     await aba.transfer(accounts[3], 10000*ethInWei);
     await aba.approve(
