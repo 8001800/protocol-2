@@ -151,6 +151,7 @@ contract AbacusKernel {
     event ServiceRequested(
         uint256 indexed providerId,
         uint256 providerVersion,
+        uint256 escrowId,
         address requester,
         uint256 cost,
         uint256 requestId
@@ -158,6 +159,7 @@ contract AbacusKernel {
 
     event ServiceRequestAccepted(
         uint256 indexed providerId,
+        uint256 escrowId,
         address requester,
         uint256 requestId
     );
@@ -172,6 +174,7 @@ contract AbacusKernel {
 
     event ServicePerformed(
         uint256 indexed providerId,
+        uint256 escrowId,
         address requester,
         uint256 requestId
     );
@@ -196,11 +199,13 @@ contract AbacusKernel {
         require(requests[msg.sender][requestId] == 0);
 
         // Open and record escrow account
-        requests[msg.sender][requestId] = openEscrow(msg.sender, owner, cost, expiryBlockInterval);
+        uint256 escrowId = openEscrow(msg.sender, owner, cost, expiryBlockInterval);
+        requests[msg.sender][requestId] = escrowId;
 
         emit ServiceRequested({
             providerId: providerId,
             providerVersion: providerRegistry.latestProviderVersion(providerId),
+            escrowId: escrowId,
             requester: msg.sender,
             cost: cost,
             requestId: requestId
@@ -226,6 +231,7 @@ contract AbacusKernel {
 
         emit ServiceRequestAccepted({
             providerId: providerId,
+            escrowId: escrowId,
             requester: requester,
             requestId: requestId
         });
@@ -271,6 +277,7 @@ contract AbacusKernel {
 
         emit ServicePerformed({
             providerId: providerId,
+            escrowId: escrowId,
             requester: requester,
             requestId: requestId
         });
