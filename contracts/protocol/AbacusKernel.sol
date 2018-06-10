@@ -54,7 +54,7 @@ contract AbacusKernel {
     /**
      * @dev Mapping of escrow id -> escrow.
      */
-    mapping (uint256 => Escrow) escrows;
+    mapping (uint256 => Escrow) public escrows;
 
     /**
      * @dev The next id for an escrow.
