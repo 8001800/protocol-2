@@ -67,7 +67,7 @@ contract("Sandbox", accounts => {
       providerVersion: version, 
       cost: 100*ethInWei,
       requestId: "12345678",
-      fieldId:"1234",
+      fieldId:"5678",
       value: "0xdeadbeef",
       expiry: 10,
       owner: ownerAdd,
@@ -123,7 +123,22 @@ contract("Sandbox", accounts => {
     assert.equal(escrow[0], 1);
     assert.equal(escrow[5], acceptService.receipt.blockNumber);
 
-    const result = await provider.writeBytesFieldForService(
+    //Write attestation
+    var result = await provider.writeBytes32Field(
+      params.requester,
+      1234,
+      "0x0f00000000000000000000000000000000000000000000000000000000000000"
+    );
+    
+    var data = await identityToken.readBytes32Data(
+      params.requester,
+      params.providerId,
+      1234
+    );
+    assert.equal(data[1],"0x0f00000000000000000000000000000000000000000000000000000000000000");
+
+    //Write final attestation
+    result = await provider.writeBytesFieldForService(
       params.requester,
       params.requestId,
       params.fieldId,
@@ -144,9 +159,9 @@ contract("Sandbox", accounts => {
     escrow = await kernel.escrows(escrowId);
     assert.equal(escrow[0].toNumber(), 2);
 
-    const data = await annoDb.bytesData(
+    data = await annoDb.bytesData(
       identityToken.address,
-      await identityToken.tokenOf(accounts[3]),
+      await identityToken.tokenOf(params.requester),
       await provider.providerId(),
       params.fieldId
     );
@@ -272,7 +287,7 @@ contract("Sandbox", accounts => {
       cost: 5*ethInWei,
       requestId: "01234567",
       fieldId:"9012",
-      value: "0xmeatbeef",
+      value: "0x0ea0beef",
       expiry: 5,
       owner: ownerAdd,
       requester: accounts[3]
@@ -381,7 +396,7 @@ contract("Sandbox", accounts => {
       cost: 256*ethInWei,
       requestId: "12345678",
       fieldId:"8765",
-      value: "0xyourbeef",
+      value: "0x0000beef",
       expiry: 213,
       owner: ownerAdd,
       requester: accounts[3]

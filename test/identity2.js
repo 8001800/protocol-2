@@ -12,7 +12,7 @@ const { promisify } = require("es6-promisify");
 const BigNumber = require("bignumber.js");
 const ethInWei = 1000000000000000000;
 
-contract("IdentityProvider", accounts => {
+contract("IdentityProvider2", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
   let annoDb = null;
