@@ -16,9 +16,9 @@ contract SandboxIdentityProvider is IdentityProvider {
         _kernel,
         _token,
         _providerId
-    ) public
+    ) public 
     {
-        kernel = _kernel;
+
     }
 
     function writeBytes32FieldForService(
