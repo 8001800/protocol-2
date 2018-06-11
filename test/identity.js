@@ -2,17 +2,16 @@ const chai = require("chai").use(require("chai-as-promised"));
 const assert = chai.assert;
 
 const ProviderRegistry = artifacts.require("ProviderRegistry");
-const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 const AnnotationDatabase = artifacts.require("AnnotationDatabase");
+const IdentityProvider = artifacts.require("IdentityProvider");
 const IdentityToken = artifacts.require("IdentityToken");
 const { promisify } = require("es6-promisify");
 const BigNumber = require("bignumber.js");
 const ethInWei = 1000000000000000000;
 
-contract("IdentityProvider2", accounts => {
+contract("IdentityProvider", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
   let annoDb = null;
@@ -154,4 +153,141 @@ contract("IdentityProvider2", accounts => {
     const balance = await aba.balanceOf(params.providerOwner);
     assert.equal(balance.toNumber(), params.cost);
   });
+
+  it("should write attestations after update", async () => {
+    // Create new identity provider with old ID
+    const identityProvider = await IdentityProvider.new(
+      identityToken.address,
+      providerRegistry.address,
+      kernel.address,
+      aba.address,
+      identityProvId
+    )
+
+    // Upgrade old provider in registry
+    const { logs: updateProviderLogs } = await providerRegistry.upgradeProvider(
+      identityProvId,
+      "www.updatedProvider.com",
+      identityProvider.address,
+      true
+    );
+
+    assert.equal(updateProviderLogs[0].event, "ProviderInfoUpdate");
+    assert.equal(updateProviderLogs[0].args.name, "manual");
+    assert.equal(updateProviderLogs[0].args.version.toNumber(), identityProvVersion.toNumber()+1);
+
+    const id = await identityProvider.providerId();
+    const version = await providerRegistry.latestProviderVersion(id);
+    const owner = await providerRegistry.providerOwner(id);
+    assert.equal(identityProvider.address, owner);
+    assert.equal(version, updateProviderLogs[0].args.version.toNumber());
+
+    //Request parameters
+    const params = {
+      providerId: id,
+      providerVersion: version, 
+      providerOwner: owner,
+      cost: 100*ethInWei,
+      requestId: "12345678",
+      fieldId:"5678",
+      value: "0xdeadbeef",
+      expiry: 10,
+      requester: accounts[3]
+    }
+
+    // Make a request
+    const { logs: requestServiceLogs } = await kernel.requestAsyncService(
+      params.providerId,
+      params.cost,
+      params.requestId,
+      params.expiry,
+      {
+        from: params.requester
+      }
+    );
+    
+    assert.equal(requestServiceLogs.length, 1);
+    assert.equal(requestServiceLogs[0].event, "ServiceRequested");
+    assert.equal(requestServiceLogs[0].args.providerId.toNumber(), params.providerId);
+    assert.equal(requestServiceLogs[0].args.providerVersion.toNumber(), params.providerVersion);
+    assert.equal(requestServiceLogs[0].args.requester, params.requester);
+    assert.equal(requestServiceLogs[0].args.cost.toNumber(), params.cost);
+    assert.equal(requestServiceLogs[0].args.requestId.toNumber(), params.requestId);
+    
+    const escrowed = await aba.balanceOf(kernel.address);
+    assert.equal(escrowed, params.cost);
+
+    const escrowId = requestServiceLogs[0].args.escrowId;
+    var escrow = await kernel.escrows(escrowId);
+    assert.equal(escrow[0].toNumber(), 0);
+    assert.equal(escrow[1], params.requester);
+    assert.equal(escrow[2], params.providerOwner);
+    assert.equal(escrow[3].toNumber(), params.cost);
+    assert.equal(escrow[4].toNumber(), params.expiry);
+    assert.equal(escrow[5].toNumber(), 0);
+
+    const acceptService = await identityProvider.acceptServiceRequest(
+      params.requester,
+      params.requestId
+    );
+    
+    // Accept service request
+    const acceptServiceEvents = await promisify(cb => 
+      kernel
+        .ServiceRequestAccepted({}, {fromBlock: acceptService.receipt.blockNumber, toBlock: "latest"})
+        .get(cb)
+    )();
+
+    assert.equal(acceptServiceEvents[0].event, "ServiceRequestAccepted");
+    assert.equal(acceptServiceEvents[0].args.providerId.toNumber(), params.providerId);
+    assert.equal(acceptServiceEvents[0].args.requester, params.requester);
+    assert.equal(acceptServiceEvents[0].args.requestId.toNumber(), params.requestId);
+
+    escrow = await kernel.escrows(escrowId);
+    assert.equal(escrow[0], 1);
+    assert.equal(escrow[5], acceptService.receipt.blockNumber);
+
+    //Write attestation
+    var result = await identityProvider.writeBytes32Field(
+      params.requester,
+      1234,
+      "0x0f00000000000000000000000000000000000000000000000000000000000000"
+    );
+    
+    var data = await identityToken.readBytes32Data(
+      params.requester,
+      params.providerId,
+      1234
+    );
+    assert.equal(data[1],"0x0f00000000000000000000000000000000000000000000000000000000000000");
+
+    // Complete service request
+    const completeService = await identityProvider.completeServiceRequest(
+      params.requester,
+      params.requestId
+    );
+    
+    const completeServiceEvents = await promisify(cb => 
+      kernel
+        .ServicePerformed({}, {fromBlock: completeService.receipt.blockNumber, toBlock: "latest"})
+        .get(cb)
+    )();
+
+    assert.equal(completeServiceEvents[0].event, "ServicePerformed");
+    assert.equal(completeServiceEvents[0].args.providerId.toNumber(), params.providerId);
+    assert.equal(completeServiceEvents[0].args.requester, params.requester);
+    assert.equal(completeServiceEvents[0].args.requestId.toNumber(), params.requestId);
+
+    escrow = await kernel.escrows(escrowId);
+    assert.equal(escrow[0], 2);
+
+    //Check identity provider's balance
+    const providerBalance = await aba.balanceOf(identityProvider.address);
+    assert.equal(providerBalance.toNumber(), params.cost);
+
+    //Check owner's wallet balance
+    await identityProvider.withdrawBalance(providerBalance);
+    const walletBalance = await aba.balanceOf(accounts[0]);
+    assert.equal(walletBalance.toNumber(), params.cost*2);
+  })
 });
