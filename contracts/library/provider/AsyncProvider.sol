@@ -47,10 +47,10 @@ contract AsyncProvider is Provider {
     }
 
     /**
-     * @dev Accept async service requests and open escrow
+     * @dev Signal the kernel to accept async service requests and open escrow
      * 
-     *  @param requester Ethereum address of the service requester
-     *  @param requestId Request ID of the service request 
+     * @param requester Ethereum address of the service requester
+     * @param requestId Request ID of the service request 
      */
 
      function acceptServiceRequest(
@@ -61,5 +61,20 @@ contract AsyncProvider is Provider {
          kernel.acceptAsyncServiceRequest(providerId, requester, requestId);
          return requestId;
      }
+
+     /**
+      * @dev Signal the kernel that service was completed and close escrow
+      *
+      * @param requester Ethereum address of the service requester
+      * @param requestId Request ID of the service request 
+      */
+      function completeServiceRequest(
+          address requester,
+          uint256 requestId
+      ) onlyOwner external returns (uint256)
+      {
+          kernel.onAsyncServiceCompleted(providerId, requester, requestId);
+          return requestId;
+      }
 
 }
