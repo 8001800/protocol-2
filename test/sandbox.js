@@ -246,23 +246,17 @@ contract("Sandbox", accounts => {
       count++;
     }
 
-    const revokeRequest = await kernel.revokeAsyncServiceRequest(
+    const { logs: revokeRequestLogs } = await kernel.revokeAsyncServiceRequest(
       params.requestId,
       { from : params.requester }
     );
 
-    const revokeRequestEvents = await promisify(cb => 
-      kernel
-        .ServiceRequestRevokedByCancel({}, {fromBlock: 0, toBlock: "latest"})
-        .get(cb)
-    )();
-
-    assert.equal(revokeRequestEvents[0].event, "ServiceRequestRevokedByCancel");
-    assert.equal(revokeRequestEvents[0].args.requestId.toNumber(), params.requestId);
+    assert.equal(revokeRequestLogs[0].event, "ServiceRequestRevokedByCancel");
+    assert.equal(revokeRequestLogs[0].args.requestId.toNumber(), params.requestId);
 
     const revokeTransferEvents = await promisify(cb => 
       aba
-        .Transfer({}, {fromBlock: revokeRequest.receipt.blockNumber, toBlock: "latest"})
+        .Transfer({}, {fromBlock: revokeRequestLogs.blockNumber, toBlock: "latest"})
         .get(cb)
     )();
 
@@ -354,24 +348,18 @@ contract("Sandbox", accounts => {
       );
       count++;
     }
-    
-    const revokeRequest = await kernel.revokeAsyncServiceRequest(
+
+    const { logs: revokeRequestLogs } = await kernel.revokeAsyncServiceRequest(
       params.requestId,
       { from : params.requester }
     );
-    
-    const revokeRequestEvents = await promisify(cb => 
-      kernel
-        .ServiceRequestRevokedByExpiry({}, {fromBlock: 0, toBlock: "latest"})
-        .get(cb)
-    )();
 
-    assert.equal(revokeRequestEvents[0].event, "ServiceRequestRevokedByExpiry");
-    assert.equal(revokeRequestEvents[0].args.requestId.toNumber(), params.requestId);
+    assert.equal(revokeRequestLogs[0].event, "ServiceRequestRevokedByExpiry");
+    assert.equal(revokeRequestLogs[0].args.requestId.toNumber(), params.requestId);
 
     const revokeTransferEvents = await promisify(cb => 
       aba
-        .Transfer({}, {fromBlock: revokeRequest.receipt.blockNumber, toBlock: "latest"})
+        .Transfer({}, {fromBlock: revokeRequestLogs.blockNumber, toBlock: "latest"})
         .get(cb)
     )();
 
