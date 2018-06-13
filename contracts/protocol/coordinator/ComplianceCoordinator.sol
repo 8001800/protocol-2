@@ -2,13 +2,12 @@ pragma solidity ^0.4.21;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../ProviderRegistry.sol";
-import "./AbacusCoordinator.sol";
 import "../../library/compliance/ComplianceStandard.sol";
 
 /**
  * Registry for compliance providers.
  */
-contract ComplianceCoordinator is AbacusCoordinator {
+contract ComplianceCoordinator {
     ProviderRegistry public providerRegistry;
 
     function ComplianceCoordinator(ProviderRegistry _providerRegistry) public  {
@@ -136,8 +135,6 @@ contract ComplianceCoordinator is AbacusCoordinator {
             blockToExpire: blockToExpire,
             checkResult: checkResult
         });
-
-        kernel.onAsyncServiceCompleted(providerId, requester, requestId);
 
         emit ComplianceCheckResultWritten({
             requestId: requestId,
