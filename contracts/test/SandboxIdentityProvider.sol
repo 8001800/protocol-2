@@ -16,7 +16,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         _kernel,
         _token,
         _providerId
-    ) public 
+    ) public
     {
 
     }
