@@ -48,7 +48,7 @@ module.exports = async deployer => {
       0
     );
     const sip = await SandboxIdentityProvider.deployed();
-    await sip.registerProvider("SandboxIdentity", "", false);
+    await sip.registerProvider("SandboxIdentity", "", true);
 
     // Bundle Protocol
     await deployer.deploy(Bundle, ComplianceCoordinator.address);

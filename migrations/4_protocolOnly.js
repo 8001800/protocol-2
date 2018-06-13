@@ -17,10 +17,8 @@ module.exports = async deployer => {
           AbacusKernel,
           AbacusToken.address,
           ProviderRegistry.address,
-          ComplianceCoordinator.address
         );
         const compliance = await ComplianceCoordinator.deployed();
-        await compliance.setKernel(AbacusKernel.address);
     
         await deployer.deploy(AnnotationDatabase, ProviderRegistry.address);
         await deployer.deploy(IdentityToken, AnnotationDatabase.address);
