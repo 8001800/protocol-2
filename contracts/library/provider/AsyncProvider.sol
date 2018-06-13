@@ -39,7 +39,7 @@ contract AsyncProvider is Provider {
      */
     function withdrawBalance(
         uint256 value
-    ) onlyOwner external returns (uint256)
+    ) onlyOwner public returns (uint256)
     {
         require(value <= token.balanceOf(this));
         token.transfer(msg.sender, value);
@@ -56,7 +56,7 @@ contract AsyncProvider is Provider {
      function acceptServiceRequest(
          address requester,
          uint256 requestId
-     ) onlyOwner external returns (uint256)
+     ) onlyOwner public returns (uint256)
      {
          kernel.acceptAsyncServiceRequest(providerId, requester, requestId);
          return requestId;
@@ -71,7 +71,7 @@ contract AsyncProvider is Provider {
       function completeServiceRequest(
           address requester,
           uint256 requestId
-      ) onlyOwner external returns (uint256)
+      ) onlyOwner public returns (uint256)
       {
           kernel.onAsyncServiceCompleted(providerId, requester, requestId);
           return requestId;

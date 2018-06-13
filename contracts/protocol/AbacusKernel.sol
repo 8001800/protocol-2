@@ -71,7 +71,7 @@ contract AbacusKernel {
         uint256 expiryBlockInterval
     ) internal returns (uint256 escrowId)
     {
-        require(from != address(0) && to != address(0));
+        require(from != address(0) && to != address(0) && to != address(this));
 
         // Transfer tokens to kernel
         require(token.transferFrom(from, this, amount));
@@ -191,7 +191,7 @@ contract AbacusKernel {
 
         // Ensure that the request id is new
         require(requests[msg.sender][requestId] == 0);
-
+        
         // Open and record escrow account
         uint256 escrowId = openEscrow(msg.sender, owner, cost, expiryBlockInterval);
         requests[msg.sender][requestId] = escrowId;
