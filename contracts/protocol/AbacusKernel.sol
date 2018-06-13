@@ -15,19 +15,13 @@ contract AbacusKernel {
     AbacusToken public token;
     ProviderRegistry public providerRegistry;
 
-    address public complianceCoordinator;
-    mapping (address => bool) coordinators;
-
     function AbacusKernel(
         AbacusToken _token,
-        ProviderRegistry _providerRegistry,
-        address _complianceCoordinator
+        ProviderRegistry _providerRegistry
     ) public
     {
         token = _token;
         providerRegistry = _providerRegistry;
-        complianceCoordinator = _complianceCoordinator;
-        coordinators[complianceCoordinator] = true;
     }
 
     /**
@@ -144,7 +138,7 @@ contract AbacusKernel {
         uint256 cost
     ) public returns (bool)
     {
-        require(coordinators[msg.sender] || msg.sender == from);
+        require(msg.sender == from);
         return token.transferFrom(from, to, cost);
     }
 
@@ -265,10 +259,8 @@ contract AbacusKernel {
         address requester,
         uint256 requestId
     ) external {
-        // Must be called from the service provider or by a coordinator.
-        require(
-            coordinators[msg.sender] ||
-            msg.sender == providerRegistry.providerOwner(providerId));
+        // Must be called from the service provider.
+        require(msg.sender == providerRegistry.providerOwner(providerId));
 
         uint256 escrowId = requests[requester][requestId];
         require(escrowId != 0);
