@@ -20,7 +20,11 @@
     "cost": {
       "type": "string",
       "description": "The cost of the service in ABA. Uint256."
+    },
+    "expiry": {
+      "type": "string",
+      "description": "The minimum time in block numbers for the service request to be completed"
     }
   },
-  "required": ["formEndpoint", "requestId", "cost"]
+  "required": ["formEndpoint", "requestId", "cost", "expiry"]
 }
