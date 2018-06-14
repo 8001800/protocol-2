@@ -52,7 +52,6 @@ contract AsyncProvider is Provider {
      * @param requester Ethereum address of the service requester
      * @param requestId Request ID of the service request 
      */
-
      function acceptServiceRequest(
          address requester,
          uint256 requestId
@@ -76,5 +75,4 @@ contract AsyncProvider is Provider {
           kernel.onAsyncServiceCompleted(providerId, requester, requestId);
           return requestId;
       }
-
 }
