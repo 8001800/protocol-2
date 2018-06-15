@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "../../protocol/IdentityToken.sol";
 import "../../protocol/AnnotationDatabase.sol";
@@ -11,7 +11,7 @@ contract WhitelistCS is ComplianceStandard {
     uint256 identityProviderId;
     uint256 constant public FIELD_WHITELISTED = 0xfaceb00c;
 
-    function WhitelistCS(
+    constructor(
         IdentityToken _identityToken,
         ProviderRegistry _providerRegistry,
         uint256 _providerId,

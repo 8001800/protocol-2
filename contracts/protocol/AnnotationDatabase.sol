@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "./ProviderRegistry.sol";
 
@@ -9,7 +9,7 @@ import "./ProviderRegistry.sol";
 contract AnnotationDatabase {
     ProviderRegistry public providerRegistry;
 
-    function AnnotationDatabase(ProviderRegistry _providerRegistry) public
+    constructor(ProviderRegistry _providerRegistry) public
     {
         providerRegistry = _providerRegistry;
     }

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../../protocol/ProviderRegistry.sol";
@@ -10,13 +10,17 @@ import "../../protocol/ProviderRegistry.sol";
 contract Provider is Ownable {
     uint256 public providerId;
     ProviderRegistry providerRegistry;
-
+    
     /**
      * @dev Constructor used for upgrades.
      *
      * @param _providerId The provider id. If set to 0, the provider can be registered.
      */
-    function Provider(ProviderRegistry _providerRegistry, uint256 _providerId) public {
+    constructor(
+        ProviderRegistry _providerRegistry, 
+        uint256 _providerId       
+    ) public 
+    {
         providerRegistry = _providerRegistry;
         providerId = _providerId;
     }

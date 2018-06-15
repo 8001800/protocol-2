@@ -4,6 +4,8 @@ const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
+const IdentityToken = artifacts.require("IdentityToken");
+const AccreditedUSCS = artifacts.require("AccreditedUSCS");
 const AccreditedUSToken = artifacts.require("AccreditedUSToken");
 
 const { promisify } = require("es6-promisify");
@@ -16,6 +18,7 @@ contract("E2E Compliance and Identity", accounts => {
   let kernel = null;
 
   let identityProvider = null;
+  let USCS = null
   let ctoken = null;
 
   before(async () => {
@@ -23,11 +26,39 @@ contract("E2E Compliance and Identity", accounts => {
     complianceCoordinator = await ComplianceCoordinator.deployed();
     aba = await AbacusToken.deployed();
     kernel = await AbacusKernel.deployed();
+    identityToken = await IdentityToken.deployed();
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
 
-    identityProvider = await SandboxIdentityProvider.deployed();
-    ctoken = await AccreditedUSToken.deployed();
+    identityProvider = await SandboxIdentityProvider.new(
+      identityToken.address,
+      kernel.address,
+      0
+    )
+
+    await identityProvider.registerProvider(
+      "sandbox",
+      "www.identityprovider.com",
+      true
+    );
+
+    USCS = await AccreditedUSCS.new(
+      identityToken.address,
+      providerRegistry.address,
+      0,
+      await identityProvider.providerId()
+    );
+
+    await USCS.registerProvider(
+      "USCS",
+      "AccreditedUSInvestor Check",
+      false
+    );
+
+    ctoken = await AccreditedUSToken.new(
+      complianceCoordinator.address,
+      await USCS.providerId()
+    );
   });
 
   it("should allow free transaction for both approved by identity provider", async () => {

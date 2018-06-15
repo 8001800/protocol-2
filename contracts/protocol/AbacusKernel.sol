@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "./AbacusToken.sol";
 import "./ProviderRegistry.sol";
@@ -15,7 +15,7 @@ contract AbacusKernel {
     AbacusToken public token;
     ProviderRegistry public providerRegistry;
 
-    function AbacusKernel(
+    constructor(
         AbacusToken _token,
         ProviderRegistry _providerRegistry
     ) public
@@ -54,7 +54,7 @@ contract AbacusKernel {
     /**
      * @dev Mapping of escrow id -> escrow.
      */
-    mapping (uint256 => Escrow) escrows;
+    mapping (uint256 => Escrow) public escrows;
 
     /**
      * @dev The next id for an escrow.
@@ -71,7 +71,7 @@ contract AbacusKernel {
         uint256 expiryBlockInterval
     ) internal returns (uint256 escrowId)
     {
-        require(from != address(0) && to != address(0));
+        require(from != address(0) && to != address(0) && to != address(this));
 
         // Transfer tokens to kernel
         require(token.transferFrom(from, this, amount));
@@ -123,7 +123,8 @@ contract AbacusKernel {
         Escrow storage escrow = escrows[escrowId];
         require(
             escrow.state == EscrowState.OPEN ||
-            block.number < escrow.blockLocked.add(escrow.expiryBlockInterval));
+            //check if service request expired
+            block.number >= escrow.blockLocked.add(escrow.expiryBlockInterval));
         require(token.transfer(escrow.from, escrow.amount));
         escrow.state = escrow.state == EscrowState.OPEN ? EscrowState.REVOKED_CANCEL : EscrowState.REVOKED_EXPIRY;
         return escrow.state;
@@ -191,7 +192,6 @@ contract AbacusKernel {
 
         // Ensure that the request id is new
         require(requests[msg.sender][requestId] == 0);
-
         // Open and record escrow account
         uint256 escrowId = openEscrow(msg.sender, owner, cost, expiryBlockInterval);
         requests[msg.sender][requestId] = escrowId;

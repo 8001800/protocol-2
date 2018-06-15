@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "../FaucetToken.sol";
 
@@ -9,7 +9,7 @@ contract AccreditedUSToken is FaucetToken {
     string public constant name = "Accredited US Token";
     string public constant symbol = "AUS";
 
-    function AccreditedUSToken(
+    constructor(
         ComplianceCoordinator _complianceCoordinator,
         uint256 _complianceProviderId
     ) FaucetToken(_complianceCoordinator, _complianceProviderId) public

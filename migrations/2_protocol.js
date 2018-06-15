@@ -34,18 +34,18 @@ module.exports = async deployer => {
     await deployer.deploy(
       artifacts.require("IdentityProvider"),
       IdentityToken.address,
-      ProviderRegistry.address,
+      AbacusKernel.address,
       0
     );
 
     await deployer.deploy(
       SandboxIdentityProvider,
-      AbacusKernel.address,
       IdentityToken.address,
+      AbacusKernel.address,
       0
     );
     const sip = await SandboxIdentityProvider.deployed();
-    await sip.registerProvider("SandboxIdentity", "", false);
+    await sip.registerProvider("SandboxIdentity", "", true);
 
     // Bundle Protocol
     await deployer.deploy(Bundle, ComplianceCoordinator.address);

@@ -1,16 +1,17 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "../../protocol/IdentityToken.sol";
-import "./Provider.sol";
+import "../../protocol/AbacusKernel.sol";
+import "./AsyncProvider.sol";
 
-contract IdentityProvider is Provider {
+contract IdentityProvider is AsyncProvider {
     IdentityToken identityToken;
 
-    function IdentityProvider(
+    constructor(
         IdentityToken _identityToken,
-        ProviderRegistry _providerRegistry,
+        AbacusKernel _kernel,
         uint256 _providerId
-    ) Provider(_providerRegistry, _providerId) public
+    ) AsyncProvider(_kernel, _providerId) public
     {
         identityToken = _identityToken;
     }

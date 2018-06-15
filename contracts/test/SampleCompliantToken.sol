@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "./FaucetToken.sol";
 
@@ -9,7 +9,7 @@ contract SampleCompliantToken is FaucetToken {
     string public constant name = "Sample Compliant Token";
     string public constant symbol = "SC1";
 
-    function SampleCompliantToken(
+    constructor(
         ComplianceCoordinator _complianceCoordinator,
         uint56 _complianceProviderId
     ) FaucetToken(_complianceCoordinator, _complianceProviderId) public
