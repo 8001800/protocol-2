@@ -10,7 +10,7 @@ import "../../library/compliance/ComplianceStandard.sol";
 contract ComplianceCoordinator {
     ProviderRegistry public providerRegistry;
 
-    constructor (ProviderRegistry _providerRegistry) public  {
+    constructor(ProviderRegistry _providerRegistry) public  {
         providerRegistry = _providerRegistry;
     }
 
