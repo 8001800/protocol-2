@@ -2,12 +2,11 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "../../protocol/coordinator/ComplianceCoordinator.sol";
-import "./AbacusInstrument.sol";
 
 /**
  * @dev An ERC20 token that uses Abacus for compliance.
  */
-contract AbacusERC20Token is StandardToken, AbacusInstrument {
+contract AbacusERC20Token is StandardToken {
     ComplianceCoordinator complianceCoordinator;
     uint256 complianceProviderId;
 
