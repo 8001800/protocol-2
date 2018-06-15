@@ -24,9 +24,8 @@ contract("Sandbox", accounts => {
 
   beforeEach(async () => {
     provider = await SandboxIdentityProvider.new(
-      kernel.address,
-      aba.address,
       identityToken.address,
+      kernel.address,
       0
     );
 

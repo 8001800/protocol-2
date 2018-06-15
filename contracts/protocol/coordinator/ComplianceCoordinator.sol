@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../ProviderRegistry.sol";
@@ -10,7 +10,7 @@ import "../../library/compliance/ComplianceStandard.sol";
 contract ComplianceCoordinator {
     ProviderRegistry public providerRegistry;
 
-    function ComplianceCoordinator(ProviderRegistry _providerRegistry) public  {
+    constructor (ProviderRegistry _providerRegistry) public  {
         providerRegistry = _providerRegistry;
     }
 
@@ -192,13 +192,15 @@ contract ComplianceCoordinator {
     {
         return uint256(
             keccak256(
-                providerId,
-                providerVersion,
-                instrumentAddr,
-                instrumentIdOrAmt,
-                from,
-                to,
-                data
+                abi.encodePacked(
+                    providerId,
+                    providerVersion,
+                    instrumentAddr,
+                    instrumentIdOrAmt,
+                    from,
+                    to,
+                    data
+                )
             )
         );
     }

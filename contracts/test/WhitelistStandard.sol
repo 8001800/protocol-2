@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "../library/compliance/ComplianceStandard.sol";
 
@@ -13,7 +13,7 @@ contract WhitelistStandard is ComplianceStandard {
     uint256 operations = 0;
     uint256 delegateProviderId;
 
-    function WhitelistStandard(
+    constructor(
         ProviderRegistry _providerRegistry, uint256 _providerId, uint256 _delegateProviderId
     ) Provider(_providerRegistry, _providerId) public
     {

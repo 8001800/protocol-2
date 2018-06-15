@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "../../protocol/IdentityToken.sol";
 import "../../protocol/AnnotationDatabase.sol";
@@ -12,7 +12,7 @@ contract AccreditedUSCS is ComplianceStandard {
     uint256 constant public FIELD_NON_US = 1776;
     uint256 constant public FIELD_ACCREDITED = 506;
 
-    function AccreditedUSCS(
+    constructor(
         IdentityToken _identityToken,
         ProviderRegistry _providerRegistry,
         uint256 _providerId,

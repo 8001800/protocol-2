@@ -1,24 +1,20 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "../protocol/AbacusKernel.sol";
 import "../library/provider/IdentityProvider.sol";
 
 contract SandboxIdentityProvider is IdentityProvider {
 
-    function SandboxIdentityProvider(
-        AbacusKernel _kernel,
-        AbacusToken _token,
+    constructor(
         IdentityToken _identityToken,
+        AbacusKernel _kernel,
         uint256 _providerId
     ) IdentityProvider(
         _identityToken,
-        _kernel.providerRegistry(),
         _kernel,
-        _token,
         _providerId
     ) public
     {
-
     }
 
     function writeBytes32FieldForService(

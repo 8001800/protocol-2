@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./Provider.sol";
@@ -11,7 +11,7 @@ import "../../protocol/AbacusKernel.sol";
  * @dev A contract which can be used as a provider in a ProviderRegistry.
  */
 contract AsyncProvider is Provider {
-    AbacusKernel kernel;
+    AbacusKernel public kernel;
     AbacusToken public token;
     
     /**
@@ -19,17 +19,13 @@ contract AsyncProvider is Provider {
      *
      * @param _providerId The provider id. If set to 0, the provider can be registered.
      */
-    function AsyncProvider(
-        ProviderRegistry _providerRegistry, 
+    constructor(
         AbacusKernel _kernel,
-        AbacusToken _token,
         uint256 _providerId       
-    ) Provider (_providerRegistry, _providerId) public 
+    ) Provider (_kernel.providerRegistry(), _providerId) public 
     {
-        providerRegistry = _providerRegistry;
         kernel = _kernel;
-        token = _token;
-        providerId = _providerId;
+        token = _kernel.token();
     }
 
     /**
@@ -39,11 +35,9 @@ contract AsyncProvider is Provider {
      */
     function withdrawBalance(
         uint256 value
-    ) onlyOwner public returns (uint256)
+    ) onlyOwner public
     {
-        require(value <= token.balanceOf(this));
         token.transfer(msg.sender, value);
-        return value;
     }
 
     /**
@@ -55,10 +49,9 @@ contract AsyncProvider is Provider {
      function acceptServiceRequest(
          address requester,
          uint256 requestId
-     ) onlyOwner public returns (uint256)
+     ) onlyOwner public
      {
          kernel.acceptAsyncServiceRequest(providerId, requester, requestId);
-         return requestId;
      }
 
      /**
@@ -70,9 +63,8 @@ contract AsyncProvider is Provider {
       function completeServiceRequest(
           address requester,
           uint256 requestId
-      ) onlyOwner public returns (uint256)
+      ) onlyOwner public
       {
           kernel.onAsyncServiceCompleted(providerId, requester, requestId);
-          return requestId;
       }
 }

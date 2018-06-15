@@ -160,9 +160,7 @@ contract("IdentityProvider", accounts => {
     // Create new identity provider with old ID
     identityProvider = await IdentityProvider.new(
       identityToken.address,
-      providerRegistry.address,
       kernel.address,
-      aba.address,
       identityProvId
     )
 

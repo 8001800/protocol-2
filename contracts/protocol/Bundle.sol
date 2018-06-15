@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
@@ -30,7 +30,7 @@ contract Bundle is ERC721Token {
 
     ComplianceCoordinator complianceCoordinator;
 
-    function Bundle(
+    constructor(
         ComplianceCoordinator _complianceCoordinator
     ) public ERC721Token("Bundle", "BND")
     {

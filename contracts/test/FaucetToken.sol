@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "../library/instruments/AbacusERC20Token.sol";
 
@@ -10,7 +10,7 @@ contract FaucetToken is AbacusERC20Token {
     uint256 public constant INITIAL_SUPPLY = 1000000000000000000 * (10 ** uint256(decimals));
     uint256 constant faucetAmt = 1000 * (10 ** uint256(decimals));
 
-    function FaucetToken(
+    constructor(
         ComplianceCoordinator _complianceCoordinator,
         uint256 _complianceProviderId
     ) AbacusERC20Token(_complianceCoordinator, _complianceProviderId) public

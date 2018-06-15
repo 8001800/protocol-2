@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "./AbacusToken.sol";
 import "./ProviderRegistry.sol";
@@ -15,7 +15,7 @@ contract AbacusKernel {
     AbacusToken public token;
     ProviderRegistry public providerRegistry;
 
-    function AbacusKernel(
+    constructor(
         AbacusToken _token,
         ProviderRegistry _providerRegistry
     ) public
@@ -123,6 +123,7 @@ contract AbacusKernel {
         Escrow storage escrow = escrows[escrowId];
         require(
             escrow.state == EscrowState.OPEN ||
+            //check if service request expired
             block.number >= escrow.blockLocked.add(escrow.expiryBlockInterval));
         require(token.transfer(escrow.from, escrow.amount));
         escrow.state = escrow.state == EscrowState.OPEN ? EscrowState.REVOKED_CANCEL : EscrowState.REVOKED_EXPIRY;
@@ -191,7 +192,6 @@ contract AbacusKernel {
 
         // Ensure that the request id is new
         require(requests[msg.sender][requestId] == 0);
-        
         // Open and record escrow account
         uint256 escrowId = openEscrow(msg.sender, owner, cost, expiryBlockInterval);
         requests[msg.sender][requestId] = escrowId;
@@ -239,7 +239,6 @@ contract AbacusKernel {
     ) external {
         uint256 escrowId = requests[msg.sender][requestId];
         require(escrowId != 0);
-        
         EscrowState state = revokeEscrow(escrowId);
 
         if (state == EscrowState.REVOKED_CANCEL)

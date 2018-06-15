@@ -16,7 +16,7 @@
     "ganache": "ganache-cli -m \"bennie and the jets bennie and the jets bennie and the jets\" --port 7545"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^1.9.0"
+    "openzeppelin-solidity": "^1.10.0"
   },
   "devDependencies": {
     "babel-polyfill": "^6.26.0",
@@ -27,7 +27,7 @@
     "chai-as-promised": "^7.1.1",
     "es6-promisify": "^6.0.0",
     "solium": "^1.1.5",
-    "truffle": "^4.1.5",
+    "truffle": "^4.1.11",
     "web3": "^1.0.0-beta.30"
   },
   "files": [

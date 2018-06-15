@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "../protocol/IdentityToken.sol";
 import "../protocol/AnnotationDatabase.sol";
@@ -12,7 +12,7 @@ contract UintSandboxComplianceStandard is ComplianceStandard {
     uint256 identityProviderId;
     uint256 constant public FIELD_NUM = 888;
 
-    function UintSandboxComplianceStandard(
+    constructor(
         IdentityToken _identityToken,
         ProviderRegistry _providerRegistry,
         uint256 _providerId,

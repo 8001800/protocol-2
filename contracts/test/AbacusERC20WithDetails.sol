@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import "../library/instruments/AbacusERC20Token.sol";
 
@@ -11,7 +11,7 @@ contract AbacusERC20WithDetails is AbacusERC20Token {
     string public symbol;
     uint8 public decimals;
 
-    function AbacusERC20WithDetails(
+    constructor(
         ComplianceCoordinator _complianceCoordinator,
         uint256 _complianceProviderId,
         string _name,

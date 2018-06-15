@@ -31,9 +31,8 @@ contract("E2E Compliance and Identity", accounts => {
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
 
     identityProvider = await SandboxIdentityProvider.new(
-      kernel.address,
-      aba.address,
       identityToken.address,
+      kernel.address,
       0
     )
 
