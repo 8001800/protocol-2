@@ -1,5 +1,4 @@
 const AnnotationDatabase = artifacts.require("AnnotationDatabase");
-const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const IdentityToken = artifacts.require("IdentityToken");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
@@ -11,7 +10,6 @@ const ProviderRegistry = artifacts.require("ProviderRegistry");
 
 module.exports = async deployer => {
   await deployer.deploy(ProviderRegistry).then(async () => {
-      await deployer.deploy(ComplianceCoordinator, ProviderRegistry.address);
       await deployer.deploy(AbacusToken);
       await deployer.deploy(
         AbacusKernel,

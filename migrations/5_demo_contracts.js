@@ -17,7 +17,7 @@ const WhitelistToken = artifacts.require("WhitelistToken");
  * Please make sure artificats for protocol contracts exist before 
  * migrating contracts in this script.
  * 
- * Run `npx truffle migrate -f 2 --to 3` to migrate contracts on 
+ * Run `npx truffle migrate -f 2 --to 5` to migrate contracts in 
  * this script with the protocol contracts
  */
 
