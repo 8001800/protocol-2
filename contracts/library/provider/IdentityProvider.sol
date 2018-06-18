@@ -20,7 +20,7 @@ contract IdentityProvider is AsyncProvider {
         address user,
         uint256 fieldId,
         bytes32 value
-    ) public {
+    ) public onlyOwner {
         identityToken.annotationDatabase().writeBytes32Field(
             identityToken,
             identityToken.tokenOf(user),
@@ -34,7 +34,7 @@ contract IdentityProvider is AsyncProvider {
         address user,
         uint256 fieldId,
         bytes value
-    ) public {
+    ) public onlyOwner {
         identityToken.annotationDatabase().writeBytesField(
             identityToken,
             identityToken.tokenOf(user),
