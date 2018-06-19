@@ -7,7 +7,7 @@ module.exports = {
     },
 
     rinkeby: {
-      host: "127.0.0.1",
+      host: "10.0.128.6",
       port: 8545,
       from: process.env.ETH_ACCOUNT,
       network_id: 4,
