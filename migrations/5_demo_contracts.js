@@ -29,8 +29,9 @@ module.exports = async deployer => {
     AbacusKernel.address,
     0
   );
-
+  
   const sip = await SandboxIdentityProvider.deployed();  
+  await sip.registerProvider("Sandbox Identity", "", true);
 
   /////////////////
   // DEMO STUFF
