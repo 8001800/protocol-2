@@ -1,7 +1,7 @@
 const IdentityToken = artifacts.require("IdentityToken");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 
-const NEW_OWNER = "0xe107f91ef6b35436cd4a61eb76c74206db444e82";
+const NEW_OWNER = "0x8b932aa60c889e58d9b6174acb5d99c7af311366";
 
 const main = async () => {
   const tok = await IdentityToken.deployed();
