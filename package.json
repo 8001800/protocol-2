@@ -6,6 +6,7 @@
   "author": "Abacus Team <team@abacusprotocol.com>",
   "license": "MIT",
   "scripts": {
+    "precommit": "pretty-quick --staged",
     "clean": "rm -fr build/",
     "compile": "truffle compile",
     "migrate:development": "truffle migrate --network development",
@@ -26,6 +27,9 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "es6-promisify": "^6.0.0",
+    "husky": "^0.14.3",
+    "pretty-quick": "^1.6.0",
+    "prettier": "1.13.7",
     "solium": "^1.1.5",
     "truffle": "^4.1.11",
     "web3": "^1.0.0-beta.30"
