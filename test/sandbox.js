@@ -30,7 +30,7 @@ contract("Sandbox", accounts => {
     );
 
     //Register provider
-    const regReciept = await provider.registerProvider("Sandbox", "", true); 
+    const regReciept = await provider.registerProvider("Sandbox", "", true);
   });
 
   before(async () => {
@@ -40,21 +40,17 @@ contract("Sandbox", accounts => {
     kernel = await AbacusKernel.deployed();
     annoDb = await AnnotationDatabase.deployed();
     identityToken = await IdentityToken.deployed();
-    
+
     //Distribute tokens
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
-    await aba.transfer(accounts[3], 10000*ethInWei);
-    await aba.approve(
-      kernel.address, 
-      new BigNumber(2).pow(256).minus(1),
-      {
-        from: accounts[3]
-      }
-    );
+    await aba.transfer(accounts[3], 10000 * ethInWei);
+    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1), {
+      from: accounts[3]
+    });
     await aba.transfer(accounts[9], await aba.balanceOf(accounts[0]));
   });
 
-  it("should write bytes field", async () => {   
+  it("should write bytes field", async () => {
     const id = await provider.providerId();
     const version = await providerRegistry.latestProviderVersion(id);
     const ownerAdd = await providerRegistry.providerOwner(id);
@@ -63,15 +59,15 @@ contract("Sandbox", accounts => {
     //Request parameters
     const params = {
       providerId: id,
-      providerVersion: version, 
-      cost: 100*ethInWei,
+      providerVersion: version,
+      cost: 100 * ethInWei,
       requestId: "12345678",
-      fieldId:"5678",
+      fieldId: "5678",
       value: "0xdeadbeef",
       expiry: 10,
       owner: ownerAdd,
       requester: accounts[3]
-    }
+    };
 
     const requestService = await kernel.requestAsyncService(
       params.providerId,
@@ -84,11 +80,20 @@ contract("Sandbox", accounts => {
     );
 
     assert.equal(requestService.logs[0].event, "ServiceRequested");
-    assert.equal(requestService.logs[0].args.providerId.toNumber(), params.providerId);
-    assert.equal(requestService.logs[0].args.providerVersion.toNumber(), params.providerVersion);
+    assert.equal(
+      requestService.logs[0].args.providerId.toNumber(),
+      params.providerId
+    );
+    assert.equal(
+      requestService.logs[0].args.providerVersion.toNumber(),
+      params.providerVersion
+    );
     assert.equal(requestService.logs[0].args.requester, params.requester);
     assert.equal(requestService.logs[0].args.cost.toNumber(), params.cost);
-    assert.equal(requestService.logs[0].args.requestId.toNumber(), params.requestId); 
+    assert.equal(
+      requestService.logs[0].args.requestId.toNumber(),
+      params.requestId
+    );
 
     const escrowId = requestService.logs[0].args.escrowId;
     const escrowed = await aba.balanceOf(kernel.address);
@@ -106,54 +111,75 @@ contract("Sandbox", accounts => {
       params.requester,
       params.requestId
     );
-    
-    const acceptServiceEvents = await promisify(cb => 
+
+    const acceptServiceEvents = await promisify(cb =>
       kernel
-        .ServiceRequestAccepted({}, {fromBlock: acceptService.receipt.blockNumber, toBlock: "latest"})
+        .ServiceRequestAccepted(
+          {},
+          { fromBlock: acceptService.receipt.blockNumber, toBlock: "latest" }
+        )
         .get(cb)
     )();
 
     assert.equal(acceptServiceEvents[0].event, "ServiceRequestAccepted");
-    assert.equal(acceptServiceEvents[0].args.providerId.toNumber(), params.providerId);
+    assert.equal(
+      acceptServiceEvents[0].args.providerId.toNumber(),
+      params.providerId
+    );
     assert.equal(acceptServiceEvents[0].args.requester, params.requester);
-    assert.equal(acceptServiceEvents[0].args.requestId.toNumber(), params.requestId);
+    assert.equal(
+      acceptServiceEvents[0].args.requestId.toNumber(),
+      params.requestId
+    );
 
     escrow = await kernel.escrows(escrowId);
     assert.equal(escrow[0], 1);
     assert.equal(escrow[5], acceptService.receipt.blockNumber);
 
     //Write attestation
-    var result = await provider.writeBytes32Field(
+    var result = await provider.writeIdentityBytes32Field(
       params.requester,
       1234,
       "0x0f00000000000000000000000000000000000000000000000000000000000000"
     );
-    
+
     var data = await identityToken.readBytes32Data(
       params.requester,
       params.providerId,
       1234
     );
-    assert.equal(data[1],"0x0f00000000000000000000000000000000000000000000000000000000000000");
+    assert.equal(
+      data[1],
+      "0x0f00000000000000000000000000000000000000000000000000000000000000"
+    );
 
     //Write final attestation
-    result = await provider.writeBytesFieldForService(
+    result = await provider.writeIdentityBytesFieldForService(
       params.requester,
       params.requestId,
       params.fieldId,
       params.value
     );
 
-    const performServiceEvents = await promisify(cb => 
+    const performServiceEvents = await promisify(cb =>
       kernel
-        .ServicePerformed({}, {fromBlock: result.receipt.blockNumber, toBlock: "latest"})
+        .ServicePerformed(
+          {},
+          { fromBlock: result.receipt.blockNumber, toBlock: "latest" }
+        )
         .get(cb)
     )();
 
     assert.equal(performServiceEvents[0].event, "ServicePerformed");
-    assert.equal(performServiceEvents[0].args.providerId.toNumber(), params.providerId);
+    assert.equal(
+      performServiceEvents[0].args.providerId.toNumber(),
+      params.providerId
+    );
     assert.equal(performServiceEvents[0].args.requester, params.requester);
-    assert.equal(performServiceEvents[0].args.requestId.toNumber(), params.requestId);
+    assert.equal(
+      performServiceEvents[0].args.requestId.toNumber(),
+      params.requestId
+    );
 
     escrow = await kernel.escrows(escrowId);
     assert.equal(escrow[0].toNumber(), 2);
@@ -184,15 +210,15 @@ contract("Sandbox", accounts => {
     //Request parameters
     const params = {
       providerId: id,
-      providerVersion: version, 
-      cost: 1*ethInWei,
+      providerVersion: version,
+      cost: 1 * ethInWei,
       requestId: "901234567",
-      fieldId:"5678",
+      fieldId: "5678",
       value: "0xbeefbeef",
       expiry: 10,
       owner: ownerAdd,
       requester: accounts[3]
-    }
+    };
 
     const requestService = await kernel.requestAsyncService(
       params.providerId,
@@ -203,13 +229,22 @@ contract("Sandbox", accounts => {
         from: params.requester
       }
     );
-    
+
     assert.equal(requestService.logs[0].event, "ServiceRequested");
-    assert.equal(requestService.logs[0].args.providerId.toNumber(), params.providerId);
-    assert.equal(requestService.logs[0].args.providerVersion.toNumber(), params.providerVersion);
+    assert.equal(
+      requestService.logs[0].args.providerId.toNumber(),
+      params.providerId
+    );
+    assert.equal(
+      requestService.logs[0].args.providerVersion.toNumber(),
+      params.providerVersion
+    );
     assert.equal(requestService.logs[0].args.requester, params.requester);
     assert.equal(requestService.logs[0].args.cost.toNumber(), params.cost);
-    assert.equal(requestService.logs[0].args.requestId.toNumber(), params.requestId); 
+    assert.equal(
+      requestService.logs[0].args.requestId.toNumber(),
+      params.requestId
+    );
 
     const escrowId = requestService.logs[0].args.escrowId;
     const escrowed = await aba.balanceOf(kernel.address);
@@ -222,40 +257,44 @@ contract("Sandbox", accounts => {
     assert.equal(escrow[3].toNumber(), params.cost);
     assert.equal(escrow[4].toNumber(), params.expiry);
     assert.equal(escrow[5].toNumber(), 0);
-    
+
     await assert.isRejected(
-      provider.writeBytesFieldForService(
+      provider.writeIdentityBytesFieldForService(
         params.requester,
         params.requestId,
         params.fieldId,
         params.value
       )
-    )
+    );
 
     //passblocks
     var count = 0;
-    while(count <= params.expiry) {
-      await web3.eth.sendTransaction(
-        {
-          value: 1,
-          from: accounts[0],
-          to: accounts[1]
-        }
-      );
+    while (count <= params.expiry) {
+      await web3.eth.sendTransaction({
+        value: 1,
+        from: accounts[0],
+        to: accounts[1]
+      });
       count++;
     }
 
     const { logs: revokeRequestLogs } = await kernel.revokeAsyncServiceRequest(
       params.requestId,
-      { from : params.requester }
+      { from: params.requester }
     );
 
     assert.equal(revokeRequestLogs[0].event, "ServiceRequestRevokedByCancel");
-    assert.equal(revokeRequestLogs[0].args.requestId.toNumber(), params.requestId);
+    assert.equal(
+      revokeRequestLogs[0].args.requestId.toNumber(),
+      params.requestId
+    );
 
-    const revokeTransferEvents = await promisify(cb => 
+    const revokeTransferEvents = await promisify(cb =>
       aba
-        .Transfer({}, {fromBlock: revokeRequestLogs.blockNumber, toBlock: "latest"})
+        .Transfer(
+          {},
+          { fromBlock: revokeRequestLogs.blockNumber, toBlock: "latest" }
+        )
         .get(cb)
     )();
 
@@ -265,7 +304,7 @@ contract("Sandbox", accounts => {
 
     escrow = await kernel.escrows(escrowId);
     assert.equal(escrow[0].toNumber(), 3);
-  })
+  });
 
   it("operational failure, cancel payment in escrow ", async () => {
     const id = await provider.providerId();
@@ -276,15 +315,15 @@ contract("Sandbox", accounts => {
     //Request parameters
     const params = {
       providerId: id,
-      providerVersion: version, 
-      cost: 5*ethInWei,
+      providerVersion: version,
+      cost: 5 * ethInWei,
       requestId: "01234567",
-      fieldId:"9012",
+      fieldId: "9012",
       value: "0x0ea0beef",
       expiry: 5,
       owner: ownerAdd,
       requester: accounts[3]
-    }
+    };
 
     const requestService = await kernel.requestAsyncService(
       params.providerId,
@@ -295,13 +334,22 @@ contract("Sandbox", accounts => {
         from: params.requester
       }
     );
-    
+
     assert.equal(requestService.logs[0].event, "ServiceRequested");
-    assert.equal(requestService.logs[0].args.providerId.toNumber(), params.providerId);
-    assert.equal(requestService.logs[0].args.providerVersion.toNumber(), params.providerVersion);
+    assert.equal(
+      requestService.logs[0].args.providerId.toNumber(),
+      params.providerId
+    );
+    assert.equal(
+      requestService.logs[0].args.providerVersion.toNumber(),
+      params.providerVersion
+    );
     assert.equal(requestService.logs[0].args.requester, params.requester);
     assert.equal(requestService.logs[0].args.cost.toNumber(), params.cost);
-    assert.equal(requestService.logs[0].args.requestId.toNumber(), params.requestId); 
+    assert.equal(
+      requestService.logs[0].args.requestId.toNumber(),
+      params.requestId
+    );
 
     const escrowId = requestService.logs[0].args.escrowId;
     const escrowed = await aba.balanceOf(kernel.address);
@@ -320,45 +368,58 @@ contract("Sandbox", accounts => {
       params.requestId
     );
 
-    const acceptServiceEvents = await promisify(cb => 
+    const acceptServiceEvents = await promisify(cb =>
       kernel
-        .ServiceRequestAccepted({}, {fromBlock: acceptService.receipt.blockNumber, toBlock: "latest"})
+        .ServiceRequestAccepted(
+          {},
+          { fromBlock: acceptService.receipt.blockNumber, toBlock: "latest" }
+        )
         .get(cb)
     )();
 
     assert.equal(acceptServiceEvents[0].event, "ServiceRequestAccepted");
-    assert.equal(acceptServiceEvents[0].args.providerId.toNumber(), params.providerId);
+    assert.equal(
+      acceptServiceEvents[0].args.providerId.toNumber(),
+      params.providerId
+    );
     assert.equal(acceptServiceEvents[0].args.requester, params.requester);
-    assert.equal(acceptServiceEvents[0].args.requestId.toNumber(), params.requestId);
+    assert.equal(
+      acceptServiceEvents[0].args.requestId.toNumber(),
+      params.requestId
+    );
 
     escrow = await kernel.escrows(escrowId);
     assert.equal(escrow[0], 1);
     assert.equal(escrow[5], acceptService.receipt.blockNumber);
-  
+
     //passblocks
     var count = 0;
-    while(count <= params.expiry) {
-      await web3.eth.sendTransaction(
-        {
-          value: 1,
-          from: accounts[0],
-          to: accounts[1]
-        }
-      );
+    while (count <= params.expiry) {
+      await web3.eth.sendTransaction({
+        value: 1,
+        from: accounts[0],
+        to: accounts[1]
+      });
       count++;
     }
 
     const { logs: revokeRequestLogs } = await kernel.revokeAsyncServiceRequest(
       params.requestId,
-      { from : params.requester }
+      { from: params.requester }
     );
 
     assert.equal(revokeRequestLogs[0].event, "ServiceRequestRevokedByExpiry");
-    assert.equal(revokeRequestLogs[0].args.requestId.toNumber(), params.requestId);
+    assert.equal(
+      revokeRequestLogs[0].args.requestId.toNumber(),
+      params.requestId
+    );
 
-    const revokeTransferEvents = await promisify(cb => 
+    const revokeTransferEvents = await promisify(cb =>
       aba
-        .Transfer({}, {fromBlock: revokeRequestLogs.blockNumber, toBlock: "latest"})
+        .Transfer(
+          {},
+          { fromBlock: revokeRequestLogs.blockNumber, toBlock: "latest" }
+        )
         .get(cb)
     )();
 
@@ -368,7 +429,7 @@ contract("Sandbox", accounts => {
 
     escrow = await kernel.escrows(escrowId);
     assert.equal(escrow[0].toNumber(), 4);
-  })
+  });
 
   it("should reject duplicate requestId ", async () => {
     const id = await provider.providerId();
@@ -379,15 +440,15 @@ contract("Sandbox", accounts => {
     //Request parameters
     const params = {
       providerId: id,
-      providerVersion: version, 
-      cost: 256*ethInWei,
+      providerVersion: version,
+      cost: 256 * ethInWei,
       requestId: "12345678",
-      fieldId:"8765",
+      fieldId: "8765",
       value: "0x0000beef",
       expiry: 213,
       owner: ownerAdd,
       requester: accounts[3]
-    }
+    };
 
     await assert.isRejected(
       kernel.requestAsyncService(
@@ -395,8 +456,8 @@ contract("Sandbox", accounts => {
         params.cost,
         params.requestId,
         params.expiry,
-        { from: params.requester}
+        { from: params.requester }
       )
-    )
-  })
+    );
+  });
 });

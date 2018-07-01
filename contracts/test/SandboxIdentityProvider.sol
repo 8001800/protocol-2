@@ -18,23 +18,47 @@ contract SandboxIdentityProvider is IdentityProvider {
     }
 
     function writeBytes32FieldForService(
+        address tokenAddr,
+        uint256 tokenId,
+        uint256 requestId,
+        uint256 fieldId,
+        bytes32 value,
+        address requester
+    ) external onlyOwner {
+        kernel.onAsyncServiceCompleted(providerId, requester, requestId);
+        writeBytes32Field(tokenAddr, tokenId, fieldId, value);
+    }
+
+    function writeBytesFieldForService(
+        address tokenAddr,
+        uint256 tokenId,
+        uint256 requestId,
+        uint256 fieldId,
+        bytes value,
+        address requester
+    ) external onlyOwner {
+        kernel.onAsyncServiceCompleted(providerId, requester, requestId);
+        writeBytesField(tokenAddr, tokenId, fieldId, value);
+    }
+
+    function writeIdentityBytes32FieldForService(
         address user,
         uint256 requestId,
         uint256 fieldId,
         bytes32 value
     ) external onlyOwner {
         kernel.onAsyncServiceCompleted(providerId, user, requestId);
-        writeBytes32Field(user, fieldId, value);
+        writeIdentityBytes32Field(user, fieldId, value);
     }
 
-    function writeBytesFieldForService(
+    function writeIdentityBytesFieldForService(
         address user,
         uint256 requestId,
         uint256 fieldId,
         bytes value
     ) external onlyOwner {
         kernel.onAsyncServiceCompleted(providerId, user, requestId);
-        writeBytesField(user, fieldId, value);
+        writeIdentityBytesField(user, fieldId, value);
     }
 
 }

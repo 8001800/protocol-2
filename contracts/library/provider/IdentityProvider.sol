@@ -6,6 +6,7 @@ import "./AsyncProvider.sol";
 
 contract IdentityProvider is AsyncProvider {
     IdentityToken identityToken;
+    AnnotationDatabase annotationDatabase;
 
     constructor(
         IdentityToken _identityToken,
@@ -14,16 +15,18 @@ contract IdentityProvider is AsyncProvider {
     ) AsyncProvider(_kernel, _providerId) public
     {
         identityToken = _identityToken;
+        annotationDatabase = _identityToken.annotationDatabase();
     }
 
     function writeBytes32Field(
-        address user,
+        address tokenAddr,
+        uint256 tokenId,
         uint256 fieldId,
         bytes32 value
     ) public onlyOwner {
-        identityToken.annotationDatabase().writeBytes32Field(
-            identityToken,
-            identityToken.tokenOf(user),
+        annotationDatabase.writeBytes32Field(
+            tokenAddr,
+            tokenId,
             providerId,
             fieldId,
             value
@@ -31,14 +34,41 @@ contract IdentityProvider is AsyncProvider {
     }
 
     function writeBytesField(
+        address tokenAddr,
+        uint256 tokenId,
+        uint256 fieldId,
+        bytes value
+    ) public onlyOwner {
+        annotationDatabase.writeBytesField(
+            tokenAddr,
+            tokenId,
+            providerId,
+            fieldId,
+            value
+        );
+    }
+
+    function writeIdentityBytes32Field(
+        address user,
+        uint256 fieldId,
+        bytes32 value
+    ) public onlyOwner {
+        writeBytes32Field(
+            identityToken,
+            identityToken.tokenOf(user),
+            fieldId,
+            value
+        );
+    }
+
+    function writeIdentityBytesField(
         address user,
         uint256 fieldId,
         bytes value
     ) public onlyOwner {
-        identityToken.annotationDatabase().writeBytesField(
+        writeBytesField(
             identityToken,
             identityToken.tokenOf(user),
-            providerId,
             fieldId,
             value
         );

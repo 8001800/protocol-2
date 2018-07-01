@@ -6,7 +6,9 @@ const main = async () => {
   console.log(await tok.annotationDatabase());
 
   const ip = await SandboxIdentityProvider.deployed();
-  console.log(await ip.writeBytes32Field(tok.address, 42, "0xdeadbeef"));
+  console.log(
+    await ip.writeIdentityBytes32Field(tok.address, 42, "0xdeadbeef")
+  );
 };
 
 module.exports = cb => {

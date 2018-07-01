@@ -18,7 +18,7 @@ contract("E2E Compliance and Identity", accounts => {
   let kernel = null;
 
   let identityProvider = null;
-  let USCS = null
+  let USCS = null;
   let ctoken = null;
 
   before(async () => {
@@ -34,7 +34,7 @@ contract("E2E Compliance and Identity", accounts => {
       identityToken.address,
       kernel.address,
       0
-    )
+    );
 
     await identityProvider.registerProvider(
       "sandbox",
@@ -49,11 +49,7 @@ contract("E2E Compliance and Identity", accounts => {
       await identityProvider.providerId()
     );
 
-    await USCS.registerProvider(
-      "USCS",
-      "AccreditedUSInvestor Check",
-      false
-    );
+    await USCS.registerProvider("USCS", "AccreditedUSInvestor Check", false);
 
     ctoken = await AccreditedUSToken.new(
       complianceCoordinator.address,
@@ -62,7 +58,6 @@ contract("E2E Compliance and Identity", accounts => {
   });
 
   it("should allow free transaction for both approved by identity provider", async () => {
-
     const cost = 0;
 
     await ctoken.request();
@@ -94,11 +89,7 @@ contract("E2E Compliance and Identity", accounts => {
     assert.equal(reqLogs1.length, 1);
     assert.equal(reqLogs1[0].args.requestId, params.requestId1);
 
-    await identityProvider.writeBytes32Field(
-      accounts[0],
-      506,
-      "0x1"
-    );
+    await identityProvider.writeIdentityBytes32Field(accounts[0], 506, "0x1");
 
     const { logs: reqLogs2 } = await kernel.requestAsyncService(
       params.providerId,
@@ -110,11 +101,7 @@ contract("E2E Compliance and Identity", accounts => {
     assert.equal(reqLogs2.length, 1);
     assert.equal(reqLogs2[0].args.requestId, params.requestId2);
 
-    await identityProvider.writeBytes32Field(
-      accounts[4],
-      506,
-      "0x1"
-    );
+    await identityProvider.writeIdentityBytes32Field(accounts[4], 506, "0x1");
 
     const { logs: xferLogs } = await ctoken.transfer(accounts[4], 100);
     assert.equal(xferLogs.length, 1);
