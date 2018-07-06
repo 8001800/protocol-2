@@ -284,6 +284,7 @@ contract("Sandbox", accounts => {
     );
 
     assert.equal(revokeRequestLogs[0].event, "ServiceRequestRevokedByCancel");
+    assert.equal(revokeRequestLogs[0].args.requester, params.requester);
     assert.equal(
       revokeRequestLogs[0].args.requestId.toNumber(),
       params.requestId
@@ -409,6 +410,7 @@ contract("Sandbox", accounts => {
     );
 
     assert.equal(revokeRequestLogs[0].event, "ServiceRequestRevokedByExpiry");
+    assert.equal(revokeRequestLogs[0].args.requester, params.requester);
     assert.equal(
       revokeRequestLogs[0].args.requestId.toNumber(),
       params.requestId

@@ -231,9 +231,9 @@ contract AbacusKernel {
         EscrowState state = revokeEscrow(escrowId);
 
         if (state == EscrowState.REVOKED_CANCEL)
-            emit ServiceRequestRevokedByCancel(requestId);
+            emit ServiceRequestRevokedByCancel(msg.sender, requestId);
         else
-            emit ServiceRequestRevokedByExpiry(requestId);
+            emit ServiceRequestRevokedByExpiry(msg.sender, requestId);
     }
 
     /**
