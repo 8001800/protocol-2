@@ -76,7 +76,7 @@ contract AbacusKernel {
         // Transfer tokens to kernel
         require(token.transferFrom(from, this, amount));
 
-        escrowId = nextEscrowId++;
+        escrowId = nextEscrowId.add(1);
         escrows[escrowId] = Escrow({
             state: EscrowState.OPEN,
             from: from,
@@ -130,19 +130,6 @@ contract AbacusKernel {
         return escrow.state;
     }
 
-    /**
-     * @dev Transfers ABA from an approved person to another.
-     */
-    function transferTokensFrom(
-        address from,
-        address to,
-        uint256 cost
-    ) public returns (bool)
-    {
-        require(msg.sender == from);
-        return token.transferFrom(from, to, cost);
-    }
-
     event ServiceRequested(
         uint256 indexed providerId,
         uint256 providerVersion,
@@ -160,10 +147,12 @@ contract AbacusKernel {
     );
 
     event ServiceRequestRevokedByCancel(
+        address requester,
         uint256 indexed requestId
     );
 
     event ServiceRequestRevokedByExpiry(
+        address requester,
         uint256 indexed requestId
     );
 
@@ -242,9 +231,9 @@ contract AbacusKernel {
         EscrowState state = revokeEscrow(escrowId);
 
         if (state == EscrowState.REVOKED_CANCEL)
-            emit ServiceRequestRevokedByCancel(requestId);
+            emit ServiceRequestRevokedByCancel(msg.sender, requestId);
         else
-            emit ServiceRequestRevokedByExpiry(requestId);
+            emit ServiceRequestRevokedByExpiry(msg.sender, requestId);
     }
 
     /**
