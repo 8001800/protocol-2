@@ -35,7 +35,7 @@ contract AsyncProvider is Provider {
      */
     function withdrawBalance(
         uint256 value
-    ) onlyOwner public
+    ) onlyRole("admin") public
     {
         token.transfer(msg.sender, value);
     }
@@ -49,7 +49,7 @@ contract AsyncProvider is Provider {
      function acceptServiceRequest(
          address requester,
          uint256 requestId
-     ) onlyOwner public
+     ) onlyRole("admin") public
      {
          kernel.acceptAsyncServiceRequest(providerId, requester, requestId);
      }
@@ -63,7 +63,7 @@ contract AsyncProvider is Provider {
       function completeServiceRequest(
           address requester,
           uint256 requestId
-      ) onlyOwner public
+      ) onlyRole("admin") public
       {
           kernel.onAsyncServiceCompleted(providerId, requester, requestId);
       }

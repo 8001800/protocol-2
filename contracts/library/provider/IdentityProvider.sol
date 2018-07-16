@@ -23,7 +23,7 @@ contract IdentityProvider is AsyncProvider {
         uint256 tokenId,
         uint256 fieldId,
         bytes32 value
-    ) public onlyOwner {
+    ) public onlyRole("admin") {
         annotationDatabase.writeBytes32Field(
             tokenAddr,
             tokenId,
@@ -38,7 +38,7 @@ contract IdentityProvider is AsyncProvider {
         uint256 tokenId,
         uint256 fieldId,
         bytes value
-    ) public onlyOwner {
+    ) public onlyRole("admin") {
         annotationDatabase.writeBytesField(
             tokenAddr,
             tokenId,
@@ -52,7 +52,7 @@ contract IdentityProvider is AsyncProvider {
         address user,
         uint256 fieldId,
         bytes32 value
-    ) public onlyOwner {
+    ) public onlyRole("admin") {
         writeBytes32Field(
             identityToken,
             identityToken.tokenOf(user),
@@ -65,7 +65,7 @@ contract IdentityProvider is AsyncProvider {
         address user,
         uint256 fieldId,
         bytes value
-    ) public onlyOwner {
+    ) public onlyRole("admin") {
         writeBytesField(
             identityToken,
             identityToken.tokenOf(user),
