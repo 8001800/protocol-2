@@ -1,4 +1,3 @@
-const IdentityToken = artifacts.require("IdentityToken");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 
 const ADMINS = [
@@ -8,12 +7,9 @@ const ADMINS = [
 ];
 
 const main = async () => {
-  const tok = await IdentityToken.deployed();
-  console.log(await tok.annotationDatabase());
-
   const ip = await SandboxIdentityProvider.deployed();
   for (var i = 0; i < ADMINS.length; i++) {
-    console.log(await ip.addAdmin(ADMINS[i]));
+    console.log(await ip.hasRole(ADMINS[i], "admin"));
   }
 };
 

@@ -4,8 +4,6 @@ const IdentityToken = artifacts.require("IdentityToken");
 const AbacusToken = artifacts.require("AbacusToken");
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 
-const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
-
 const AccreditedUSCS = artifacts.require("AccreditedUSCS");
 const AccreditedUSToken = artifacts.require("AccreditedUSToken");
 const OutsideUSCS = artifacts.require("OutsideUSCS");
@@ -14,25 +12,14 @@ const WhitelistCS = artifacts.require("WhitelistCS");
 const WhitelistToken = artifacts.require("WhitelistToken");
 
 /**
- * Please make sure artificats for protocol contracts exist before 
+ * Please make sure artificats for protocol contracts exist before
  * migrating contracts in this script.
- * 
- * Run `npx truffle migrate -f 2 --to 5` to migrate contracts in 
+ *
+ * Run `npx truffle migrate -f 2 --to 4` to migrate contracts in
  * this script with the protocol contracts
  */
 
 module.exports = async deployer => {
-  //Deploying Sandbox Identity Provider
-  await deployer.deploy(
-    SandboxIdentityProvider,
-    IdentityToken.address,
-    AbacusKernel.address,
-    0
-  );
-  
-  const sip = await SandboxIdentityProvider.deployed();  
-  await sip.registerProvider("Sandbox Identity", "", true);
-
   /////////////////
   // DEMO STUFF
   /////////////////
@@ -44,7 +31,7 @@ module.exports = async deployer => {
     ProviderRegistry.address,
     0,
     await sip.providerId()
-  )
+  );
   // deploy Outside US Token
   const outsideUSCS = await OutsideUSCS.deployed();
   await outsideUSCS.registerProvider("Outside US", "", false);
@@ -61,7 +48,7 @@ module.exports = async deployer => {
     ProviderRegistry.address,
     0,
     await sip.providerId()
-  )
+  );
   const accreditedUSCS = await AccreditedUSCS.deployed();
   await accreditedUSCS.registerProvider("Accredited US", "", false);
   // deploy Accredited US Token
@@ -78,7 +65,7 @@ module.exports = async deployer => {
     ProviderRegistry.address,
     0,
     await sip.providerId()
-  )
+  );
   const whitelistCS = await WhitelistCS.deployed();
   await whitelistCS.registerProvider("Whitelist", "", false);
   // deploy Whitelist Token

@@ -17,7 +17,7 @@ contract AsyncProvider is Provider {
     AnnotationDatabase annotationDatabase;
 
     /**
-     * @dev Constructor used for upgrades.
+     * @dev Constructor can also be used for upgrades.
      *
      * @param _providerId The provider id. If set to 0, the provider can be registered.
      */
