@@ -35,8 +35,7 @@
     "web3": "^1.0.0-beta.30"
   },
   "files": [
-    "build/*.json",
-    "build/contracts/*.json",
+    "artifacts/**/*",
     "contracts/**/*.sol"
   ]
 }
