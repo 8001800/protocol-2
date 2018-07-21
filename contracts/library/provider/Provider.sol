@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/ownership/rbac/RBAC.sol";
 import "../../protocol/ProviderRegistry.sol";
 
 /**
  * @title Provider
  * @dev A contract which can be used as a provider in a ProviderRegistry.
  */
-contract Provider is Ownable {
+contract Provider is RBAC {
     uint256 public providerId;
     ProviderRegistry providerRegistry;
     
@@ -23,6 +23,7 @@ contract Provider is Ownable {
     {
         providerRegistry = _providerRegistry;
         providerId = _providerId;
+        addRole(msg.sender, "admin");
     }
 
     /**
@@ -32,7 +33,7 @@ contract Provider is Ownable {
         string name,
         string metadata,
         bool isAsync
-    ) onlyOwner external returns (uint256)
+    ) onlyRole("admin") external returns (uint256)
     {
         // First, check if the provider id has been already set.
         if (providerId != 0) {
@@ -56,11 +57,35 @@ contract Provider is Ownable {
      */
     function performUpgrade(
         string nextMetadata, address nextProvider, bool nextIsAsync
-    ) onlyOwner external returns (bool)
+    ) onlyRole("admin") external returns (bool)
     {
         return providerRegistry.upgradeProvider(
             providerId, nextMetadata, nextProvider, nextIsAsync
         );
     }
 
+    /**
+     * @dev Add a new admin to this provider
+     *
+     * @param newAdmin The address of the new admin
+     */
+
+    function addAdmin(
+        address newAdmin
+    ) onlyRole("admin") external 
+    {
+        addRole(newAdmin, "admin");
+    }
+
+    /**
+     * @dev Remove an admin to this provider
+     *
+     * @param admin The address of the admin to be removed
+     */
+    function removeAdmin(
+        address admin
+    ) onlyRole("admin") external 
+    {
+        removeRole(admin, "admin");
+    }
 }

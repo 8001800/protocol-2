@@ -5,6 +5,7 @@ import "./Provider.sol";
 import "../../protocol/ProviderRegistry.sol";
 import "../../protocol/AbacusToken.sol";
 import "../../protocol/AbacusKernel.sol";
+import "../../protocol/AnnotationDatabase.sol";
 
 /**
  * @title Provider
@@ -12,8 +13,9 @@ import "../../protocol/AbacusKernel.sol";
  */
 contract AsyncProvider is Provider {
     AbacusKernel public kernel;
-    AbacusToken public token;
-    
+    AbacusToken token;
+    AnnotationDatabase annotationDatabase;
+
     /**
      * @dev Constructor used for upgrades.
      *
@@ -21,11 +23,13 @@ contract AsyncProvider is Provider {
      */
     constructor(
         AbacusKernel _kernel,
-        uint256 _providerId       
+        AnnotationDatabase _annotationDatabase,
+        uint256 _providerId     
     ) Provider (_kernel.providerRegistry(), _providerId) public 
     {
         kernel = _kernel;
         token = _kernel.token();
+        annotationDatabase = _annotationDatabase;
     }
 
     /**
@@ -35,7 +39,7 @@ contract AsyncProvider is Provider {
      */
     function withdrawBalance(
         uint256 value
-    ) onlyOwner public
+    ) onlyRole("admin") public
     {
         token.transfer(msg.sender, value);
     }
@@ -46,25 +50,55 @@ contract AsyncProvider is Provider {
      * @param requester Ethereum address of the service requester
      * @param requestId Request ID of the service request 
      */
-     function acceptServiceRequest(
-         address requester,
-         uint256 requestId
-     ) onlyOwner public
-     {
-         kernel.acceptAsyncServiceRequest(providerId, requester, requestId);
-     }
+    function acceptServiceRequest(
+        address requester,
+        uint256 requestId
+    ) onlyRole("admin") public
+    {
+        kernel.acceptAsyncServiceRequest(providerId, requester, requestId);
+    }
 
-     /**
-      * @dev Signal the kernel that service was completed and close escrow
-      *
-      * @param requester Ethereum address of the service requester
-      * @param requestId Request ID of the service request 
-      */
-      function completeServiceRequest(
-          address requester,
-          uint256 requestId
-      ) onlyOwner public
-      {
-          kernel.onAsyncServiceCompleted(providerId, requester, requestId);
-      }
+    /**
+    * @dev Signal the kernel that service was completed and close escrow
+    *
+    * @param requester Ethereum address of the service requester
+    * @param requestId Request ID of the service request 
+    */
+    function completeServiceRequest(
+        address requester,
+        uint256 requestId
+    ) onlyRole("admin") public
+    {
+        kernel.onAsyncServiceCompleted(providerId, requester, requestId);
+    }
+
+    function writeBytes32Field(
+    address tokenAddr,
+    uint256 tokenId,
+    uint256 fieldId,
+    bytes32 value
+    ) public onlyRole("admin") {
+        annotationDatabase.writeBytes32Field(
+            tokenAddr,
+            tokenId,
+            providerId,
+            fieldId,
+            value
+        );
+    }
+
+    function writeBytesField(
+        address tokenAddr,
+        uint256 tokenId,
+        uint256 fieldId,
+        bytes value
+    ) public onlyRole("admin") {
+        annotationDatabase.writeBytesField(
+            tokenAddr,
+            tokenId,
+            providerId,
+            fieldId,
+            value
+        );
+    }
 }

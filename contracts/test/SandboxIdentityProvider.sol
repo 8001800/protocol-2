@@ -24,7 +24,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         uint256 fieldId,
         bytes32 value,
         address requester
-    ) external onlyOwner {
+    ) external onlyRole("admin") {
         kernel.onAsyncServiceCompleted(providerId, requester, requestId);
         writeBytes32Field(tokenAddr, tokenId, fieldId, value);
     }
@@ -36,7 +36,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         uint256 fieldId,
         bytes value,
         address requester
-    ) external onlyOwner {
+    ) external onlyRole("admin") {
         kernel.onAsyncServiceCompleted(providerId, requester, requestId);
         writeBytesField(tokenAddr, tokenId, fieldId, value);
     }
@@ -46,7 +46,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         uint256 requestId,
         uint256 fieldId,
         bytes32 value
-    ) external onlyOwner {
+    ) external onlyRole("admin") {
         kernel.onAsyncServiceCompleted(providerId, user, requestId);
         writeIdentityBytes32Field(user, fieldId, value);
     }
@@ -56,7 +56,7 @@ contract SandboxIdentityProvider is IdentityProvider {
         uint256 requestId,
         uint256 fieldId,
         bytes value
-    ) external onlyOwner {
+    ) external onlyRole("admin") {
         kernel.onAsyncServiceCompleted(providerId, user, requestId);
         writeIdentityBytesField(user, fieldId, value);
     }
