@@ -9,7 +9,7 @@ contract WhitelistStandard is ComplianceStandard {
 
     mapping (address => bool) allowed;
 
-    uint8 constant E_UNWHITELISTED = 1;
+    uint256 constant E_UNWHITELISTED = 1;
     uint256 operations = 0;
     uint256 delegateProviderId;
 
@@ -31,7 +31,7 @@ contract WhitelistStandard is ComplianceStandard {
         address from,
         address to,
         bytes32 
-  ) view external returns (uint8, uint256)
+  ) view external returns (uint256, uint256)
     {
         if (allowed[from] && allowed[to]) {
             return (0, delegateProviderId);

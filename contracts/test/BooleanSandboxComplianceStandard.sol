@@ -7,7 +7,7 @@ import "../library/compliance/ComplianceStandard.sol";
 contract BooleanSandboxComplianceStandard is ComplianceStandard {
     IdentityToken identityToken;
 
-    uint8 constant E_UNWHITELISTED = 1;
+    uint256 constant E_UNWHITELISTED = 1;
     uint256 operations = 0;
     uint256 identityProviderId;
     uint256 constant public FIELD_NUM = 88;
@@ -29,7 +29,7 @@ contract BooleanSandboxComplianceStandard is ComplianceStandard {
         address from,
         address to,
         bytes32 
-    ) view external returns (uint8, uint256)
+    ) view external returns (uint256, uint256)
     {
         bytes32 fromVal;
         (,fromVal) = identityToken.annotationDatabase().bytes32Data(

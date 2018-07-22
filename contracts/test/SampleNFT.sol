@@ -13,7 +13,7 @@ contract SampleNFT is ERC721Token{
         batchId = _batchId;
     }
 
-    function mint(address owner){
+    function mint(address owner) public {
         _mint(owner, allTokens.length);
         emit Mint(owner, allTokens.length);
     }

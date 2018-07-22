@@ -35,7 +35,7 @@ contract ComplianceCoordinator {
         /**
          * @dev Result of the check. 0 indicates success, non-zero is left to the caller.
          */
-        uint8 checkResult;
+        uint256 checkResult;
     }
 
     /**
@@ -74,7 +74,7 @@ contract ComplianceCoordinator {
         address from,
         address to,
         bytes32 data,
-        uint8 checkResult,
+        uint256 checkResult,
         uint256 nextProviderId
     );
 
@@ -92,7 +92,7 @@ contract ComplianceCoordinator {
         uint256 providerId,
         uint256 providerVersion,
         uint256 blockToExpire,
-        uint8 checkResult
+        uint256 checkResult
     );
 
     /**
@@ -109,7 +109,7 @@ contract ComplianceCoordinator {
         uint256 providerVersion,
         uint256 actionHash,
         uint256 blockToExpire,
-        uint8 checkResult
+        uint256 checkResult
     ) external
     {
         uint256 id;
@@ -205,8 +205,8 @@ contract ComplianceCoordinator {
         );
     }
 
-    uint8 constant E_CASYNC_CHECK_NOT_PERFORMED = 100;
-    uint8 constant E_CASYNC_CHECK_NOT_EXPIRED = 101;
+    uint256 constant E_CASYNC_CHECK_NOT_PERFORMED = 100;
+    uint256 constant E_CASYNC_CHECK_NOT_EXPIRED = 101;
 
     /**
      * @dev Checks the result of an async service.
@@ -219,7 +219,7 @@ contract ComplianceCoordinator {
         address from,
         address to,
         bytes32 data
-    ) view private returns (uint8, uint256)
+    ) view private returns (uint256, uint256)
     {
         uint256 actionHash = computeActionHash(
             providerId,
@@ -256,9 +256,9 @@ contract ComplianceCoordinator {
         address from,
         address to,
         bytes32 data
-    ) view public returns (uint8, uint256)
+    ) view public returns (uint256, uint256)
     {
-        uint8 checkResult;
+        uint256 checkResult;
         address owner;
         bool isAsync;
         (,,, owner,, isAsync) = providerRegistry.latestProvider(providerId);
@@ -305,7 +305,7 @@ contract ComplianceCoordinator {
         return (checkResult, nextProviderId);
     }
 
-    uint8 constant E_CHECK_INSTRUMENT_WRONG_SENDER = 140;
+    uint256 constant E_CHECK_INSTRUMENT_WRONG_SENDER = 140;
 
     /**
      * @dev Checks the result of a compliance check and performs any necessary state changes.
@@ -317,7 +317,7 @@ contract ComplianceCoordinator {
         address from,
         address to,
         bytes32 data
-    ) public returns (uint8, uint256)
+    ) public returns (uint256, uint256)
     {
         if (msg.sender != instrumentAddr) {
             return (E_CHECK_INSTRUMENT_WRONG_SENDER, 0);
@@ -327,7 +327,7 @@ contract ComplianceCoordinator {
         bool isAsync;
         (,,, owner, providerVersion, isAsync) = providerRegistry.latestProvider(providerId);
 
-        uint8 checkResult;
+        uint256 checkResult;
 
         // This variable is used for two purposes to save on stack space.
         uint256 nextProviderIdOrActionHash;

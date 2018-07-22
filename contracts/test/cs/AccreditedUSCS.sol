@@ -23,7 +23,7 @@ contract AccreditedUSCS is ComplianceStandard {
         identityProviderId = _identityProviderId;
     }
 
-    function fromAllowed(address token, address from) view internal returns (uint8) {
+    function fromAllowed(address token, address from) view internal returns (uint256) {
         bytes32 fromNonUsVal;
         (,fromNonUsVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(from), identityProviderId, FIELD_NON_US
@@ -45,7 +45,7 @@ contract AccreditedUSCS is ComplianceStandard {
             return 0;
         }
 
-        uint8 err = 0x10;
+        uint256 err = 0x10;
         if (fromNonUs) {
             err |= 0x8;
         }
@@ -55,7 +55,7 @@ contract AccreditedUSCS is ComplianceStandard {
         return err;
     }
 
-    function toAllowed(address to) internal view returns (uint8) {
+    function toAllowed(address to) internal view returns (uint256) {
         bytes32 toNonUsVal;
         (,toNonUsVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(to), identityProviderId, FIELD_NON_US
@@ -72,7 +72,7 @@ contract AccreditedUSCS is ComplianceStandard {
             return 0;
         }
 
-        uint8 err = 0x10;
+        uint256 err = 0x10;
         if (toNonUs) {
             err |= 0x2;
         }
@@ -88,10 +88,10 @@ contract AccreditedUSCS is ComplianceStandard {
         address from,
         address to,
         bytes32 
-    ) view external returns (uint8, uint256)
+    ) view external returns (uint256, uint256)
     {
-        uint8 fromAllowedRes = fromAllowed(token, to);
-        uint8 toAllowedRes = toAllowed(to);
+        uint256 fromAllowedRes = fromAllowed(token, to);
+        uint256 toAllowedRes = toAllowed(to);
         if ((fromAllowedRes == 0) && (toAllowedRes == 0)) {
             return (0, 0);
         }
