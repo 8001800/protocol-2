@@ -39,7 +39,7 @@ contract AsyncProvider is Provider {
      */
     function withdrawBalance(
         uint256 value
-    ) onlyRole("admin") public
+    ) onlyRole(ROLE_ADMIN) public
     {
         token.transfer(msg.sender, value);
     }
@@ -53,7 +53,7 @@ contract AsyncProvider is Provider {
     function acceptServiceRequest(
         address requester,
         uint256 requestId
-    ) onlyRole("admin") public
+    ) onlyRole(ROLE_ADMIN) public
     {
         kernel.acceptAsyncServiceRequest(providerId, requester, requestId);
     }
@@ -67,7 +67,7 @@ contract AsyncProvider is Provider {
     function completeServiceRequest(
         address requester,
         uint256 requestId
-    ) onlyRole("admin") public
+    ) onlyRole(ROLE_ADMIN) public
     {
         kernel.onAsyncServiceCompleted(providerId, requester, requestId);
     }
@@ -77,7 +77,7 @@ contract AsyncProvider is Provider {
     uint256 tokenId,
     uint256 fieldId,
     bytes32 value
-    ) public onlyRole("admin") {
+    ) public onlyRole(ROLE_ADMIN) {
         annotationDatabase.writeBytes32Field(
             tokenAddr,
             tokenId,
@@ -92,7 +92,7 @@ contract AsyncProvider is Provider {
         uint256 tokenId,
         uint256 fieldId,
         bytes value
-    ) public onlyRole("admin") {
+    ) public onlyRole(ROLE_ADMIN) {
         annotationDatabase.writeBytesField(
             tokenAddr,
             tokenId,

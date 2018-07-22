@@ -8,6 +8,7 @@ import "../../protocol/ProviderRegistry.sol";
  * @dev A contract which can be used as a provider in a ProviderRegistry.
  */
 contract Provider is RBAC {
+    string public constant ROLE_ADMIN = "admin";
     uint256 public providerId;
     ProviderRegistry providerRegistry;
     
@@ -23,7 +24,7 @@ contract Provider is RBAC {
     {
         providerRegistry = _providerRegistry;
         providerId = _providerId;
-        addRole(msg.sender, "admin");
+        addRole(msg.sender, ROLE_ADMIN);
     }
 
     /**
@@ -33,7 +34,7 @@ contract Provider is RBAC {
         string name,
         string metadata,
         bool isAsync
-    ) onlyRole("admin") external returns (uint256)
+    ) onlyRole(ROLE_ADMIN) external returns (uint256)
     {
         // First, check if the provider id has been already set.
         if (providerId != 0) {
@@ -57,7 +58,7 @@ contract Provider is RBAC {
      */
     function performUpgrade(
         string nextMetadata, address nextProvider, bool nextIsAsync
-    ) onlyRole("admin") external returns (bool)
+    ) onlyRole(ROLE_ADMIN) external returns (bool)
     {
         return providerRegistry.upgradeProvider(
             providerId, nextMetadata, nextProvider, nextIsAsync
@@ -72,9 +73,9 @@ contract Provider is RBAC {
 
     function addAdmin(
         address newAdmin
-    ) onlyRole("admin") external 
+    ) onlyRole(ROLE_ADMIN) external 
     {
-        addRole(newAdmin, "admin");
+        addRole(newAdmin, ROLE_ADMIN);
     }
 
     /**
@@ -84,8 +85,8 @@ contract Provider is RBAC {
      */
     function removeAdmin(
         address admin
-    ) onlyRole("admin") external 
+    ) onlyRole(ROLE_ADMIN) external 
     {
-        removeRole(admin, "admin");
+        removeRole(admin, ROLE_ADMIN);
     }
 }

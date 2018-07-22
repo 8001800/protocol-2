@@ -4,6 +4,8 @@ const IdentityToken = artifacts.require("IdentityToken");
 const AbacusToken = artifacts.require("AbacusToken");
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 
+const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
+
 const AccreditedUSCS = artifacts.require("AccreditedUSCS");
 const AccreditedUSToken = artifacts.require("AccreditedUSToken");
 const OutsideUSCS = artifacts.require("OutsideUSCS");
@@ -14,12 +16,19 @@ const WhitelistToken = artifacts.require("WhitelistToken");
 /**
  * Please make sure artificats for protocol contracts exist before
  * migrating contracts in this script.
- *
- * Run `npx truffle migrate -f 2 --to 4` to migrate contracts in
- * this script with the protocol contracts
  */
 
 module.exports = async deployer => {
+  await deployer.deploy(
+    SandboxIdentityProvider,
+    IdentityToken.address,
+    AbacusKernel.address,
+    0
+  );
+
+  const sip = await SandboxIdentityProvider.deployed();
+  await sip.registerProvider("Sandbox Identity", "", true);
+
   /////////////////
   // DEMO STUFF
   /////////////////

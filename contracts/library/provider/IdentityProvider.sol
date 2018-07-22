@@ -24,7 +24,7 @@ contract IdentityProvider is AsyncProvider {
         address user,
         uint256 fieldId,
         bytes32 value
-    ) public onlyRole("admin") {
+    ) public onlyRole(ROLE_ADMIN) {
         writeBytes32Field(
             identityToken,
             identityToken.tokenOf(user),
@@ -37,7 +37,7 @@ contract IdentityProvider is AsyncProvider {
         address user,
         uint256 fieldId,
         bytes value
-    ) public onlyRole("admin") {
+    ) public onlyRole(ROLE_ADMIN) {
         writeBytesField(
             identityToken,
             identityToken.tokenOf(user),
