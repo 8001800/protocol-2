@@ -25,18 +25,18 @@ contract AnnotationDatabase {
     }
 
     event WriteBytes32Annotation(
-        address nftAddr,
-        uint256 nftId,
-        uint256 providerId,
+        address indexed nftAddr,
+        uint256 indexed nftId,
+        uint256 indexed providerId,
         uint256 fieldId,
         bytes32 value,
         uint256 blockNumber
     );
 
     event WriteBytesAnnotation(
-        address nftAddr,
-        uint256 nftId,
-        uint256 providerId,
+        address indexed nftAddr,
+        uint256 indexed nftId,
+        uint256 indexed providerId,
         uint256 fieldId,
         bytes value,
         uint256 blockNumber
