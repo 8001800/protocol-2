@@ -408,14 +408,13 @@ contract ComplianceCoordinator {
 
     function hardCheckMany(
         uint256[] providerIds,
-        uint256 numProviders,
         address instrumentAddr,
         uint256 instrumentIdOrAmt,
         address from,
         address to,
         bytes32 data
     ) public returns (uint256 checkResult, uint256 next) {
-        for (uint256 i = 0; i < numProviders; i++) {
+        for (uint256 i = 0; i < providerIds.length; i++) {
             (checkResult, next) = hardCheck(
                 providerIds[i],
                 instrumentAddr,
