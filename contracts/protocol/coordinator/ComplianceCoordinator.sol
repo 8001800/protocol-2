@@ -405,4 +405,30 @@ contract ComplianceCoordinator {
         }
         return (checkResult, nextProviderIdOrActionHash);
     }
+
+    function hardCheckMany(
+        uint256[] providerIds,
+        uint256 numProviders,
+        address instrumentAddr,
+        uint256 instrumentIdOrAmt,
+        address from,
+        address to,
+        bytes32 data
+    ) public returns (uint256 checkResult, uint256 next) {
+        for (uint256 i = 0; i < numProviders; i++) {
+            (checkResult, next) = hardCheck(
+                providerIds[i],
+                instrumentAddr,
+                instrumentIdOrAmt,
+                from,
+                to,
+                data
+            );
+
+            if (checkResult != 0) {
+                return;
+            }
+        }
+    }
+
 }
