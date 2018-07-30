@@ -1,6 +1,6 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const WhitelistStandard = artifacts.require("WhitelistStandard");
+const DelegateCS = artifacts.require("DelegateCS");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 const { promisify } = require("es6-promisify");
@@ -22,10 +22,11 @@ contract("Upgrade Providers", accounts => {
   });
 
   it("Register and upgrade compliance standard", async () => {
-    const standard = await WhitelistStandard.new(
+    const standard = await DelegateCS.new(
       providerRegistry.address,
       0,
-      0
+      0,
+      complianceCoordinator.address
     );
 
     const name = "Whitelist";
@@ -42,10 +43,11 @@ contract("Upgrade Providers", accounts => {
     assert.equal(standardProviderInfo[3], owner);
     assert.equal(standardProviderInfo[4].toNumber(), 1);
 
-    const newStandard = await WhitelistStandard.new(
+    const newStandard = await DelegateCS.new(
       providerRegistry.address,
       id,
-      id
+      id,
+      complianceCoordinator.address
     );
 
     metaData = "new";

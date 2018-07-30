@@ -88,26 +88,16 @@ contract AccreditedUSCS is ComplianceStandard {
         address from,
         address to,
         bytes32 
-    ) view external returns (uint256, uint256)
+    ) external returns (uint256)
     {
+        operations++;
         uint256 fromAllowedRes = fromAllowed(token, to);
         uint256 toAllowedRes = toAllowed(to);
         if ((fromAllowedRes == 0) && (toAllowedRes == 0)) {
-            return (0, 0);
+            return 0;
         }
 
-        return (fromAllowedRes | toAllowedRes, 0);
-    }
-
-    function performHardCheck(
-        address,
-        uint256,
-        address,
-        address,
-        bytes32
-    ) external
-    {
-        operations++;
+        return fromAllowedRes | toAllowedRes;
     }
 
 }

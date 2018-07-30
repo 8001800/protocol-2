@@ -28,8 +28,9 @@ contract OutsideUSCS is ComplianceStandard {
         address from,
         address to,
         bytes32 
-    ) view external returns (uint256, uint256)
+    ) external returns (uint256)
     {
+        operations++;
         bytes32 fromNonUsVal;
         (,fromNonUsVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(from), identityProviderId, FIELD_NON_US
@@ -48,7 +49,7 @@ contract OutsideUSCS is ComplianceStandard {
         bool toNonUs = toNonUsVal != bytes32(0);
 
         if (fromNonUs && toNonUs) {
-            return (0, 0);
+            return 0;
         }
 
         uint256 err = 0x10;
@@ -58,18 +59,7 @@ contract OutsideUSCS is ComplianceStandard {
         if (toNonUs) {
             err |= 0x2;
         }
-        return (err, 0);
-    }
-
-    function performHardCheck(
-        address,
-        uint256,
-        address,
-        address,
-        bytes32
-    ) external
-    {
-        operations++;
+        return err;
     }
 
 }

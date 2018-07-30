@@ -64,7 +64,6 @@ contract ComplianceCoordinator {
      * @param to The to address of the token transfer.
      * @param data Any additional data related to the action.
      * @param checkResult The result of the compliance check.
-     * @param nextProviderId The id of the compliance provider used after this provider.
      */
     event ComplianceCheckPerformed(
         uint256 providerId,
@@ -74,8 +73,7 @@ contract ComplianceCoordinator {
         address from,
         address to,
         bytes32 data,
-        uint256 checkResult,
-        uint256 nextProviderId
+        uint256 checkResult
     );
 
     /**
@@ -205,12 +203,12 @@ contract ComplianceCoordinator {
         );
     }
 
-    uint256 constant E_CASYNC_CHECK_NOT_PERFORMED = 100;
-    uint256 constant E_CASYNC_CHECK_NOT_EXPIRED = 101;
+    uint256 constant public E_CASYNC_CHECK_NOT_PERFORMED = 100;
+    uint256 constant public E_CASYNC_CHECK_NOT_EXPIRED = 101;
 
     /**
      * @dev Checks the result of an async service.
-     * Assumes the service is async. Check your preconditions before using.
+     * Assumes the service is async. Check your preconditions before calling.
      */
     function checkAsync(
         uint256 providerId,
@@ -247,7 +245,7 @@ contract ComplianceCoordinator {
     }
 
     /**
-     * @dev Checks the result of a compliance check.
+     * @dev Performs a compliance check.
      */
     function check(
         uint256 providerId,
@@ -256,85 +254,18 @@ contract ComplianceCoordinator {
         address from,
         address to,
         bytes32 data
-    ) view public returns (uint256, uint256)
+    ) public returns (uint256)
     {
-        uint256 checkResult;
-        address owner;
-        bool isAsync;
-        (,,, owner,, isAsync) = providerRegistry.latestProvider(providerId);
-
-        // Async checks
-        if (isAsync) {
-            (checkResult,) = checkAsync(
-                providerId,
-                instrumentAddr,
-                instrumentIdOrAmt,
-                from,
-                to,
-                data
-            );
-            if (checkResult != 0) {
-                return (checkResult, providerId);
-            }
-            return (checkResult, 0);
-        }
-
-        // Sync checks
-        ComplianceStandard standard = ComplianceStandard(owner);
-
-        uint256 nextProviderId;
-        (checkResult, nextProviderId) = standard.performCheck(
-            instrumentAddr,
-            instrumentIdOrAmt,
-            from,
-            to,
-            data
-        );
-
-        if (nextProviderId != 0) {
-            // recursively check next service
-            (checkResult, nextProviderId) = check(
-                nextProviderId,
-                instrumentAddr,
-                instrumentIdOrAmt,
-                from,
-                to,
-                data
-            );
-        }
-        return (checkResult, nextProviderId);
-    }
-
-    uint256 constant E_CHECK_INSTRUMENT_WRONG_SENDER = 140;
-
-    /**
-     * @dev Checks the result of a compliance check and performs any necessary state changes.
-     */
-    function hardCheck(
-        uint256 providerId,
-        address instrumentAddr,
-        uint256 instrumentIdOrAmt,
-        address from,
-        address to,
-        bytes32 data
-    ) public returns (uint256, uint256)
-    {
-        if (msg.sender != instrumentAddr) {
-            return (E_CHECK_INSTRUMENT_WRONG_SENDER, 0);
-        }
         address owner;
         uint256 providerVersion;
         bool isAsync;
         (,,, owner, providerVersion, isAsync) = providerRegistry.latestProvider(providerId);
 
         uint256 checkResult;
-
-        // This variable is used for two purposes to save on stack space.
-        uint256 nextProviderIdOrActionHash;
-
-        // Async checks
         if (isAsync) {
-            (checkResult, nextProviderIdOrActionHash) = checkAsync(
+            uint256 actionHash;
+            // Async checks
+            (checkResult, actionHash) = checkAsync(
                 providerId,
                 instrumentAddr,
                 instrumentIdOrAmt,
@@ -342,60 +273,11 @@ contract ComplianceCoordinator {
                 to,
                 data
             );
-            emit ComplianceCheckPerformed(
-                providerId,
-                providerVersion,
-                instrumentAddr,
-                instrumentIdOrAmt,
-                from,
-                to,
-                data,
-                checkResult,
-                0
-            );
-            if (checkResult != 0) {
-                return (checkResult, providerId);
-            }
             // Invalidate check result if successful check.
-            delete actionsToRequests[nextProviderIdOrActionHash];
-            return (checkResult, 0);
-        }
-
-        // Sync checks
-        ComplianceStandard standard = ComplianceStandard(owner);
-
-        (checkResult, nextProviderIdOrActionHash) = standard.performCheck(
-            instrumentAddr,
-            instrumentIdOrAmt,
-            from,
-            to,
-            data
-        );
-        standard.performHardCheck(
-            instrumentAddr,
-            instrumentIdOrAmt,
-            from,
-            to,
-            data
-        );
-
-        // For auditing
-        emit ComplianceCheckPerformed(
-            providerId,
-            providerVersion,
-            instrumentAddr,
-            instrumentIdOrAmt,
-            from,
-            to,
-            data,
-            checkResult,
-            nextProviderIdOrActionHash
-        );
-
-        if (nextProviderIdOrActionHash != 0) {
-            // recursively check next service
-            (checkResult, nextProviderIdOrActionHash) = hardCheck(
-                nextProviderIdOrActionHash,
+            delete actionsToRequests[actionHash];
+        } else {
+            // Sync checks -- call method on compliance standard
+            checkResult = ComplianceStandard(owner).performCheck(
                 instrumentAddr,
                 instrumentIdOrAmt,
                 from,
@@ -403,31 +285,18 @@ contract ComplianceCoordinator {
                 data
             );
         }
-        return (checkResult, nextProviderIdOrActionHash);
-    }
 
-    function hardCheckMany(
-        uint256[] providerIds,
-        address instrumentAddr,
-        uint256 instrumentIdOrAmt,
-        address from,
-        address to,
-        bytes32 data
-    ) public returns (uint256 checkResult, uint256 next) {
-        for (uint256 i = 0; i < providerIds.length; i++) {
-            (checkResult, next) = hardCheck(
-                providerIds[i],
-                instrumentAddr,
-                instrumentIdOrAmt,
-                from,
-                to,
-                data
-            );
-
-            if (checkResult != 0) {
-                return;
-            }
-        }
+        emit ComplianceCheckPerformed({
+            providerId: providerId,
+            providerVersion: providerVersion,
+            instrumentAddr: instrumentAddr,
+            instrumentIdOrAmt: instrumentIdOrAmt,
+            from: from,
+            to: to,
+            data: data,
+            checkResult: checkResult
+        });
+        return checkResult;
     }
 
 }

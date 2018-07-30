@@ -4,7 +4,7 @@ const assert = chai.assert;
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
-const WhitelistStandard = artifacts.require("WhitelistStandard");
+const DelegateCS = artifacts.require("DelegateCS");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 const { promisify } = require("es6-promisify");
@@ -27,10 +27,11 @@ contract("ComplianceCoordinator", accounts => {
   });
 
   it("should ensure registry and compliance", async () => {
-    const standard = await WhitelistStandard.new(
+    const standard = await DelegateCS.new(
       providerRegistry.address,
       0,
-      0
+      0,
+      complianceCoordinator.address
     );
     const regReceipt = await standard.registerProvider("Whitelist", "", false);
 
@@ -44,7 +45,6 @@ contract("ComplianceCoordinator", accounts => {
       complianceCoordinator.address,
       id.toString()
     );
-    await token.request();
 
     // Authorize account 2 on list standard
     await standard.allow(accounts[2]);
@@ -94,10 +94,11 @@ contract("ComplianceCoordinator", accounts => {
   });
 
   it("should support delegation", async () => {
-    const standard = await WhitelistStandard.new(
+    const standard = await DelegateCS.new(
       providerRegistry.address,
       0,
-      0
+      0,
+      complianceCoordinator.address
     );
     const {
       receipt: { blockNumber }
@@ -106,10 +107,11 @@ contract("ComplianceCoordinator", accounts => {
     const id = await standard.providerId();
     const owner = await providerRegistry.providerOwner(id);
 
-    const parentStandard = await WhitelistStandard.new(
+    const parentStandard = await DelegateCS.new(
       providerRegistry.address,
       0,
-      id
+      id,
+      complianceCoordinator.address
     );
     await parentStandard.registerProvider("ParentWhitelist", "", false);
     const parentId = await parentStandard.providerId();
@@ -125,7 +127,6 @@ contract("ComplianceCoordinator", accounts => {
       complianceCoordinator.address,
       parentId.toString()
     );
-    await token.request();
 
     // Authorize account 2 on both standards
     const lol = await standard.allow(accounts[2]);
@@ -180,42 +181,43 @@ contract("ComplianceCoordinator", accounts => {
     );
 
     // second xfer is fully permitted
-    assert.equal(
-      complianceCheckPerformedEvents[1].args.providerId.toNumber(),
-      parentId.toNumber()
-    );
-    assert.equal(complianceCheckPerformedEvents[1].args.to, accounts[2]);
-    assert.equal(
-      complianceCheckPerformedEvents[1].args.checkResult.toNumber(),
-      0
-    );
+    // note that the order of events is reversed since we go depth-first
     assert.equal(
       complianceCheckPerformedEvents[2].args.providerId.toNumber(),
-      id.toNumber()
+      parentId.toNumber()
     );
     assert.equal(complianceCheckPerformedEvents[2].args.to, accounts[2]);
     assert.equal(
       complianceCheckPerformedEvents[2].args.checkResult.toNumber(),
       0
     );
+    assert.equal(
+      complianceCheckPerformedEvents[1].args.providerId.toNumber(),
+      id.toNumber()
+    );
+    assert.equal(complianceCheckPerformedEvents[1].args.to, accounts[2]);
+    assert.equal(
+      complianceCheckPerformedEvents[1].args.checkResult.toNumber(),
+      0
+    );
 
     // third xfer is permitted by parent, blocked by child
     assert.equal(
-      complianceCheckPerformedEvents[3].args.providerId.toNumber(),
-      parentId.toNumber()
-    );
-    assert.equal(complianceCheckPerformedEvents[3].args.to, accounts[3]);
-    assert.equal(
-      complianceCheckPerformedEvents[3].args.checkResult.toNumber(),
-      0
-    );
-    assert.equal(
       complianceCheckPerformedEvents[4].args.providerId.toNumber(),
-      id.toNumber()
+      parentId.toNumber()
     );
     assert.equal(complianceCheckPerformedEvents[4].args.to, accounts[3]);
     assert.equal(
       complianceCheckPerformedEvents[4].args.checkResult.toNumber(),
+      1
+    );
+    assert.equal(
+      complianceCheckPerformedEvents[3].args.providerId.toNumber(),
+      id.toNumber()
+    );
+    assert.equal(complianceCheckPerformedEvents[3].args.to, accounts[3]);
+    assert.equal(
+      complianceCheckPerformedEvents[3].args.checkResult.toNumber(),
       1
     );
   });
@@ -237,8 +239,6 @@ contract("ComplianceCoordinator", accounts => {
       complianceCoordinator.address,
       id.toString()
     );
-
-    await token.request();
 
     const params = {
       providerId: id,
