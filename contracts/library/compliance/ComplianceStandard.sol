@@ -16,7 +16,7 @@ contract ComplianceStandard is Provider {
     * @param to The to address of the token transfer.
     * @param data Any additional data related to the action.
     *
-    * @return result and next serviceId.
+    * @return an error code, 0 if no error.
     */
     function performCheck(
         address instrumentAddr,
