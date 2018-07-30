@@ -28,8 +28,9 @@ contract WhitelistCS is ComplianceStandard {
         address from,
         address to,
         bytes32 
-    ) view external returns (uint256, uint256)
+    ) external returns (uint256)
     {
+        operations++;
         bytes32 fromWhitelistedVal;
         (,fromWhitelistedVal) = identityToken.annotationDatabase().bytes32Data(
             identityToken, identityToken.tokenOf(from), identityProviderId, FIELD_WHITELISTED
@@ -48,7 +49,7 @@ contract WhitelistCS is ComplianceStandard {
         bool toWhitelisted = toWhitelistedVal != bytes32(0);
 
         if (fromWhitelisted && toWhitelisted) {
-            return (0, 0);
+            return 0;
         }
 
         uint256 err = 0x10;
@@ -58,18 +59,7 @@ contract WhitelistCS is ComplianceStandard {
         if (toWhitelisted) {
             err |= 0x2;
         }
-        return (err, 0);
-    }
-
-    function performHardCheck(
-        address,
-        uint256,
-        address,
-        address,
-        bytes32
-    ) external
-    {
-        operations++;
+        return err;
     }
 
 }

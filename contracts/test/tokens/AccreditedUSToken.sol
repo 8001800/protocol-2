@@ -1,18 +1,18 @@
 pragma solidity ^0.4.24;
 
-import "../FaucetToken.sol";
+import "../../library/instruments/AbacusERC20Token.sol";
 
 /**
  * @dev A very simple token that implements a single compliance standard.
  */
-contract AccreditedUSToken is FaucetToken {
+contract AccreditedUSToken is AbacusERC20Token {
     string public constant name = "Accredited US Token";
     string public constant symbol = "AUS";
 
     constructor(
         ComplianceCoordinator _complianceCoordinator,
         uint256 _complianceProviderId
-    ) FaucetToken(_complianceCoordinator, _complianceProviderId) public
+    ) AbacusERC20Token(_complianceCoordinator, _complianceProviderId) public
     {
     }
 }

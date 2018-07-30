@@ -152,8 +152,7 @@ contract Bundle is ERC721Token {
     function transferFrom(address _from, address _to, uint256 _tokenId) public {
         require(locked[_tokenId]);
         if (complianceProviderIds[_tokenId] != 0) {
-            uint256 result;
-            (result,) = complianceCoordinator.hardCheck(
+            uint256 result = complianceCoordinator.check(
                 complianceProviderIds[_tokenId],
                 this,
                 _tokenId,
@@ -171,8 +170,7 @@ contract Bundle is ERC721Token {
     function safeTransferFrom(address _from, address _to, uint256 _tokenId) public {
         require(locked[_tokenId]);
         if (complianceProviderIds[_tokenId] != 0) {
-            uint256 result;
-            (result,) = complianceCoordinator.hardCheck(
+            uint256 result = complianceCoordinator.check(
                 complianceProviderIds[_tokenId],
                 this,
                 _tokenId,
@@ -195,8 +193,7 @@ contract Bundle is ERC721Token {
     ) public {
         require(locked[_tokenId]);
         if (complianceProviderIds[_tokenId] != 0) {
-            uint256 result;
-            (result,) = complianceCoordinator.hardCheck(
+            uint256 result = complianceCoordinator.check(
                 complianceProviderIds[_tokenId],
                 this,
                 _tokenId,
