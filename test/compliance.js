@@ -33,13 +33,10 @@ contract("ComplianceCoordinator", accounts => {
       0,
       complianceCoordinator.address
     );
-    console.log("a");
     const regReceipt = await standard.registerProvider("Whitelist", "", false);
-    console.log("b");
 
     const id = await standard.providerId();
     const owner = await providerRegistry.providerOwner(id);
-    console.log("c");
 
     assert.equal(standard.address, owner);
 
@@ -184,42 +181,43 @@ contract("ComplianceCoordinator", accounts => {
     );
 
     // second xfer is fully permitted
-    assert.equal(
-      complianceCheckPerformedEvents[1].args.providerId.toNumber(),
-      parentId.toNumber()
-    );
-    assert.equal(complianceCheckPerformedEvents[1].args.to, accounts[2]);
-    assert.equal(
-      complianceCheckPerformedEvents[1].args.checkResult.toNumber(),
-      0
-    );
+    // note that the order of events is reversed since we go depth-first
     assert.equal(
       complianceCheckPerformedEvents[2].args.providerId.toNumber(),
-      id.toNumber()
+      parentId.toNumber()
     );
     assert.equal(complianceCheckPerformedEvents[2].args.to, accounts[2]);
     assert.equal(
       complianceCheckPerformedEvents[2].args.checkResult.toNumber(),
       0
     );
+    assert.equal(
+      complianceCheckPerformedEvents[1].args.providerId.toNumber(),
+      id.toNumber()
+    );
+    assert.equal(complianceCheckPerformedEvents[1].args.to, accounts[2]);
+    assert.equal(
+      complianceCheckPerformedEvents[1].args.checkResult.toNumber(),
+      0
+    );
 
     // third xfer is permitted by parent, blocked by child
     assert.equal(
-      complianceCheckPerformedEvents[3].args.providerId.toNumber(),
-      parentId.toNumber()
-    );
-    assert.equal(complianceCheckPerformedEvents[3].args.to, accounts[3]);
-    assert.equal(
-      complianceCheckPerformedEvents[3].args.checkResult.toNumber(),
-      0
-    );
-    assert.equal(
       complianceCheckPerformedEvents[4].args.providerId.toNumber(),
-      id.toNumber()
+      parentId.toNumber()
     );
     assert.equal(complianceCheckPerformedEvents[4].args.to, accounts[3]);
     assert.equal(
       complianceCheckPerformedEvents[4].args.checkResult.toNumber(),
+      1
+    );
+    assert.equal(
+      complianceCheckPerformedEvents[3].args.providerId.toNumber(),
+      id.toNumber()
+    );
+    assert.equal(complianceCheckPerformedEvents[3].args.to, accounts[3]);
+    assert.equal(
+      complianceCheckPerformedEvents[3].args.checkResult.toNumber(),
       1
     );
   });

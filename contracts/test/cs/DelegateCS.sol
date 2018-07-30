@@ -42,14 +42,18 @@ contract DelegateCS is ComplianceStandard {
     {
         operations++;
         if (allowed[from] && allowed[to]) {
-            return complianceCoordinator.check(
-                delegateProviderId,
-                instrumentAddr,
-                instrumentIdOrAmt,
-                from,
-                to,
-                data
-            );
+            if (delegateProviderId != 0) {
+                return complianceCoordinator.check(
+                    delegateProviderId,
+                    instrumentAddr,
+                    instrumentIdOrAmt,
+                    from,
+                    to,
+                    data
+                );
+            } else {
+                return 0;
+            }
         } else {
             return E_UNWHITELISTED;
         }
