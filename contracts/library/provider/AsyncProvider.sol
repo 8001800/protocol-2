@@ -25,7 +25,7 @@ contract AsyncProvider is Provider {
         AbacusKernel _kernel,
         AnnotationDatabase _annotationDatabase,
         uint256 _providerId     
-    ) Provider (_kernel.providerRegistry(), _providerId) public 
+    ) Provider(_kernel.providerRegistry(), _providerId) public
     {
         kernel = _kernel;
         token = _kernel.token();
@@ -73,10 +73,10 @@ contract AsyncProvider is Provider {
     }
 
     function writeBytes32Field(
-    address tokenAddr,
-    uint256 tokenId,
-    uint256 fieldId,
-    bytes32 value
+        address tokenAddr,
+        uint256 tokenId,
+        uint256 fieldId,
+        bytes32 value
     ) public onlyRole(ROLE_ADMIN) {
         annotationDatabase.writeBytes32Field(
             tokenAddr,
