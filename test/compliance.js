@@ -4,7 +4,7 @@ const assert = chai.assert;
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
-const WhitelistStandard = artifacts.require("WhitelistStandard");
+const DelegateCS = artifacts.require("DelegateCS");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 const { promisify } = require("es6-promisify");
@@ -27,15 +27,19 @@ contract("ComplianceCoordinator", accounts => {
   });
 
   it("should ensure registry and compliance", async () => {
-    const standard = await WhitelistStandard.new(
+    const standard = await DelegateCS.new(
       providerRegistry.address,
       0,
-      0
+      0,
+      complianceCoordinator.address
     );
+    console.log("a");
     const regReceipt = await standard.registerProvider("Whitelist", "", false);
+    console.log("b");
 
     const id = await standard.providerId();
     const owner = await providerRegistry.providerOwner(id);
+    console.log("c");
 
     assert.equal(standard.address, owner);
 
@@ -44,7 +48,6 @@ contract("ComplianceCoordinator", accounts => {
       complianceCoordinator.address,
       id.toString()
     );
-    await token.request();
 
     // Authorize account 2 on list standard
     await standard.allow(accounts[2]);
@@ -94,10 +97,11 @@ contract("ComplianceCoordinator", accounts => {
   });
 
   it("should support delegation", async () => {
-    const standard = await WhitelistStandard.new(
+    const standard = await DelegateCS.new(
       providerRegistry.address,
       0,
-      0
+      0,
+      complianceCoordinator.address
     );
     const {
       receipt: { blockNumber }
@@ -106,10 +110,11 @@ contract("ComplianceCoordinator", accounts => {
     const id = await standard.providerId();
     const owner = await providerRegistry.providerOwner(id);
 
-    const parentStandard = await WhitelistStandard.new(
+    const parentStandard = await DelegateCS.new(
       providerRegistry.address,
       0,
-      id
+      id,
+      complianceCoordinator.address
     );
     await parentStandard.registerProvider("ParentWhitelist", "", false);
     const parentId = await parentStandard.providerId();
@@ -125,7 +130,6 @@ contract("ComplianceCoordinator", accounts => {
       complianceCoordinator.address,
       parentId.toString()
     );
-    await token.request();
 
     // Authorize account 2 on both standards
     const lol = await standard.allow(accounts[2]);
@@ -237,8 +241,6 @@ contract("ComplianceCoordinator", accounts => {
       complianceCoordinator.address,
       id.toString()
     );
-
-    await token.request();
 
     const params = {
       providerId: id,

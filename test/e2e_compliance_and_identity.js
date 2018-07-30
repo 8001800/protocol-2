@@ -1,6 +1,5 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const WhitelistStandard = artifacts.require("WhitelistStandard");
 const AbacusToken = artifacts.require("AbacusToken");
 const AbacusKernel = artifacts.require("AbacusKernel");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
@@ -59,8 +58,6 @@ contract("E2E Compliance and Identity", accounts => {
 
   it("should allow free transaction for both approved by identity provider", async () => {
     const cost = 0;
-
-    await ctoken.request();
 
     await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1), {
       from: accounts[0]

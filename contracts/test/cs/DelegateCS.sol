@@ -6,7 +6,7 @@ import "../../protocol/coordinator/ComplianceCoordinator.sol";
 /**
  * @dev A compliance standard that ensures everyone is on a whitelist.
  */
-contract WhitelistStandard is ComplianceStandard {
+contract DelegateCS is ComplianceStandard {
 
     mapping (address => bool) allowed;
 
