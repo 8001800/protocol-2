@@ -19,15 +19,7 @@ const WhitelistToken = artifacts.require("WhitelistToken");
  */
 
 module.exports = async deployer => {
-  await deployer.deploy(
-    SandboxIdentityProvider,
-    IdentityToken.address,
-    AbacusKernel.address,
-    0
-  );
-
   const sip = await SandboxIdentityProvider.deployed();
-  await sip.registerProvider("Sandbox Identity", "", true);
 
   /////////////////
   // DEMO STUFF
