@@ -1,5 +1,8 @@
 const IdentityToken = artifacts.require("IdentityToken");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
+const SandboxComplianceProvider = artifacts.require(
+  "SandboxComplianceProvider"
+);
 
 const ADMINS = [
   "0xb55af10efbb5fa1b75f55451922779633567f4fc",
@@ -12,8 +15,10 @@ const main = async () => {
   console.log(await tok.annotationDatabase());
 
   const ip = await SandboxIdentityProvider.deployed();
+  const cp = await SandboxComplianceProvider.deployed();
   for (var i = 0; i < ADMINS.length; i++) {
     console.log(await ip.addAdmin(ADMINS[i]));
+    console.log(await cp.addAdmin(ADMINS[i]));
   }
 };
 
