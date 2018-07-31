@@ -2,38 +2,20 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "../../protocol/coordinator/ComplianceCoordinator.sol";
+import "../compliance/AbacusCheck.sol";
 
 /**
  * @dev An ERC20 token that uses Abacus for compliance.
  */
-contract AbacusERC20Token is StandardToken {
-    ComplianceCoordinator complianceCoordinator;
-    uint256 complianceProviderId;
+contract AbacusERC20Token is StandardToken, AbacusCheck {
 
     constructor(
         ComplianceCoordinator _complianceCoordinator,
         uint256 _complianceProviderId
-    ) public
-    {
-        complianceCoordinator = _complianceCoordinator;
-        complianceProviderId = _complianceProviderId;
-    }
-
-    function check(
-        uint256 instrumentIdOrAmt,
-        address from,
-        address to,
-        bytes32 data
-    ) internal returns (uint256 checkResult) {
-        checkResult = complianceCoordinator.check(
-            complianceProviderId,
-            this,
-            instrumentIdOrAmt,
-            from,
-            to,
-            data
-        );
-    }
+    ) AbacusCheck(
+        _complianceCoordinator,
+        _complianceProviderId
+    ) public {}
 
     function transfer(address to, uint256 value) public returns (bool) {
         uint256 checkResult = check(value, msg.sender, to, 0);
