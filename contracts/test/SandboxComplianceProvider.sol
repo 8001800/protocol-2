@@ -23,12 +23,10 @@ contract SandboxComplianceProvider is AsyncProvider {
     /**
      * @dev Writes the result of an asynchronous compliance check to the blockchain.
      *
-     * @param requestId The id of the request.
      * @param blockToExpire The block in which the compliance check result expires.
      * @param checkResult The result of the compliance check.
      */
     function writeCheckResult(
-        uint256 requestId,
         uint256 providerVersion,
         uint256 actionHash,
         uint256 blockToExpire,
@@ -36,7 +34,6 @@ contract SandboxComplianceProvider is AsyncProvider {
     ) external
     {
         complianceCoordinator.writeCheckResult(
-            requestId,
             providerId,
             providerVersion,
             actionHash,

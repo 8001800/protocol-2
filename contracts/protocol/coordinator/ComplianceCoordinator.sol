@@ -16,11 +16,6 @@ contract ComplianceCoordinator {
 
     struct CheckResult {
         /**
-         * @dev Id of the action associated with the request.
-         */
-        uint256 actionHash;
-
-        /**
          * @dev Block when this check status has expired. 0 if we haven't writen.
          */
         uint256 blockToExpire;
@@ -32,19 +27,9 @@ contract ComplianceCoordinator {
     }
 
     /**
-     * @dev Mapping of providerId and requestId to the check result.
+     * @dev Mapping of action hash to the check result.
      */
-    mapping (uint256 => mapping(uint256 => CheckResult)) checkResults;
-
-    struct CheckRequest {
-        uint256 providerId;
-        uint256 requestId;
-    }
-
-    /**
-     * @dev Mapping of action ids to request ids.
-     */
-    mapping (uint256 => CheckRequest) actionsToRequests;
+    mapping(uint256 => CheckResult) checkResults;
 
     /**
      * @dev Emitted when a compliance check is performed.
@@ -78,7 +63,6 @@ contract ComplianceCoordinator {
      */
     event ComplianceCheckResultWritten(
         uint256 indexed providerId,
-        uint256 indexed requestId,
         uint256 actionHash,
         uint256 providerVersion,
         uint256 blockToExpire,
@@ -88,12 +72,10 @@ contract ComplianceCoordinator {
     /**
      * @dev Writes the result of an asynchronous compliance check to the blockchain.
      *
-     * @param requestId The id of the request.
      * @param blockToExpire The block in which the compliance check result expires.
      * @param checkResult The result of the compliance check.
      */
     function writeCheckResult(
-        uint256 requestId,
         uint256 providerId,
         uint256 providerVersion,
         uint256 actionHash,
@@ -114,19 +96,13 @@ contract ComplianceCoordinator {
         require(msg.sender == owner);
 
         // Overwrite existing action
-        actionsToRequests[actionHash] = CheckRequest({
-            providerId: providerId,
-            requestId: requestId
-        });
-        checkResults[providerId][requestId] = CheckResult({
-            actionHash: actionHash,
+        checkResults[actionHash] = CheckResult({
             blockToExpire: blockToExpire,
             checkResult: checkResult
         });
 
         emit ComplianceCheckResultWritten({
             providerId: providerId,
-            requestId: requestId,
             actionHash: actionHash,
             providerVersion: providerVersion,
             blockToExpire: blockToExpire,
@@ -159,9 +135,7 @@ contract ComplianceCoordinator {
         );
         address owner = providerRegistry.providerOwner(providerId);
         require(msg.sender == owner || msg.sender == instrumentAddr);
-        CheckRequest storage request = actionsToRequests[actionHash];
-        delete checkResults[request.providerId][request.requestId];
-        delete actionsToRequests[actionHash];
+        delete checkResults[actionHash];
     }
 
     /**
@@ -217,8 +191,7 @@ contract ComplianceCoordinator {
             to,
             data
         );
-        CheckRequest storage request = actionsToRequests[actionHash];
-        CheckResult storage result = checkResults[request.providerId][request.requestId];
+        CheckResult storage result = checkResults[actionHash];
 
         // Check that the status check has been performed.
         if (result.blockToExpire == 0) {
@@ -263,7 +236,9 @@ contract ComplianceCoordinator {
                 data
             );
             // Invalidate check result if successful check.
-            delete actionsToRequests[actionHash];
+            if (checkResult == 0) {
+                delete checkResults[actionHash];
+            }
         } else {
             // Sync checks -- call method on compliance standard
             checkResult = ComplianceStandard(owner).performCheck(

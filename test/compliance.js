@@ -289,8 +289,6 @@ contract("ComplianceCoordinator", accounts => {
     const {
       logs: writeCheckLogs
     } = await complianceCoordinator.writeCheckResult(
-      params.requestId,
-      accounts[0],
       params.providerId,
       1,
       actionId,
