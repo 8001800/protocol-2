@@ -14,14 +14,7 @@ contract ComplianceCoordinator {
         providerRegistry = _providerRegistry;
     }
 
-    uint256 nextRequestId = 1;
-
     struct CheckResult {
-        /**
-         * @dev Id of the escrow associated with this request.
-         */
-        uint256 requestId;
-
         /**
          * @dev Id of the action associated with the request.
          */
@@ -39,12 +32,12 @@ contract ComplianceCoordinator {
     }
 
     /**
-     * @dev Mapping of requester and requestId to the check result.
+     * @dev Mapping of providerId and requestId to the check result.
      */
-    mapping (address => mapping(uint256 => CheckResult)) checkResults;
+    mapping (uint256 => mapping(uint256 => CheckResult)) checkResults;
 
     struct CheckRequest {
-        address requester;
+        uint256 providerId;
         uint256 requestId;
     }
 
@@ -66,7 +59,7 @@ contract ComplianceCoordinator {
      * @param checkResult The result of the compliance check.
      */
     event ComplianceCheckPerformed(
-        uint256 providerId,
+        uint256 indexed providerId,
         uint256 providerVersion,
         address instrumentAddr,
         uint256 instrumentIdOrAmt,
@@ -84,10 +77,9 @@ contract ComplianceCoordinator {
      * @param checkResult The result of the compliance check.
      */
     event ComplianceCheckResultWritten(
-        uint256 requestId,
-        address requester,
+        uint256 indexed providerId,
+        uint256 indexed requestId,
         uint256 actionHash,
-        uint256 providerId,
         uint256 providerVersion,
         uint256 blockToExpire,
         uint256 checkResult
@@ -102,7 +94,6 @@ contract ComplianceCoordinator {
      */
     function writeCheckResult(
         uint256 requestId,
-        address requester,
         uint256 providerId,
         uint256 providerVersion,
         uint256 actionHash,
@@ -124,21 +115,19 @@ contract ComplianceCoordinator {
 
         // Overwrite existing action
         actionsToRequests[actionHash] = CheckRequest({
-            requester: requester,
+            providerId: providerId,
             requestId: requestId
         });
-        checkResults[requester][requestId] = CheckResult({
-            requestId: requestId,
+        checkResults[providerId][requestId] = CheckResult({
             actionHash: actionHash,
             blockToExpire: blockToExpire,
             checkResult: checkResult
         });
 
         emit ComplianceCheckResultWritten({
-            requestId: requestId,
-            requester: requester,
-            actionHash: actionHash,
             providerId: providerId,
+            requestId: requestId,
+            actionHash: actionHash,
             providerVersion: providerVersion,
             blockToExpire: blockToExpire,
             checkResult: checkResult
@@ -171,7 +160,7 @@ contract ComplianceCoordinator {
         address owner = providerRegistry.providerOwner(providerId);
         require(msg.sender == owner || msg.sender == instrumentAddr);
         CheckRequest storage request = actionsToRequests[actionHash];
-        delete checkResults[request.requester][request.requestId];
+        delete checkResults[request.providerId][request.requestId];
         delete actionsToRequests[actionHash];
     }
 
@@ -229,7 +218,7 @@ contract ComplianceCoordinator {
             data
         );
         CheckRequest storage request = actionsToRequests[actionHash];
-        CheckResult storage result = checkResults[request.requester][request.requestId];
+        CheckResult storage result = checkResults[request.providerId][request.requestId];
 
         // Check that the status check has been performed.
         if (result.blockToExpire == 0) {

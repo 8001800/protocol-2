@@ -29,7 +29,6 @@ contract SandboxComplianceProvider is AsyncProvider {
      */
     function writeCheckResult(
         uint256 requestId,
-        address requester,
         uint256 providerVersion,
         uint256 actionHash,
         uint256 blockToExpire,
@@ -38,7 +37,6 @@ contract SandboxComplianceProvider is AsyncProvider {
     {
         complianceCoordinator.writeCheckResult(
             requestId,
-            requester,
             providerId,
             providerVersion,
             actionHash,
