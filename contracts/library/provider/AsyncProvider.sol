@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "./Provider.sol";
 import "../../protocol/ProviderRegistry.sol";
-import "../../protocol/AbacusToken.sol";
 import "../../protocol/AbacusKernel.sol";
 import "../../protocol/AnnotationDatabase.sol";
 
@@ -13,7 +13,7 @@ import "../../protocol/AnnotationDatabase.sol";
  */
 contract AsyncProvider is Provider {
     AbacusKernel public kernel;
-    AbacusToken token;
+    StandardToken token;
     AnnotationDatabase annotationDatabase;
 
     /**
