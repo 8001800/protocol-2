@@ -22,8 +22,6 @@ contract AbacusERC20WithDetails is AbacusERC20Token {
     {
         name = _name;
         symbol = _symbol;
-        totalSupply_ = _initialSupply;
-        balances[msg.sender] = _initialSupply;
-        emit Transfer(0x0, msg.sender, _initialSupply);
+        _mint(msg.sender, _initialSupply);
     }
 }

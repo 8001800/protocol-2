@@ -1,24 +1,16 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const DelegateCS = artifacts.require("DelegateCS");
-const AbacusToken = artifacts.require("AbacusToken");
-const AbacusKernel = artifacts.require("AbacusKernel");
 const { promisify } = require("es6-promisify");
 const BigNumber = require("bignumber.js");
 
 contract("Upgrade Providers", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
-  let aba = null;
-  let kernel = null;
 
   beforeEach(async () => {
     providerRegistry = await ProviderRegistry.deployed();
     complianceCoordinator = await ComplianceCoordinator.deployed();
-    aba = await AbacusToken.deployed();
-    kernel = await AbacusKernel.deployed();
-
-    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
 
   it("Register and upgrade compliance standard", async () => {

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/ERC721Full.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./coordinator/ComplianceCoordinator.sol";
@@ -10,7 +10,7 @@ import "./coordinator/ComplianceCoordinator.sol";
  * Bundles are initialized in an unlocked state. Transfer of Bundles may only
  * occur when the Bundle is locked. When a Bundle is unlocked, transfer is forbidden.
  */
-contract Bundle is ERC721Token {
+contract Bundle is ERC721Full {
     using SafeMath for uint256;
 
     uint256 nextTokenId = 1;
@@ -32,7 +32,7 @@ contract Bundle is ERC721Token {
 
     constructor(
         ComplianceCoordinator _complianceCoordinator
-    ) public ERC721Token("Bundle", "BND")
+    ) public ERC721Full("Bundle", "BND")
     {
         complianceCoordinator = _complianceCoordinator;
     }
@@ -89,7 +89,7 @@ contract Bundle is ERC721Token {
      * @dev Allows one to inject ERC-721 assets into the Bundle.
      */
     function depositERC721Asset(
-        uint256 _bundleId, ERC721Basic _token, uint256 _id
+        uint256 _bundleId, ERC721 _token, uint256 _id
     ) external returns (bool) {
         if (locked[_bundleId]) {
             return false;
@@ -104,7 +104,7 @@ contract Bundle is ERC721Token {
      * @dev Allows the bundle owner to withdraw ERC-721 tokens from the Bundle.
      */
     function withdrawERC721Asset(
-        uint256 _bundleId, ERC721Basic _token, uint256 _id
+        uint256 _bundleId, ERC721 _token, uint256 _id
     ) external returns (bool) {
         if (msg.sender != ownerOf(_bundleId)) {
             return false;

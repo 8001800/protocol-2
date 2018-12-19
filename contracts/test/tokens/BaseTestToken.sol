@@ -14,8 +14,6 @@ contract BaseTestToken is AbacusERC20Token {
         uint256 _complianceProviderId
     ) AbacusERC20Token(_complianceCoordinator, _complianceProviderId) public
     {
-        totalSupply_ = INITIAL_SUPPLY;
-        balances[msg.sender] = INITIAL_SUPPLY;
-        emit Transfer(0x0, msg.sender, INITIAL_SUPPLY);
+        _mint(msg.sender, INITIAL_SUPPLY);
     }
 }

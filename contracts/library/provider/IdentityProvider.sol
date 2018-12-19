@@ -1,21 +1,20 @@
 pragma solidity ^0.4.24;
 
 import "../../protocol/IdentityToken.sol";
-import "../../protocol/AbacusKernel.sol";
 import "./AsyncProvider.sol";
 
 contract IdentityProvider is AsyncProvider {
     IdentityToken identityToken;
 
     constructor(
+        ProviderRegistry _providerRegistry,
         IdentityToken _identityToken,
-        AbacusKernel _kernel,
         uint256 _providerId
     ) AsyncProvider(
-        _kernel, 
+        _providerRegistry,
         _identityToken.annotationDatabase(),
         _providerId
-        ) public
+    ) public
     {
         identityToken = _identityToken;
     }
@@ -24,7 +23,7 @@ contract IdentityProvider is AsyncProvider {
         address user,
         uint256 fieldId,
         bytes32 value
-    ) public onlyRole(ROLE_ADMIN) {
+    ) public onlyAdmin {
         writeBytes32Field(
             identityToken,
             identityToken.tokenOf(user),
@@ -37,7 +36,7 @@ contract IdentityProvider is AsyncProvider {
         address user,
         uint256 fieldId,
         bytes value
-    ) public onlyRole(ROLE_ADMIN) {
+    ) public onlyAdmin {
         writeBytesField(
             identityToken,
             identityToken.tokenOf(user),

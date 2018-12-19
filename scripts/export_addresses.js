@@ -2,8 +2,6 @@ const AnnotationDatabase = artifacts.require("AnnotationDatabase");
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const IdentityToken = artifacts.require("IdentityToken");
-const AbacusToken = artifacts.require("AbacusToken");
-const AbacusKernel = artifacts.require("AbacusKernel");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 
 const AccreditedUSCS = artifacts.require("AccreditedUSCS");
@@ -19,8 +17,6 @@ const main = async () => {
     ProviderRegistry: ProviderRegistry.address,
     ComplianceCoordinator: ComplianceCoordinator.address,
     IdentityToken: IdentityToken.address,
-    AbacusToken: AbacusToken.address,
-    AbacusKernel: AbacusKernel.address,
     SandboxIdentityProvider: SandboxIdentityProvider.address,
 
     AccreditedUSCS: AccreditedUSCS.address,

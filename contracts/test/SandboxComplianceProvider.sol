@@ -7,12 +7,12 @@ contract SandboxComplianceProvider is AsyncProvider {
     ComplianceCoordinator complianceCoordinator;
 
     constructor(
-        AbacusKernel _kernel,
+        ProviderRegistry _providerRegistry,
         AnnotationDatabase _annotationDatabase,
         uint256 _providerId,
         ComplianceCoordinator _complianceCoordinator
     ) AsyncProvider(
-        _kernel,
+        _providerRegistry,
         _annotationDatabase,
         _providerId
     ) public

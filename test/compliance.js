@@ -5,8 +5,6 @@ const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
 const SampleCompliantToken = artifacts.require("SampleCompliantToken");
 const DelegateCS = artifacts.require("DelegateCS");
-const AbacusToken = artifacts.require("AbacusToken");
-const AbacusKernel = artifacts.require("AbacusKernel");
 const { promisify } = require("es6-promisify");
 const BigNumber = require("bignumber.js");
 
@@ -14,16 +12,10 @@ contract("ComplianceCoordinator", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
   let identityCoordinator = null;
-  let aba = null;
-  let kernel = null;
 
   beforeEach(async () => {
     providerRegistry = await ProviderRegistry.deployed();
     complianceCoordinator = await ComplianceCoordinator.deployed();
-    aba = await AbacusToken.deployed();
-    kernel = await AbacusKernel.deployed();
-
-    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
   });
 
   it("should ensure registry and compliance", async () => {
@@ -255,27 +247,6 @@ contract("ComplianceCoordinator", accounts => {
     const { logs: acc1XferLogs } = await token.transfer(accounts[1], 10);
     assert.equal(acc1XferLogs.length, 0);
 
-    // Make a request
-    const { logs: requestCheckLogs } = await kernel.requestAsyncService(
-      params.providerId,
-      params.cost,
-      params.requestId,
-      params.expiryBlockInterval
-    );
-    assert.equal(requestCheckLogs.length, 1);
-    assert.equal(requestCheckLogs[0].event, "ServiceRequested");
-    assert.equal(requestCheckLogs[0].args.cost.toNumber(), params.cost);
-
-    // Accept the request
-    const { logs: acceptLogs } = await kernel.acceptAsyncServiceRequest(
-      params.providerId,
-      params.from,
-      params.requestId,
-      { from: owner }
-    );
-    assert.equal(acceptLogs.length, 1);
-    assert.equal(acceptLogs[0].event, "ServiceRequestAccepted");
-
     const actionId = await complianceCoordinator.computeActionHash(
       params.providerId,
       1,
@@ -299,7 +270,6 @@ contract("ComplianceCoordinator", accounts => {
     assert.equal(writeCheckLogs.length, 1);
     assert.equal(writeCheckLogs[0].event, "ComplianceCheckResultWritten");
     assert.equal(writeCheckLogs[0].args.checkResult.toNumber(), 0);
-    assert.equal(await aba.balanceOf(accounts[3]), params.cost);
 
     // Test transfer is allowed
     const { logs: acc1XferLogsSuccess } = await token.transfer(
@@ -336,15 +306,6 @@ contract("ComplianceCoordinator", accounts => {
       params.from,
       params.to,
       0
-    );
-
-    // Make a request
-    await assert.isRejected(
-      kernel.requestAsyncService(
-        params.providerId,
-        0, // (cost) doesn't matter
-        params.requestId
-      )
     );
 
     // Write check result
@@ -391,26 +352,6 @@ contract("ComplianceCoordinator", accounts => {
       0
     );
 
-    // Make a request
-    const { logs: requestCheckLogs } = await kernel.requestAsyncService(
-      params.providerId,
-      0, // doesn't matter
-      params.requestId,
-      params.expiryBlockInterval
-    );
-    assert.equal(requestCheckLogs.length, 1);
-    assert.equal(requestCheckLogs[0].event, "ServiceRequested");
-
-    // Accept the request
-    const { logs: acceptLogs } = await kernel.acceptAsyncServiceRequest(
-      params.providerId,
-      params.from,
-      params.requestId,
-      { from: accounts[4] }
-    );
-    assert.equal(acceptLogs.length, 1);
-    assert.equal(acceptLogs[0].event, "ServiceRequestAccepted");
-
     await assert.isRejected(
       complianceCoordinator.writeCheckResult(
         params.requestId,
@@ -454,26 +395,6 @@ contract("ComplianceCoordinator", accounts => {
       params.to,
       0
     );
-
-    // Make a request
-    const { logs: requestCheckLogs } = await kernel.requestAsyncService(
-      params.providerId,
-      0, // doesn't matter
-      params.requestId,
-      params.expiryBlockInterval
-    );
-    assert.equal(requestCheckLogs.length, 1);
-    assert.equal(requestCheckLogs[0].event, "ServiceRequested");
-
-    // Accept the request
-    const { logs: acceptLogs } = await kernel.acceptAsyncServiceRequest(
-      params.providerId,
-      params.from,
-      params.requestId,
-      { from: accounts[4] }
-    );
-    assert.equal(acceptLogs.length, 1);
-    assert.equal(acceptLogs[0].event, "ServiceRequestAccepted");
 
     await assert.isRejected(
       complianceCoordinator.writeCheckResult(
