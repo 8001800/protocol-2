@@ -5,7 +5,6 @@ const IdentityToken = artifacts.require("IdentityToken");
 const IdentityProvider = artifacts.require("IdentityProvider");
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const AnnotationDatabase = artifacts.require("AnnotationDatabase");
-const AbacusKernel = artifacts.require("AbacusKernel");
 const { promisify } = require("es6-promisify");
 
 contract("RBAC Identity Provider", accounts => {
@@ -13,18 +12,16 @@ contract("RBAC Identity Provider", accounts => {
   let identityToken = null;
   let providerRegistry = null;
   let annoDB = null;
-  let kernel = null;
 
   before(async () => {
     identityToken = await IdentityToken.deployed();
     providerRegistry = await ProviderRegistry.deployed();
-    kernel = await AbacusKernel.deployed();
     annoDB = await AnnotationDatabase.deployed();
 
     //Create identity provider
     identityProvider = await IdentityProvider.new(
+      providerRegistry.address,
       identityToken.address,
-      kernel.address,
       0
     );
 

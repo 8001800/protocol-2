@@ -1,7 +1,5 @@
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const AbacusKernel = artifacts.require("AbacusKernel");
 const IdentityToken = artifacts.require("IdentityToken");
-const AbacusToken = artifacts.require("AbacusToken");
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");

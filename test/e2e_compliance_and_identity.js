@@ -1,7 +1,5 @@
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const AbacusToken = artifacts.require("AbacusToken");
-const AbacusKernel = artifacts.require("AbacusKernel");
 const SandboxIdentityProvider = artifacts.require("SandboxIdentityProvider");
 const IdentityToken = artifacts.require("IdentityToken");
 const AccreditedUSCS = artifacts.require("AccreditedUSCS");
@@ -13,8 +11,6 @@ const BigNumber = require("bignumber.js");
 contract("E2E Compliance and Identity", accounts => {
   let providerRegistry = null;
   let complianceCoordinator = null;
-  let aba = null;
-  let kernel = null;
 
   let identityProvider = null;
   let USCS = null;
@@ -23,15 +19,11 @@ contract("E2E Compliance and Identity", accounts => {
   before(async () => {
     providerRegistry = await ProviderRegistry.deployed();
     complianceCoordinator = await ComplianceCoordinator.deployed();
-    aba = await AbacusToken.deployed();
-    kernel = await AbacusKernel.deployed();
     identityToken = await IdentityToken.deployed();
 
-    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1));
-
     identityProvider = await SandboxIdentityProvider.new(
+      providerRegistry.address,
       identityToken.address,
-      kernel.address,
       0
     );
 
@@ -59,13 +51,6 @@ contract("E2E Compliance and Identity", accounts => {
   it("should allow free transaction for both approved by identity provider", async () => {
     const cost = 0;
 
-    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1), {
-      from: accounts[0]
-    });
-    await aba.approve(kernel.address, new BigNumber(2).pow(256).minus(1), {
-      from: accounts[4]
-    });
-
     const id = await identityProvider.providerId();
 
     const params = {
@@ -76,27 +61,7 @@ contract("E2E Compliance and Identity", accounts => {
       expiry: 50
     };
 
-    const { logs: reqLogs1 } = await kernel.requestAsyncService(
-      params.providerId,
-      params.cost,
-      params.requestId1,
-      params.expiry,
-      { from: accounts[0] }
-    );
-    assert.equal(reqLogs1.length, 1);
-    assert.equal(reqLogs1[0].args.requestId, params.requestId1);
-
     await identityProvider.writeIdentityBytes32Field(accounts[0], 506, "0x1");
-
-    const { logs: reqLogs2 } = await kernel.requestAsyncService(
-      params.providerId,
-      params.cost,
-      params.requestId2,
-      params.expiry,
-      { from: accounts[4] }
-    );
-    assert.equal(reqLogs2.length, 1);
-    assert.equal(reqLogs2[0].args.requestId, params.requestId2);
 
     await identityProvider.writeIdentityBytes32Field(accounts[4], 506, "0x1");
 

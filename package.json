@@ -31,7 +31,7 @@
     "prettier": "1.13.7",
     "pretty-quick": "^1.6.0",
     "solium": "^1.1.5",
-    "truffle": "^4.1.11",
+    "truffle": "4",
     "web3": "^1.0.0-beta.30"
   },
   "files": [
