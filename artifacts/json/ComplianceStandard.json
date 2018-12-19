@@ -2,24 +2,6 @@
   "contractName": "ComplianceStandard",
   "abi": [
     {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "addr",
-          "type": "address"
-        },
-        {
-          "name": "roleName",
-          "type": "string"
-        }
-      ],
-      "name": "checkRole",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "constant": false,
       "inputs": [
         {
@@ -37,18 +19,14 @@
       "constant": true,
       "inputs": [
         {
-          "name": "addr",
+          "name": "_address",
           "type": "address"
-        },
-        {
-          "name": "roleName",
-          "type": "string"
         }
       ],
-      "name": "hasRole",
+      "name": "isAdmin",
       "outputs": [
         {
-          "name": "",
+          "name": "_isAdmin",
           "type": "bool"
         }
       ],
@@ -112,20 +90,6 @@
       "type": "function"
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "ROLE_ADMIN",
-      "outputs": [
-        {
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "constant": false,
       "inputs": [
         {
@@ -151,40 +115,6 @@
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "name": "addr",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "name": "roleName",
-          "type": "string"
-        }
-      ],
-      "name": "RoleAdded",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "name": "addr",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "name": "roleName",
-          "type": "string"
-        }
-      ],
-      "name": "RoleRemoved",
-      "type": "event"
     },
     {
       "constant": false,
@@ -229,10 +159,10 @@
   "source":
     "pragma solidity ^0.4.24;\n\nimport \"../provider/Provider.sol\";\n\n/**\n * @title ComplianceStandard\n * @dev An on-chain Compliance Provider.\n */\ncontract ComplianceStandard is Provider {\n    /**\n    * @dev Performs a compliance check.\n    *\n    * @param instrumentAddr The address of the instrument contract.\n    * @param instrumentIdOrAmt The instrument id (NFT) or amount (ERC20).\n    * @param from The from address of the token transfer.\n    * @param to The to address of the token transfer.\n    * @param data Any additional data related to the action.\n    *\n    * @return an error code, 0 if no error.\n    */\n    function performCheck(\n        address instrumentAddr,\n        uint256 instrumentIdOrAmt,\n        address from,\n        address to,\n        bytes32 data\n    ) external returns (uint256);\n}\n",
   "sourcePath":
-    "/home/ian/proj/abacusprotocol/protocol/contracts/library/compliance/ComplianceStandard.sol",
+    "/home/ian/proj/abacusfi/protocol/contracts/library/compliance/ComplianceStandard.sol",
   "ast": {
     "absolutePath":
-      "/home/ian/proj/abacusprotocol/protocol/contracts/library/compliance/ComplianceStandard.sol",
+      "/home/ian/proj/abacusfi/protocol/contracts/library/compliance/ComplianceStandard.sol",
     "exportedSymbols": {
       "ComplianceStandard": [127]
     },
@@ -247,12 +177,12 @@
       },
       {
         "absolutePath":
-          "/home/ian/proj/abacusprotocol/protocol/contracts/library/provider/Provider.sol",
+          "/home/ian/proj/abacusfi/protocol/contracts/library/provider/Provider.sol",
         "file": "../provider/Provider.sol",
         "id": 109,
         "nodeType": "ImportDirective",
         "scope": 128,
-        "sourceUnit": 568,
+        "sourceUnit": 515,
         "src": "26:34:2",
         "symbolAliases": [],
         "unitAlias": ""
@@ -266,10 +196,10 @@
               "id": 110,
               "name": "Provider",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 567,
+              "referencedDeclaration": 514,
               "src": "171:8:2",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Provider_$567",
+                "typeIdentifier": "t_contract$_Provider_$514",
                 "typeString": "contract Provider"
               }
             },
@@ -278,13 +208,13 @@
             "src": "171:8:2"
           }
         ],
-        "contractDependencies": [567, 4219],
+        "contractDependencies": [514],
         "contractKind": "contract",
         "documentation":
           "@title ComplianceStandard\n@dev An on-chain Compliance Provider.",
         "fullyImplemented": false,
         "id": 127,
-        "linearizedBaseContracts": [127, 567, 4219],
+        "linearizedBaseContracts": [127, 514],
         "name": "ComplianceStandard",
         "nodeType": "ContractDefinition",
         "nodes": [
@@ -485,7 +415,7 @@
   },
   "legacyAST": {
     "absolutePath":
-      "/home/ian/proj/abacusprotocol/protocol/contracts/library/compliance/ComplianceStandard.sol",
+      "/home/ian/proj/abacusfi/protocol/contracts/library/compliance/ComplianceStandard.sol",
     "exportedSymbols": {
       "ComplianceStandard": [127]
     },
@@ -500,12 +430,12 @@
       },
       {
         "absolutePath":
-          "/home/ian/proj/abacusprotocol/protocol/contracts/library/provider/Provider.sol",
+          "/home/ian/proj/abacusfi/protocol/contracts/library/provider/Provider.sol",
         "file": "../provider/Provider.sol",
         "id": 109,
         "nodeType": "ImportDirective",
         "scope": 128,
-        "sourceUnit": 568,
+        "sourceUnit": 515,
         "src": "26:34:2",
         "symbolAliases": [],
         "unitAlias": ""
@@ -519,10 +449,10 @@
               "id": 110,
               "name": "Provider",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 567,
+              "referencedDeclaration": 514,
               "src": "171:8:2",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Provider_$567",
+                "typeIdentifier": "t_contract$_Provider_$514",
                 "typeString": "contract Provider"
               }
             },
@@ -531,13 +461,13 @@
             "src": "171:8:2"
           }
         ],
-        "contractDependencies": [567, 4219],
+        "contractDependencies": [514],
         "contractKind": "contract",
         "documentation":
           "@title ComplianceStandard\n@dev An on-chain Compliance Provider.",
         "fullyImplemented": false,
         "id": 127,
-        "linearizedBaseContracts": [127, 567, 4219],
+        "linearizedBaseContracts": [127, 514],
         "name": "ComplianceStandard",
         "nodeType": "ContractDefinition",
         "nodes": [
@@ -742,5 +672,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-08-02T05:54:28.378Z"
+  "updatedAt": "2018-12-19T05:52:05.402Z"
 }
