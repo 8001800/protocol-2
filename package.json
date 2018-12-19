@@ -1,6 +1,6 @@
 {
   "name": "@abacusprotocol/protocol",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Abacus Protocol Contracts",
   "repository": "git@github.com:abacusprotocol/protocol.git",
   "author": "Abacus Team <team@abacusprotocol.com>",
