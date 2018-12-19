@@ -161,11 +161,11 @@ contract("Bundle", accounts => {
     );
 
     assert.equal(acc1NFT1Id0InBundle, true);
-    assert.equal(depNFT1Logs.length, 3);
-    assert.equal(depNFT1Logs[2].event, "DepositERC721");
-    assert.equal(depNFT1Logs[2].args.bundleId.toNumber(), bundle1);
-    assert.equal(depNFT1Logs[2].args.token, NFT1.address);
-    assert.equal(depNFT1Logs[2].args.id.toNumber(), acc1NFT1Id.toNumber());
+    assert.equal(depNFT1Logs.length, 2);
+    assert.equal(depNFT1Logs[1].event, "DepositERC721");
+    assert.equal(depNFT1Logs[1].args.bundleId.toNumber(), bundle1);
+    assert.equal(depNFT1Logs[1].args.token, NFT1.address);
+    assert.equal(depNFT1Logs[1].args.id.toNumber(), acc1NFT1Id.toNumber());
   });
 
   it(`lock bundle`, async () => {
