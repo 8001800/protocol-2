@@ -4,7 +4,6 @@ const SandboxComplianceProvider = artifacts.require(
 const AnnotationDatabase = artifacts.require("AnnotationDatabase");
 const ProviderRegistry = artifacts.require("ProviderRegistry");
 const ComplianceCoordinator = artifacts.require("ComplianceCoordinator");
-const ProviderRegistry = artifacts.require("ProviderRegistry");
 
 /**
  *  Please make sure artifacts for ProviderRegistry and ComplianceToken exist before
@@ -14,6 +13,7 @@ const ProviderRegistry = artifacts.require("ProviderRegistry");
  */
 
 module.exports = async deployer => {
+  await ProviderRegistry.deployed();
   await deployer.deploy(
     SandboxComplianceProvider,
     ProviderRegistry.address,

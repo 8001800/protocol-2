@@ -10,6 +10,7 @@ const ProviderRegistry = artifacts.require("ProviderRegistry");
  */
 
 module.exports = async deployer => {
+  const it = await IdentityToken.deployed();
   await deployer.deploy(
     SandboxIdentityProvider,
     ProviderRegistry.address,

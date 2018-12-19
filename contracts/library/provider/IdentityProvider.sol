@@ -14,7 +14,7 @@ contract IdentityProvider is AsyncProvider {
         _providerRegistry,
         _identityToken.annotationDatabase(),
         _providerId
-        ) public
+    ) public
     {
         identityToken = _identityToken;
     }
