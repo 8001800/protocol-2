@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 import "./ProviderRegistry.sol";
 
@@ -13,11 +13,11 @@ import "./ProviderRegistry.sol";
 contract AbacusKernel {
     using SafeMath for uint256;
 
-    StandardToken public token;
+    ERC20 public token;
     ProviderRegistry public providerRegistry;
 
     constructor(
-        StandardToken _token,
+        ERC20 _token,
         ProviderRegistry _providerRegistry
     ) public
     {

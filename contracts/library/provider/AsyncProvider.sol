@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "./Provider.sol";
 import "../../protocol/ProviderRegistry.sol";
 import "../../protocol/AbacusKernel.sol";
@@ -13,7 +13,7 @@ import "../../protocol/AnnotationDatabase.sol";
  */
 contract AsyncProvider is Provider {
     AbacusKernel public kernel;
-    StandardToken token;
+    ERC20 token;
     AnnotationDatabase annotationDatabase;
 
     /**
@@ -39,7 +39,7 @@ contract AsyncProvider is Provider {
      */
     function withdrawBalance(
         uint256 value
-    ) onlyRole(ROLE_ADMIN) public
+    ) public onlyAdmin
     {
         token.transfer(msg.sender, value);
     }
@@ -53,7 +53,7 @@ contract AsyncProvider is Provider {
     function acceptServiceRequest(
         address requester,
         uint256 requestId
-    ) onlyRole(ROLE_ADMIN) public
+    ) public onlyAdmin
     {
         kernel.acceptAsyncServiceRequest(providerId, requester, requestId);
     }
@@ -67,7 +67,7 @@ contract AsyncProvider is Provider {
     function completeServiceRequest(
         address requester,
         uint256 requestId
-    ) onlyRole(ROLE_ADMIN) public
+    ) public onlyAdmin
     {
         kernel.onAsyncServiceCompleted(providerId, requester, requestId);
     }
@@ -77,7 +77,7 @@ contract AsyncProvider is Provider {
         uint256 tokenId,
         uint256 fieldId,
         bytes32 value
-    ) public onlyRole(ROLE_ADMIN) {
+    ) public onlyAdmin {
         annotationDatabase.writeBytes32Field(
             tokenAddr,
             tokenId,
@@ -92,7 +92,7 @@ contract AsyncProvider is Provider {
         uint256 tokenId,
         uint256 fieldId,
         bytes value
-    ) public onlyRole(ROLE_ADMIN) {
+    ) public onlyAdmin {
         annotationDatabase.writeBytesField(
             tokenAddr,
             tokenId,

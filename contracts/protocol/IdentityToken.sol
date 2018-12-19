@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/token/ERC721/ERC721Basic.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
 import "./AnnotationDatabase.sol";
 
 /**
@@ -8,7 +8,7 @@ import "./AnnotationDatabase.sol";
  * @dev Tokenized representation of identity. The AnnotationDatabase stores data related
  * to this token.
  */
-contract IdentityToken is ERC721Basic {
+contract IdentityToken is ERC721 {
     AnnotationDatabase public annotationDatabase;
 
     constructor(AnnotationDatabase _annotationDatabase) public

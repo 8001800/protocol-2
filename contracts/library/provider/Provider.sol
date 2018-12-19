@@ -1,14 +1,26 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/ownership/rbac/RBAC.sol";
+import "openzeppelin-solidity/contracts/access/Roles.sol";
 import "../../protocol/ProviderRegistry.sol";
 
 /**
  * @title Provider
  * @dev A contract which can be used as a provider in a ProviderRegistry.
  */
-contract Provider is RBAC {
-    string public constant ROLE_ADMIN = "admin";
+contract Provider {
+    using Roles for Roles.Role;
+
+    Roles.Role private _admins;
+
+    modifier onlyAdmin() {
+        require(isAdmin(msg.sender), "Must be an admin to perform this action.");
+        _;
+    }
+
+    function isAdmin(address _address) public view returns (bool _isAdmin) {
+        return _admins.has(_address);
+    }
+
     uint256 public providerId;
     ProviderRegistry providerRegistry;
     
@@ -24,7 +36,32 @@ contract Provider is RBAC {
     {
         providerRegistry = _providerRegistry;
         providerId = _providerId;
-        addRole(msg.sender, ROLE_ADMIN);
+        addAdmin(msg.sender);
+    }
+
+    /**
+     * @dev Add a new admin to this provider
+     *
+     * @param newAdmin The address of the new admin
+     */
+
+    function addAdmin(
+        address newAdmin
+    ) public onlyAdmin
+    {
+        _admins.add(newAdmin);
+    }
+
+    /**
+     * @dev Remove an admin to this provider
+     *
+     * @param admin The address of the admin to be removed
+     */
+    function removeAdmin(
+        address admin
+    ) external onlyAdmin
+    {
+        _admins.remove(admin);
     }
 
     /**
@@ -34,7 +71,7 @@ contract Provider is RBAC {
         string name,
         string metadata,
         bool isAsync
-    ) onlyRole(ROLE_ADMIN) external returns (uint256)
+    ) external onlyAdmin returns (uint256)
     {
         // First, check if the provider id has been already set.
         if (providerId != 0) {
@@ -58,35 +95,10 @@ contract Provider is RBAC {
      */
     function performUpgrade(
         string nextMetadata, address nextProvider, bool nextIsAsync
-    ) onlyRole(ROLE_ADMIN) external returns (bool)
+    ) external onlyAdmin returns (bool)
     {
         return providerRegistry.upgradeProvider(
             providerId, nextMetadata, nextProvider, nextIsAsync
         );
-    }
-
-    /**
-     * @dev Add a new admin to this provider
-     *
-     * @param newAdmin The address of the new admin
-     */
-
-    function addAdmin(
-        address newAdmin
-    ) onlyRole(ROLE_ADMIN) external 
-    {
-        addRole(newAdmin, ROLE_ADMIN);
-    }
-
-    /**
-     * @dev Remove an admin to this provider
-     *
-     * @param admin The address of the admin to be removed
-     */
-    function removeAdmin(
-        address admin
-    ) onlyRole(ROLE_ADMIN) external 
-    {
-        removeRole(admin, ROLE_ADMIN);
     }
 }
