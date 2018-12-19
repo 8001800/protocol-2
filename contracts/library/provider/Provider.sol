@@ -36,7 +36,7 @@ contract Provider {
     {
         providerRegistry = _providerRegistry;
         providerId = _providerId;
-        addAdmin(msg.sender);
+        _admins.add(msg.sender);
     }
 
     /**
